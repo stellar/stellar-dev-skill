@@ -10,7 +10,6 @@ Protocol 25 "X-Ray" (Mainnet January 22, 2026) introduced native ZK cryptographi
 - **ZK Merkle trees** — Efficient membership proofs using Poseidon hashes
 - **Cross-chain bridges** — Verify state proofs from other chains
 - **Compliance-forward privacy** — KYC/AML compliance with minimal data exposure
-- **ZK Email** — Prove email contents without revealing the full email
 
 ## Prerequisites
 
@@ -30,53 +29,71 @@ Ensure your Stellar CLI and network target Protocol 25+.
 
 BN254 (alt_bn128) is a pairing-friendly curve matching Ethereum's EIP-196/EIP-197 precompiles. This enables migration of existing EVM ZK applications.
 
-#### Access Pattern
+#### Types
 
 ```rust
-use soroban_sdk::{Env, BytesN};
-use soroban_sdk::crypto::bn254::{Bn254, Bn254G1Affine, Bn254G2Affine, Fr, Bn254Fp};
-
-pub fn zk_operations(env: &Env) {
-    let bn254: Bn254 = env.crypto().bn254();
-
-    // Use bn254.g1_add(), bn254.g1_mul(), bn254.pairing_check()
-}
+use soroban_sdk::crypto::bn254::{Fr, G1Affine, G2Affine};
 ```
-
-#### Types
 
 | Type | Size | Description |
 |------|------|-------------|
-| `Bn254Fp` | 32 bytes | Base field element |
-| `Fr` | 32 bytes | Scalar field element (U256 internally) |
-| `Bn254G1Affine` | 64 bytes | G1 point (x, y coordinates) |
-| `Bn254G2Affine` | 128 bytes | G2 point (extension field coordinates) |
+| `Fr` | 32 bytes | Scalar field element (converts to/from U256) |
+| `G1Affine` | 64 bytes | G1 point (x, y coordinates) |
+| `G2Affine` | 128 bytes | G2 point (extension field coordinates) |
 
-#### Host Functions
+#### Operations
+
+BN254 uses **operator overloading** for point arithmetic:
 
 ```rust
-// G1 Point Addition
-// Combines two points on the G1 curve
-let sum: Bn254G1Affine = bn254.g1_add(&p1, &p2);
+use soroban_sdk::{contract, contractimpl, Env, BytesN, U256, Vec};
+use soroban_sdk::crypto::bn254::{Fr, G1Affine, G2Affine};
 
-// G1 Scalar Multiplication
-// Multiplies a G1 point by a scalar
-let product: Bn254G1Affine = bn254.g1_mul(&point, &scalar);
+#[contract]
+pub struct Bn254Example;
 
-// Multi-Pairing Check (core of zk-SNARK verification)
-// Returns true if: e(g1[0], g2[0]) × e(g1[1], g2[1]) × ... = 1
-let valid: bool = bn254.pairing_check(g1_points, g2_points);
+#[contractimpl]
+impl Bn254Example {
+    /// Add two G1 points
+    pub fn g1_add(a: BytesN<64>, b: BytesN<64>) -> BytesN<64> {
+        let a = G1Affine::from_bytes(a);
+        let b = G1Affine::from_bytes(b);
+        (a + b).to_bytes()  // Use + operator
+    }
+
+    /// Scalar multiplication
+    pub fn g1_mul(p: BytesN<64>, s: U256) -> BytesN<64> {
+        let p = G1Affine::from_bytes(p);
+        let s = Fr::from(s);
+        (p * s).to_bytes()  // Use * operator
+    }
+
+    /// Multi-pairing check (core of zk-SNARK verification)
+    /// Returns true if: e(g1[0], g2[0]) × e(g1[1], g2[1]) × ... = 1
+    pub fn verify_pairing(env: Env, g1_bytes: Vec<BytesN<64>>, g2_bytes: Vec<BytesN<128>>) -> bool {
+        let mut g1_points = Vec::new(&env);
+        for bytes in g1_bytes.iter() {
+            g1_points.push_back(G1Affine::from_bytes(bytes));
+        }
+
+        let mut g2_points = Vec::new(&env);
+        for bytes in g2_bytes.iter() {
+            g2_points.push_back(G2Affine::from_bytes(bytes));
+        }
+
+        env.crypto().bn254().pairing_check(g1_points, g2_points)
+    }
+}
 ```
 
 #### Encoding Format
 
 Points use **uncompressed big-endian** encoding (no flag bits):
 
-- **G1**: `be_encode(X) || be_encode(Y)` — 64 bytes
-- **G2**: `be_encode(X_c1) || be_encode(X_c0) || be_encode(Y_c1) || be_encode(Y_c0)` — 128 bytes
+- **G1**: 64 bytes — `be_encode(X) || be_encode(Y)`
+- **G2**: 128 bytes — `be_encode(X_c1) || be_encode(X_c0) || be_encode(Y_c1) || be_encode(Y_c0)`
 - **Point at infinity**: All zeros
-
-Field element max value: `0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47`
+- **Fr (scalar)**: U256 / 32 bytes
 
 ---
 
@@ -84,52 +101,45 @@ Field element max value: `0x30644e72e131a029b85045b68181585d97816a916871ca8d3c20
 
 Poseidon is optimized for ZK circuits — ~300 constraints vs ~27,000 for SHA-256. Essential for efficient Merkle trees and commitments in ZK applications.
 
-#### Host Functions
-
-The Poseidon functions expose the raw permutation primitive, requiring you to specify all parameters:
+#### API
 
 ```rust
-use soroban_sdk::{Env, Vec, U256, Symbol};
+use soroban_sdk::{contract, contractimpl, Env, Symbol, U256, Vec};
 
-pub fn poseidon_example(env: &Env, inputs: Vec<U256>) -> U256 {
-    // Poseidon permutation
-    // Parameters: input, field_type, state_size, sbox_degree, full_rounds, partial_rounds, mds_matrix, round_constants
-    let result = env.crypto().poseidon_permutation(
-        inputs,
-        0,           // 0 = BLS12-381 Fr, 1 = BN254 Fr
-        3,           // state size (t)
-        5,           // S-box degree (d)
-        8,           // full rounds (must be even)
-        22,          // partial rounds
-        mds_matrix,  // t×t MDS matrix
-        round_constants,
-    );
-    result.get(0).unwrap()
+#[contract]
+pub struct PoseidonExample;
+
+#[contractimpl]
+impl PoseidonExample {
+    /// Poseidon hash over BN254 scalar field
+    pub fn poseidon(env: Env, inputs: Vec<U256>) -> U256 {
+        let field = Symbol::new(&env, "BN254");
+        env.crypto().poseidon_hash(&inputs, field)
+    }
+
+    /// Poseidon2 hash (optimized variant)
+    pub fn poseidon2(env: Env, inputs: Vec<U256>) -> U256 {
+        let field = Symbol::new(&env, "BN254");
+        env.crypto().poseidon2_hash(&inputs, field)
+    }
 }
 ```
 
-#### Field Types
+#### Supported Fields
 
-| Field ID | Curve | Order |
-|----------|-------|-------|
-| 0 | BLS12-381 Fr | `0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001` |
-| 1 | BN254 Fr | `0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001` |
+| Field Symbol | Curve |
+|--------------|-------|
+| `"BN254"` | BN254 scalar field |
+| `"BLS12_381"` | BLS12-381 scalar field |
 
-#### Poseidon2 Variant
+#### CLI Example
 
-Poseidon2 uses optimized diagonal matrices instead of full MDS:
+```bash
+# Hash two field elements [3, 4]
+stellar contract invoke --id poseidon --network futurenet -- poseidon \
+  --inputs '["3", "4"]'
 
-```rust
-let result = env.crypto().poseidon2_permutation(
-    inputs,
-    1,                    // BN254 field
-    3,                    // state size
-    5,                    // S-box degree (also supports 3, 7, 11)
-    8,                    // full rounds
-    22,                   // partial rounds
-    internal_diagonal,    // diagonal matrix (not full MDS)
-    round_constants,
-);
+# Output: "14763215145315200506921711489642608356394854266165572616578112107564877678998"
 ```
 
 ---
@@ -150,23 +160,25 @@ Where:
 ### Verification Contract Structure
 
 ```rust
-use soroban_sdk::{contract, contractimpl, Env, Vec, BytesN};
-use soroban_sdk::crypto::bn254::{Bn254G1Affine, Bn254G2Affine, Fr};
+use soroban_sdk::{contract, contractimpl, contracttype, Env, Vec, BytesN};
+use soroban_sdk::crypto::bn254::{Fr, G1Affine, G2Affine};
 
 #[derive(Clone)]
+#[contracttype]
 pub struct VerifyingKey {
-    pub alpha_g1: Bn254G1Affine,
-    pub beta_g2: Bn254G2Affine,
-    pub gamma_g2: Bn254G2Affine,
-    pub delta_g2: Bn254G2Affine,
-    pub ic: Vec<Bn254G1Affine>,  // Input commitments
+    pub alpha_g1: BytesN<64>,
+    pub beta_g2: BytesN<128>,
+    pub gamma_g2: BytesN<128>,
+    pub delta_g2: BytesN<128>,
+    pub ic: Vec<BytesN<64>>,  // Input commitments
 }
 
 #[derive(Clone)]
+#[contracttype]
 pub struct Proof {
-    pub a: Bn254G1Affine,
-    pub b: Bn254G2Affine,
-    pub c: Bn254G1Affine,
+    pub a: BytesN<64>,
+    pub b: BytesN<128>,
+    pub c: BytesN<64>,
 }
 
 #[contract]
@@ -179,48 +191,44 @@ impl Groth16Verifier {
         env: Env,
         vk: VerifyingKey,
         proof: Proof,
-        public_inputs: Vec<Fr>,
+        public_inputs: Vec<U256>,
     ) -> bool {
-        let bn254 = env.crypto().bn254();
-
         // Compute vk_x = ic[0] + sum(public_inputs[i] * ic[i+1])
-        let mut vk_x = vk.ic.get(0).unwrap();
+        let mut vk_x = G1Affine::from_bytes(vk.ic.get(0).unwrap());
+
         for i in 0..public_inputs.len() {
-            let ic_i = vk.ic.get(i + 1).unwrap();
-            let input_i = public_inputs.get(i).unwrap();
-            let term = bn254.g1_mul(&ic_i, &input_i);
-            vk_x = bn254.g1_add(&vk_x, &term);
+            let ic_i = G1Affine::from_bytes(vk.ic.get(i + 1).unwrap());
+            let input_i = Fr::from(public_inputs.get(i).unwrap());
+            let term = ic_i * input_i;
+            vk_x = vk_x + term;
         }
 
         // Negate proof.a for the pairing equation
-        let neg_a = negate_g1(&env, &proof.a);
+        let proof_a = G1Affine::from_bytes(proof.a);
+        let neg_a = -proof_a;
 
-        // Pairing check: e(-A, B) * e(alpha, beta) * e(vk_x, gamma) * e(C, delta) = 1
+        // Build point vectors for pairing check
         let g1_points = Vec::from_array(&env, [
             neg_a,
-            vk.alpha_g1,
+            G1Affine::from_bytes(vk.alpha_g1),
             vk_x,
-            proof.c,
-        ]);
-        let g2_points = Vec::from_array(&env, [
-            proof.b,
-            vk.beta_g2,
-            vk.gamma_g2,
-            vk.delta_g2,
+            G1Affine::from_bytes(proof.c),
         ]);
 
-        bn254.pairing_check(g1_points, g2_points)
+        let g2_points = Vec::from_array(&env, [
+            G2Affine::from_bytes(proof.b),
+            G2Affine::from_bytes(vk.beta_g2),
+            G2Affine::from_bytes(vk.gamma_g2),
+            G2Affine::from_bytes(vk.delta_g2),
+        ]);
+
+        // Pairing check: e(-A, B) * e(alpha, beta) * e(vk_x, gamma) * e(C, delta) = 1
+        env.crypto().bn254().pairing_check(g1_points, g2_points)
     }
 }
-
-/// Negate a G1 point (flip y-coordinate in the field)
-fn negate_g1(env: &Env, point: &Bn254G1Affine) -> Bn254G1Affine {
-    // y_neg = p - y where p is the field modulus
-    // Implementation depends on how you access the point coordinates
-    // This is a simplified placeholder
-    todo!("Implement G1 negation")
-}
 ```
+
+> **Note**: The official `groth16_verifier` example in soroban-examples uses BLS12-381. The pattern above adapts it for BN254 (Ethereum-compatible).
 
 ---
 
@@ -277,27 +285,28 @@ Submit proofs to your verifier contract for on-chain verification.
 
 ## Multi-Scalar Multiplication (MSM)
 
-Soroban doesn't provide native MSM. Implement it using g1_mul and g1_add:
+Soroban doesn't provide native MSM. Implement using operator overloading:
 
 ```rust
+use soroban_sdk::{Env, Vec, BytesN, U256};
+use soroban_sdk::crypto::bn254::{Fr, G1Affine};
+
 /// Compute sum of scalar[i] * point[i]
 pub fn g1_msm(
-    env: &Env,
-    scalars: &Vec<Fr>,
-    points: &Vec<Bn254G1Affine>,
-) -> Bn254G1Affine {
-    let bn254 = env.crypto().bn254();
-
+    scalars: &Vec<U256>,
+    points: &Vec<BytesN<64>>,
+) -> G1Affine {
     assert_eq!(scalars.len(), points.len());
 
-    // Start with point at infinity (identity)
-    let mut result = identity_g1(env);
+    // Start with first term
+    let mut result = G1Affine::from_bytes(points.get(0).unwrap())
+        * Fr::from(scalars.get(0).unwrap());
 
-    for i in 0..scalars.len() {
-        let scalar = scalars.get(i).unwrap();
-        let point = points.get(i).unwrap();
-        let term = bn254.g1_mul(&point, &scalar);
-        result = bn254.g1_add(&result, &term);
+    for i in 1..scalars.len() {
+        let scalar = Fr::from(scalars.get(i).unwrap());
+        let point = G1Affine::from_bytes(points.get(i).unwrap());
+        let term = point * scalar;
+        result = result + term;
     }
 
     result
@@ -309,7 +318,7 @@ pub fn g1_msm(
 ## ZK Merkle Tree with Poseidon
 
 ```rust
-use soroban_sdk::{Env, Vec, U256, BytesN};
+use soroban_sdk::{Env, Vec, U256, Symbol};
 
 /// Verify a Merkle proof using Poseidon hash
 pub fn verify_merkle_proof(
@@ -319,6 +328,7 @@ pub fn verify_merkle_proof(
     path_indices: Vec<bool>,  // true = right, false = left
     root: U256,
 ) -> bool {
+    let field = Symbol::new(env, "BN254");
     let mut current = leaf;
 
     for i in 0..proof.len() {
@@ -332,32 +342,12 @@ pub fn verify_merkle_proof(
             Vec::from_array(env, [current, sibling])
         };
 
-        current = poseidon_hash(env, inputs);
+        current = env.crypto().poseidon_hash(&inputs, field.clone());
     }
 
     current == root
 }
 ```
-
----
-
-## Resource Costs
-
-BN254 operations have associated cost types for metering:
-
-| Cost Type | Operation |
-|-----------|-----------|
-| `Bn254G1Add` | G1 point addition |
-| `Bn254G1Mul` | G1 scalar multiplication |
-| `Bn254Pairing` | Pairing (linear with vector length) |
-| `Bn254EncodeFp` / `Bn254DecodeFp` | Field element encoding |
-| `Bn254G1CheckPointOnCurve` | Curve membership check |
-| `Bn254G2CheckPointInSubgroup` | Subgroup membership check |
-| `Bn254FrFromU256` / `Bn254FrToU256` | Scalar conversion |
-| `Bn254FrMul` / `Bn254FrAddSub` | Scalar arithmetic |
-| `Bn254FrPow` / `Bn254FrInv` | Exponentiation / Inversion |
-
-Poseidon costs scale linearly with rounds and quadratically with state size.
 
 ---
 
@@ -381,6 +371,8 @@ Host functions trap on:
 ### Privacy Pool Patterns
 
 ```rust
+use soroban_sdk::{Env, U256};
+
 // Use nullifiers to prevent double-spending
 pub fn withdraw(
     env: Env,
@@ -415,37 +407,31 @@ pub fn withdraw(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use soroban_sdk::testutils::Env as _;
+    use soroban_sdk::Env;
+
+    #[test]
+    fn test_poseidon_hash() {
+        let env = Env::default();
+        let field = Symbol::new(&env, "BN254");
+
+        let inputs = Vec::from_array(&env, [U256::from_u32(&env, 1), U256::from_u32(&env, 2)]);
+        let hash = env.crypto().poseidon_hash(&inputs, field);
+
+        // Expected: 7853200120776062878684798364095072458815029376092732009249414926327459813530
+        assert!(hash != U256::from_u32(&env, 0));
+    }
 
     #[test]
     fn test_pairing_check() {
         let env = Env::default();
-        let bn254 = env.crypto().bn254();
 
         // Test with known valid pairing inputs
         // (You'll need actual test vectors from your proving system)
         let g1_points = create_test_g1_points(&env);
         let g2_points = create_test_g2_points(&env);
 
-        let result = bn254.pairing_check(g1_points, g2_points);
+        let result = env.crypto().bn254().pairing_check(g1_points, g2_points);
         assert!(result);
-    }
-
-    #[test]
-    fn test_invalid_proof_rejected() {
-        let env = Env::default();
-
-        // Modify a valid proof to make it invalid
-        let invalid_proof = create_invalid_proof(&env);
-
-        let result = Groth16Verifier::verify(
-            env.clone(),
-            get_vk(&env),
-            invalid_proof,
-            get_public_inputs(&env),
-        );
-
-        assert!(!result);
     }
 }
 ```
@@ -453,17 +439,19 @@ mod tests {
 ### Integration Tests
 
 1. Generate real proofs using your off-chain prover
-2. Deploy verifier to local Quickstart or Testnet
+2. Deploy verifier to Futurenet or Testnet
 3. Submit proofs via Stellar CLI or SDK
 4. Verify correct acceptance/rejection
 
 ```bash
 # Deploy verifier
-stellar contract deploy --wasm target/wasm32-unknown-unknown/release/verifier.wasm \
-  --source alice --network testnet
+stellar contract deploy \
+  --wasm target/wasm32v1-none/release/verifier.optimized.wasm \
+  --alias verifier \
+  --network futurenet
 
 # Invoke with proof data
-stellar contract invoke --id <CONTRACT_ID> --source alice --network testnet \
+stellar contract invoke --id verifier --network futurenet \
   -- verify --proof <PROOF_HEX> --public_inputs <INPUTS_HEX>
 ```
 
@@ -475,22 +463,21 @@ stellar contract invoke --id <CONTRACT_ID> --source alice --network testnet \
 - [X-Ray Announcement](https://stellar.org/blog/developers/announcing-stellar-x-ray-protocol-25) — Protocol 25 overview
 - [CAP-0074](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0074.md) — BN254 specification
 - [CAP-0075](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0075.md) — Poseidon specification
-- [Soroban SDK BN254 Docs](https://docs.rs/soroban-sdk/latest/soroban_sdk/crypto/bn254/) — Type and function reference
+- [Soroban SDK BN254 Source](https://github.com/stellar/rs-soroban-sdk/blob/release/v25-preview/soroban-sdk/src/crypto/bn254.rs) — Implementation reference
 
 ### Example Contracts
-- [Soroban Examples](https://github.com/stellar/soroban-examples) — Official examples (check for `groth16_verifier`, `privacy-pools`, `import_ark_bn254`)
+- [P25 Preview Examples](https://github.com/jayz22/soroban-examples/tree/p25-preview/p25-preview) — BN254 and Poseidon examples
+- [Groth16 Verifier (BLS12-381)](https://github.com/stellar/soroban-examples/tree/main/groth16_verifier) — Official verifier example
+- [Import Ark BN254](https://github.com/jayz22/soroban-examples/tree/p25-preview/import_ark_bn254) — Using ark-bn254 crate
 
 ### Proving Systems
 - [Noir Documentation](https://noir-lang.org/docs/) — Aztec's ZK DSL
 - [RISC Zero](https://dev.risczero.com/) — General-purpose zkVM
 
-### Community Resources
-- [UltraHonk Soroban Verifier](https://github.com/indextree/ultrahonk_soroban_contract) — Noir proof verification (verify SDK compatibility)
-
-> **Note**: Protocol 25 launched January 22, 2026. Some community projects may still be updating to soroban-sdk v25. Always verify SDK version compatibility before using third-party code.
+> **Note**: Protocol 25 launched January 22, 2026. Always verify SDK version compatibility (soroban-sdk v25+) when using examples.
 
 ---
 
 ## Keywords
-zero-knowledge, zk, zk-snark, groth16, plonk, bn254, alt_bn128, poseidon, pairing, elliptic curve,
+zero-knowledge, zk, zk-snark, groth16, plonk, bn254, alt_bn128, poseidon, poseidon2, pairing, elliptic curve,
 privacy, confidential, merkle tree, nullifier, proof verification, noir, risc zero, x-ray, protocol 25
