@@ -160,8 +160,16 @@ Where:
 ### Verification Contract Structure
 
 ```rust
-use soroban_sdk::{contract, contractimpl, contracttype, Env, Vec, BytesN};
+use soroban_sdk::{contract, contractimpl, contracttype, contracterror, Env, Vec, BytesN, U256};
 use soroban_sdk::crypto::bn254::{Fr, G1Affine, G2Affine};
+
+#[contracterror]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(u32)]
+pub enum ZkError {
+    InvalidVerifyingKey = 1,
+    InvalidPublicInputs = 2,
+}
 
 #[derive(Clone)]
 #[contracttype]
@@ -192,13 +200,19 @@ impl Groth16Verifier {
         vk: VerifyingKey,
         proof: Proof,
         public_inputs: Vec<U256>,
-    ) -> bool {
+    ) -> Result<bool, ZkError> {
         // Compute vk_x = ic[0] + sum(public_inputs[i] * ic[i+1])
-        let mut vk_x = G1Affine::from_bytes(vk.ic.get(0).unwrap());
+        let mut vk_x = G1Affine::from_bytes(
+            vk.ic.get(0).ok_or(ZkError::InvalidVerifyingKey)?
+        );
 
         for i in 0..public_inputs.len() {
-            let ic_i = G1Affine::from_bytes(vk.ic.get(i + 1).unwrap());
-            let input_i = Fr::from(public_inputs.get(i).unwrap());
+            let ic_i = G1Affine::from_bytes(
+                vk.ic.get(i + 1).ok_or(ZkError::InvalidVerifyingKey)?
+            );
+            let input_i = Fr::from(
+                public_inputs.get(i).ok_or(ZkError::InvalidPublicInputs)?
+            );
             let term = ic_i * input_i;
             vk_x = vk_x + term;
         }
@@ -223,7 +237,7 @@ impl Groth16Verifier {
         ]);
 
         // Pairing check: e(-A, B) * e(alpha, beta) * e(vk_x, gamma) * e(C, delta) = 1
-        env.crypto().bn254().pairing_check(g1_points, g2_points)
+        Ok(env.crypto().bn254().pairing_check(g1_points, g2_points))
     }
 }
 ```
@@ -288,15 +302,19 @@ Submit proofs to your verifier contract for on-chain verification.
 Soroban doesn't provide native MSM. Implement using operator overloading:
 
 ```rust
-use soroban_sdk::{Env, Vec, BytesN, U256};
+use soroban_sdk::{Vec, BytesN, U256};
 use soroban_sdk::crypto::bn254::{Fr, G1Affine};
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum MsmError { EmptyInput, LengthMismatch }
 
 /// Compute sum of scalar[i] * point[i]
 pub fn g1_msm(
     scalars: &Vec<U256>,
     points: &Vec<BytesN<64>>,
-) -> G1Affine {
-    assert_eq!(scalars.len(), points.len());
+) -> Result<G1Affine, MsmError> {
+    if scalars.len() != points.len() { return Err(MsmError::LengthMismatch); }
+    if scalars.is_empty() { return Err(MsmError::EmptyInput); }
 
     // Start with first term
     let mut result = G1Affine::from_bytes(points.get(0).unwrap())
@@ -309,7 +327,7 @@ pub fn g1_msm(
         result = result + term;
     }
 
-    result
+    Ok(result)
 }
 ```
 
@@ -320,6 +338,9 @@ pub fn g1_msm(
 ```rust
 use soroban_sdk::{Env, Vec, U256, Symbol};
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum MerkleError { LengthMismatch, InvalidProof }
+
 /// Verify a Merkle proof using Poseidon hash
 pub fn verify_merkle_proof(
     env: &Env,
@@ -327,13 +348,15 @@ pub fn verify_merkle_proof(
     proof: Vec<U256>,
     path_indices: Vec<bool>,  // true = right, false = left
     root: U256,
-) -> bool {
+) -> Result<bool, MerkleError> {
+    if proof.len() != path_indices.len() { return Err(MerkleError::LengthMismatch); }
+
     let field = Symbol::new(env, "BN254");
     let mut current = leaf;
 
     for i in 0..proof.len() {
-        let sibling = proof.get(i).unwrap();
-        let is_right = path_indices.get(i).unwrap();
+        let sibling = proof.get(i).ok_or(MerkleError::InvalidProof)?;
+        let is_right = path_indices.get(i).ok_or(MerkleError::InvalidProof)?;
 
         // Hash pair in correct order
         let inputs = if is_right {
@@ -345,7 +368,7 @@ pub fn verify_merkle_proof(
         current = env.crypto().poseidon_hash(&inputs, field.clone());
     }
 
-    current == root
+    Ok(current == root)
 }
 ```
 
@@ -371,7 +394,12 @@ Host functions trap on:
 ### Privacy Pool Patterns
 
 ```rust
-use soroban_sdk::{Env, U256};
+use soroban_sdk::{contracttype, Env, U256};
+
+#[contracttype]
+pub enum DataKey {
+    Nullifier(U256),
+}
 
 // Use nullifiers to prevent double-spending
 pub fn withdraw(
@@ -425,13 +453,11 @@ mod tests {
     fn test_pairing_check() {
         let env = Env::default();
 
-        // Test with known valid pairing inputs
-        // (You'll need actual test vectors from your proving system)
-        let g1_points = create_test_g1_points(&env);
-        let g2_points = create_test_g2_points(&env);
-
-        let result = env.crypto().bn254().pairing_check(g1_points, g2_points);
-        assert!(result);
+        // TODO: Add test vectors from your proving system
+        // let g1_points = Vec::from_array(&env, [/* G1 points */]);
+        // let g2_points = Vec::from_array(&env, [/* G2 points */]);
+        // let result = env.crypto().bn254().pairing_check(g1_points, g2_points);
+        // assert!(result);
     }
 }
 ```
