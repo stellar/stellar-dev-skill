@@ -317,12 +317,15 @@ pub fn g1_msm(
     if scalars.is_empty() { return Err(MsmError::EmptyInput); }
 
     // Start with first term
-    let mut result = G1Affine::from_bytes(points.get(0).unwrap())
-        * Fr::from(scalars.get(0).unwrap());
+    let first_point = points.get(0).ok_or(MsmError::LengthMismatch)?;
+    let first_scalar = scalars.get(0).ok_or(MsmError::LengthMismatch)?;
+    let mut result = G1Affine::from_bytes(first_point) * Fr::from(first_scalar);
 
     for i in 1..scalars.len() {
-        let scalar = Fr::from(scalars.get(i).unwrap());
-        let point = G1Affine::from_bytes(points.get(i).unwrap());
+        let scalar_u256 = scalars.get(i).ok_or(MsmError::LengthMismatch)?;
+        let point_bytes = points.get(i).ok_or(MsmError::LengthMismatch)?;
+        let scalar = Fr::from(scalar_u256);
+        let point = G1Affine::from_bytes(point_bytes);
         let term = point * scalar;
         result = result + term;
     }
