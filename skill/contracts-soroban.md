@@ -523,3 +523,5 @@ ZK-friendly hash functions (two orders of magnitude fewer ZK constraints than SH
 - [BLS Signature](https://github.com/stellar/soroban-examples) — BLS12-381 signature verification
 
 > **Note**: BLS12-381 curve operations were added in Protocol 22 via CAP-0059. Protocol 25 adds BN254 as a complement, matching Ethereum's curve for easier migration of EVM ZK applications.
+
+> See [zk-proofs.md](zk-proofs.md) for Groth16 verification patterns, Poseidon usage, Noir/RISC Zero integration, and complete implementation guidance.

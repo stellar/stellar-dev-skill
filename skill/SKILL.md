@@ -1,6 +1,6 @@
 ---
 name: stellar-dev
-description: End-to-end Stellar development playbook (Jan 2026). Covers Soroban smart contracts (Rust SDK), Stellar CLI, JavaScript/Python/Go SDKs for client apps, Stellar RPC (preferred) and Horizon API (legacy), Stellar Assets vs Soroban tokens (SAC bridge), wallet integration (Freighter, Stellar Wallets Kit), smart accounts with passkeys, testing strategies, security patterns, and common pitfalls. Optimized for payments, asset tokenization, DeFi, and financial applications. Use when building on Stellar, Soroban, or working with XLM, Stellar Assets, trustlines, anchors, SEPs, or the Stellar RPC/Horizon APIs.
+description: End-to-end Stellar development playbook (Jan 2026). Covers Soroban smart contracts (Rust SDK), Stellar CLI, JavaScript/Python/Go SDKs for client apps, Stellar RPC (preferred) and Horizon API (legacy), Stellar Assets vs Soroban tokens (SAC bridge), wallet integration (Freighter, Stellar Wallets Kit), smart accounts with passkeys, zero-knowledge proofs (Protocol 25 X-Ray, BN254, Poseidon), testing strategies, security patterns, and common pitfalls. Optimized for payments, asset tokenization, DeFi, privacy-preserving applications, and financial applications. Use when building on Stellar, Soroban, or working with XLM, Stellar Assets, trustlines, anchors, SEPs, ZK proofs, privacy pools, or the Stellar RPC/Horizon APIs.
 user-invocable: true
 argument-hint: "[task-description]"
 ---
@@ -15,6 +15,8 @@ Use this Skill when the user asks for:
 - Transaction building / sending / confirmation
 - Stellar Asset issuance and management
 - Client SDK usage (JavaScript, Python, Go, Rust)
+- Zero-knowledge proof verification (BN254, Poseidon, Groth16)
+- Privacy-preserving applications (privacy pools, confidential tokens)
 - Local testing and deployment
 - Security hardening and audit-style reviews
 
@@ -76,6 +78,7 @@ Use this Skill when the user asks for:
 - Need custom on-chain logic? → [contracts-soroban.md](contracts-soroban.md)
 - Building a frontend/dApp? → [frontend-stellar-sdk.md](frontend-stellar-sdk.md)
 - Issuing or managing tokens? → [stellar-assets.md](stellar-assets.md)
+- Zero-knowledge proofs or privacy? → [zk-proofs.md](zk-proofs.md)
 - Setting up tests/CI? → [testing.md](testing.md)
 - Querying chain data or indexing? → [api-rpc-horizon.md](api-rpc-horizon.md) (also see [Data Docs](https://developers.stellar.org/docs/data))
 - Security review? → [security.md](security.md)
@@ -115,6 +118,7 @@ When you implement changes, provide:
 - Frontend + wallets: [frontend-stellar-sdk.md](frontend-stellar-sdk.md)
 - Testing strategy: [testing.md](testing.md)
 - Stellar Assets: [stellar-assets.md](stellar-assets.md)
+- Zero-knowledge proofs: [zk-proofs.md](zk-proofs.md)
 - API access (RPC/Horizon): [api-rpc-horizon.md](api-rpc-horizon.md)
 - Security checklist: [security.md](security.md)
 - Common pitfalls: [common-pitfalls.md](common-pitfalls.md)
@@ -124,4 +128,6 @@ When you implement changes, provide:
 ## Keywords
 stellar, soroban, xlm, smart contracts, rust, wasm, webassembly, rpc, horizon,
 freighter, stellar-sdk, soroban-sdk, stellar-cli, trustline, anchor, sep, passkey,
-smart wallet, sac, stellar asset contract, defi, token, nft, scaffold stellar
+smart wallet, sac, stellar asset contract, defi, token, nft, scaffold stellar,
+zero-knowledge, zk, zk-snark, groth16, bn254, poseidon, pairing, privacy, confidential,
+x-ray, protocol 25, noir, risc zero, privacy pool, merkle tree
