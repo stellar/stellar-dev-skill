@@ -1,6 +1,6 @@
 # Stellar Development Skill
 
-A comprehensive AI skill for modern Stellar development (January 2026 best practices).
+A comprehensive AI skill for modern Stellar development with current best practices.
 
 Inspired by [solana-foundation/solana-dev-skill](https://github.com/solana-foundation/solana-dev-skill) and [cloudflare/skills](https://github.com/cloudflare/skills).
 
@@ -67,6 +67,8 @@ skill/
 ├── api-rpc-horizon.md          # API access (RPC/Horizon)
 ├── security.md                 # Security checklist
 ├── common-pitfalls.md          # Common issues and solutions
+├── advanced-patterns.md        # Advanced Soroban architecture patterns
+├── standards-reference.md      # SEP/CAP standards quick reference
 ├── ecosystem.md                # DeFi protocols, wallets, tools, projects
 └── resources.md                # Curated reference links
 ```

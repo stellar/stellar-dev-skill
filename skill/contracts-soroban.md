@@ -81,6 +81,55 @@ inherits = "release"
 debug-assertions = true
 ```
 
+## Contract Constructors (Protocol 22+)
+
+Use constructors for atomic initialization when protocol support is available. This avoids a separate `initialize` transaction and reduces front-running risk.
+
+### Constructor pattern
+```rust
+#![no_std]
+use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
+
+#[contracttype]
+#[derive(Clone)]
+pub enum DataKey {
+    Admin,
+    Value,
+}
+
+#[contract]
+pub struct MyContract;
+
+#[contractimpl]
+impl MyContract {
+    // Runs once at deployment time.
+    pub fn __constructor(env: Env, admin: Address, initial_value: u32) {
+        env.storage().instance().set(&DataKey::Admin, &admin);
+        env.storage().instance().set(&DataKey::Value, &initial_value);
+    }
+}
+```
+
+### Deploy with constructor args (CLI)
+```bash
+stellar contract deploy \
+  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
+  --source alice \
+  --network testnet \
+  -- \
+  --admin alice \
+  --initial_value 100
+```
+
+### Rules
+1. Name must be `__constructor` exactly.
+2. Constructor returns `()` (no return value).
+3. Runs only at creation time and does not run on upgrade.
+4. If constructor fails, deployment fails atomically.
+
+### Backwards compatibility
+If targeting older protocol environments, use guarded `initialize` patterns and prevent re-initialization explicitly.
+
 ## Core Contract Structure
 
 ### Basic Contract
@@ -484,44 +533,26 @@ fn test_transfer_with_auth() {
 - Batch operations where possible
 - Profile resource usage with `stellar contract invoke --sim`
 
-## Zero-Knowledge Cryptography (Protocol 25 "X-Ray")
+## Zero-Knowledge Cryptography (Status-Sensitive)
 
-Protocol 25 (mainnet January 22, 2026) added native ZK cryptographic primitives via [CAP-0074](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0074.md) and [CAP-0075](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0075.md).
+Stellar's ZK cryptography capabilities are evolving. Treat availability as protocol- and network-dependent.
 
-### BN254 Elliptic Curve (CAP-0074)
+- [CAP-0059](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0059.md): BLS12-381 primitives
+- [CAP-0074](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0074.md): BN254 host functions (proposed)
+- [CAP-0075](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0075.md): Poseidon/Poseidon2 host functions (proposed)
 
-Provides feature parity with Ethereum's EIP-196/EIP-197 precompiles:
+Before implementation, always verify:
+1. CAP status in the CAP preamble (`Accepted`/`Implemented` vs draft/awaiting decision)
+2. Target network software version and protocol support
+3. `soroban-sdk` release support for the target host functions
 
-```rust
-use soroban_sdk::crypto::bn254::{Bn254, Bn254G1Affine, Fr};
+### Practical guidance
+- Use BLS12-381 features where supported and documented in your target SDK/network.
+- For BN254/Poseidon plans, design feature flags and graceful fallbacks until support is active.
+- Keep cryptographic assumptions explicit in audits and deployment notes.
 
-let bn254 = env.crypto().bn254();
+### Example references
+- [Groth16 Verifier](https://github.com/stellar/soroban-examples/tree/main/groth16_verifier)
+- [Soroban examples repository](https://github.com/stellar/soroban-examples)
 
-// G1 point addition
-let result: Bn254G1Affine = bn254.g1_add(&p0, &p1);
-
-// G1 scalar multiplication
-let result: Bn254G1Affine = bn254.g1_mul(&p0, &scalar);
-
-// Multi-pairing check (Groth16 verification)
-let valid: bool = bn254.pairing_check(g1_points, g2_points);
-```
-
-### Poseidon Hash Functions (CAP-0075)
-
-ZK-friendly hash functions (two orders of magnitude fewer ZK constraints than SHA-256). Exposed as raw permutation primitives via `env.crypto_hazmat()` (requires `hazmat` feature flag).
-
-### Use Cases Unlocked
-- **zk-SNARK verification** (Groth16, PlonK) — on-chain proof verification
-- **Privacy pools** — prove lawful source of funds without revealing details
-- **Confidential tokens** — hidden balances with validity proofs
-- **Merkle trees** with Poseidon hashes for efficient ZK circuits
-- **Cross-chain ZK proofs** via Wormhole + RISC Zero integration
-
-### Examples
-- [Groth16 Verifier](https://github.com/stellar/soroban-examples/tree/main/groth16_verifier) — zk-SNARK verifier example (uses BLS12-381; BN254 follows the same pattern)
-- [BLS Signature](https://github.com/stellar/soroban-examples) — BLS12-381 signature verification
-
-> **Note**: BLS12-381 curve operations were added in Protocol 22 via CAP-0059. Protocol 25 adds BN254 as a complement, matching Ethereum's curve for easier migration of EVM ZK applications.
-
-> See [zk-proofs.md](zk-proofs.md) for Groth16 verification patterns, Poseidon usage, Noir/RISC Zero integration, and complete implementation guidance.
+> See [zk-proofs.md](zk-proofs.md) for Groth16 verification patterns, Poseidon usage, Noir/RISC Zero integration, and implementation guidance.

@@ -1,6 +1,6 @@
 ---
 name: stellar-dev
-description: End-to-end Stellar development playbook (Jan 2026). Covers Soroban smart contracts (Rust SDK), Stellar CLI, JavaScript/Python/Go SDKs for client apps, Stellar RPC (preferred) and Horizon API (legacy), Stellar Assets vs Soroban tokens (SAC bridge), wallet integration (Freighter, Stellar Wallets Kit), smart accounts with passkeys, zero-knowledge proofs (Protocol 25 X-Ray, BN254, Poseidon), testing strategies, security patterns, and common pitfalls. Optimized for payments, asset tokenization, DeFi, privacy-preserving applications, and financial applications. Use when building on Stellar, Soroban, or working with XLM, Stellar Assets, trustlines, anchors, SEPs, ZK proofs, privacy pools, or the Stellar RPC/Horizon APIs.
+description: End-to-end Stellar development playbook. Covers Soroban smart contracts (Rust SDK), Stellar CLI, JavaScript/Python/Go SDKs for client apps, Stellar RPC (preferred) and Horizon API (legacy), Stellar Assets vs Soroban tokens (SAC bridge), wallet integration (Freighter, Stellar Wallets Kit), smart accounts with passkeys, zero-knowledge proof patterns, testing strategies, security patterns, and common pitfalls. Optimized for payments, asset tokenization, DeFi, privacy-aware applications, and financial applications. Use when building on Stellar, Soroban, or working with XLM, Stellar Assets, trustlines, anchors, SEPs, ZK proofs, or the Stellar RPC/Horizon APIs.
 user-invocable: true
 argument-hint: "[task-description]"
 ---
@@ -64,6 +64,9 @@ Use this Skill when the user asks for:
 - Use Stellar Wallets Kit for multi-wallet support
 - Wallet Standard for consistent connection patterns
 
+### 7. Freshness policy
+- Verify volatile facts (protocol support, RPC endpoints, CAP/SEP status, SDK API changes) against official docs before asserting them as current.
+
 ## Operating procedure (how to execute tasks)
 
 ### 1. Classify the task layer
@@ -83,6 +86,8 @@ Use this Skill when the user asks for:
 - Querying chain data or indexing? → [api-rpc-horizon.md](api-rpc-horizon.md) (also see [Data Docs](https://developers.stellar.org/docs/data))
 - Security review? → [security.md](security.md)
 - Hit an error? → [common-pitfalls.md](common-pitfalls.md)
+- Need upgrade/factory/governance/DeFi architecture patterns? → [advanced-patterns.md](advanced-patterns.md)
+- Need SEP/CAP guidance and standards links? → [standards-reference.md](standards-reference.md)
 
 ### 2. Pick the right building blocks
 - Contracts: Soroban Rust SDK + Stellar CLI
@@ -122,12 +127,13 @@ When you implement changes, provide:
 - API access (RPC/Horizon): [api-rpc-horizon.md](api-rpc-horizon.md)
 - Security checklist: [security.md](security.md)
 - Common pitfalls: [common-pitfalls.md](common-pitfalls.md)
+- Advanced architecture patterns: [advanced-patterns.md](advanced-patterns.md)
+- SEP/CAP standards map: [standards-reference.md](standards-reference.md)
 - Ecosystem projects: [ecosystem.md](ecosystem.md)
 - Reference links: [resources.md](resources.md)
 
 ## Keywords
 stellar, soroban, xlm, smart contracts, rust, wasm, webassembly, rpc, horizon,
 freighter, stellar-sdk, soroban-sdk, stellar-cli, trustline, anchor, sep, passkey,
-smart wallet, sac, stellar asset contract, defi, token, nft, scaffold stellar,
-zero-knowledge, zk, zk-snark, groth16, bn254, poseidon, pairing, privacy, confidential,
-x-ray, protocol 25, noir, risc zero, privacy pool, merkle tree
+smart wallet, sac, stellar asset contract, defi, token, nft, scaffold stellar, constructor, upgrade, factory, governance, standards,
+zero-knowledge, zk, zk-snark, groth16, bn254, poseidon, pairing, privacy, confidential, noir, risc zero, privacy pool, merkle tree

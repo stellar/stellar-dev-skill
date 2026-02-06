@@ -15,9 +15,11 @@ Stellar provides two API paradigms:
 
 ### Endpoints
 
+> Note: SDF directly provides Futurenet public RPC. For Mainnet RPC, select a provider from the RPC providers directory.
+
 | Network | RPC URL |
 |---------|---------|
-| Mainnet | `https://soroban.stellar.org` |
+| Mainnet | Provider-specific endpoint (see RPC providers doc) |
 | Testnet | `https://soroban-testnet.stellar.org` |
 | Futurenet | `https://rpc-futurenet.stellar.org` |
 | Local | `http://localhost:8000/soroban/rpc` |
@@ -410,7 +412,7 @@ type NetworkConfig = {
 
 const configs: Record<string, NetworkConfig> = {
   mainnet: {
-    rpcUrl: "https://soroban.stellar.org",
+    rpcUrl: process.env.STELLAR_MAINNET_RPC_URL || "https://mainnet.sorobanrpc.com",
     horizonUrl: "https://horizon.stellar.org",
     networkPassphrase: StellarSdk.Networks.PUBLIC,
     friendbotUrl: null,

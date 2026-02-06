@@ -180,7 +180,7 @@ Cloud execution environment for blockchain data processing.
 ### Contract Libraries
 
 #### OpenZeppelin Stellar Contracts
-Audited smart contract library for Soroban (v0.6.0, Jan 2026).
+Audited smart contract library for Soroban (track latest release tags before pinning versions).
 - **GitHub**: https://github.com/OpenZeppelin/stellar-contracts
 - **Docs**: https://developers.stellar.org/docs/tools/openzeppelin-contracts
 - **Contract Wizard**: https://wizard.openzeppelin.com/stellar

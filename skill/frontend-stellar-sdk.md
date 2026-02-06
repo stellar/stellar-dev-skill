@@ -31,7 +31,7 @@ const networkPassphrase = StellarSdk.Networks.TESTNET;
 
 // For Mainnet
 const server = new StellarSdk.Horizon.Server("https://horizon.stellar.org");
-const rpc = new StellarSdk.rpc.Server("https://soroban.stellar.org");
+const rpc = new StellarSdk.rpc.Server(process.env.NEXT_PUBLIC_STELLAR_MAINNET_RPC_URL || "https://mainnet.sorobanrpc.com");
 const networkPassphrase = StellarSdk.Networks.PUBLIC;
 ```
 
@@ -51,7 +51,7 @@ export const config = {
   },
   mainnet: {
     horizonUrl: "https://horizon.stellar.org",
-    rpcUrl: "https://soroban.stellar.org",
+    rpcUrl: process.env.NEXT_PUBLIC_STELLAR_MAINNET_RPC_URL || "https://mainnet.sorobanrpc.com",
     networkPassphrase: StellarSdk.Networks.PUBLIC,
     friendbotUrl: null,
   },

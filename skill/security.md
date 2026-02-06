@@ -472,9 +472,9 @@ Open-source contract monitoring with Stellar support.
 - **Features**: Self-hosted via Docker, Prometheus + Grafana observability
 - **Source**: https://www.openzeppelin.com/news/monitor-and-relayers-are-now-open-source
 
-## OpenZeppelin Partnership (Jan 2025 – Dec 2026)
+## OpenZeppelin Partnership Overview
 
-Two-year strategic partnership covering:
+Strategic partnership highlights include:
 - **40 Auditor Weeks** of dedicated security audits
 - **Stellar Contracts library** (audited, production-ready)
 - **Relayer** (fee-sponsored transactions, Stellar-native)
