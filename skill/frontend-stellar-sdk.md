@@ -6,6 +6,14 @@
 - Clean separation of client/server in Next.js
 - Transaction sending with proper confirmation handling
 
+## Quick Navigation
+- SDK setup and env config: [SDK Initialization](#sdk-initialization)
+- Wallet integrations: [Wallet Integration](#wallet-integration)
+- Tx build/send patterns: [Transaction Building](#transaction-building), [Transaction Submission](#transaction-submission)
+- React + Next.js patterns: [React Components](#react-components), [Next.js App Router Setup](#nextjs-app-router-setup)
+- Smart wallets/passkeys: [Smart Accounts (Passkey Wallets)](#smart-accounts-passkey-wallets)
+- Production UX checklist: [Transaction UX Checklist](#transaction-ux-checklist)
+
 ## Recommended Dependencies
 
 > **Requires Node.js 20+** — the Stellar SDK dropped Node 18 support.
@@ -25,22 +33,32 @@ npm install @stellar/stellar-sdk @creit.tech/stellar-wallets-kit
 import * as StellarSdk from "@stellar/stellar-sdk";
 
 // For Testnet
-const server = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
-const rpc = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
-const networkPassphrase = StellarSdk.Networks.TESTNET;
+const testnetServer = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
+const testnetRpc = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
+const testnetNetworkPassphrase = StellarSdk.Networks.TESTNET;
 
 // For Mainnet
-const server = new StellarSdk.Horizon.Server("https://horizon.stellar.org");
-const rpc = new StellarSdk.rpc.Server("https://soroban.stellar.org");
-const networkPassphrase = StellarSdk.Networks.PUBLIC;
+const mainnetServer = new StellarSdk.Horizon.Server("https://horizon.stellar.org");
+const mainnetRpcUrl = process.env.NEXT_PUBLIC_STELLAR_MAINNET_RPC_URL;
+if (!mainnetRpcUrl) throw new Error("Missing NEXT_PUBLIC_STELLAR_MAINNET_RPC_URL");
+const mainnetRpc = new StellarSdk.rpc.Server(mainnetRpcUrl); // set from your chosen RPC provider
+const mainnetNetworkPassphrase = StellarSdk.Networks.PUBLIC;
 ```
 
 ### Environment Configuration
+> Use a provider-specific mainnet RPC URL (see: https://developers.stellar.org/docs/data/apis/rpc/providers).
+
 ```typescript
 // lib/stellar.ts
 import * as StellarSdk from "@stellar/stellar-sdk";
 
 const NETWORK = process.env.NEXT_PUBLIC_STELLAR_NETWORK || "testnet";
+
+const requireEnv = (name: string): string => {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required env var: ${name}`);
+  return value;
+};
 
 export const config = {
   testnet: {
@@ -51,7 +69,7 @@ export const config = {
   },
   mainnet: {
     horizonUrl: "https://horizon.stellar.org",
-    rpcUrl: "https://soroban.stellar.org",
+    rpcUrl: requireEnv("NEXT_PUBLIC_STELLAR_MAINNET_RPC_URL"),
     networkPassphrase: StellarSdk.Networks.PUBLIC,
     friendbotUrl: null,
   },

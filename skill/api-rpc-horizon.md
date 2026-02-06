@@ -7,17 +7,26 @@ Stellar provides two API paradigms:
 | API | Status | Use Case |
 |-----|--------|----------|
 | **Stellar RPC** | Preferred | Soroban, real-time state, new projects |
-| **Horizon** | Deprecated (maintained) | Historical data, legacy applications |
+| **Horizon** | Legacy-focused | Historical data, legacy applications |
 
-**Recommendation**: Use Stellar RPC for all new projects. Use Horizon only for historical queries or legacy compatibility.
+**Recommendation**: Use Stellar RPC for all new projects. Use Horizon mainly for historical queries and legacy compatibility paths.
+
+## Quick Navigation
+- RPC methods and usage: [Stellar RPC](#stellar-rpc)
+- Horizon endpoints and streaming: [Horizon API (Legacy)](#horizon-api-legacy)
+- Migration strategy: [Migration: Horizon to RPC](#migration-horizon-to-rpc)
+- Data history/indexing options: [Historical Data Access](#historical-data-access)
+- Environment setup and endpoints: [Network Configuration](#network-configuration)
 
 ## Stellar RPC
 
 ### Endpoints
 
+> Note: SDF directly provides Futurenet public RPC. For Mainnet RPC, select a provider from the [RPC providers directory](https://developers.stellar.org/docs/data/apis/rpc/providers).
+
 | Network | RPC URL |
 |---------|---------|
-| Mainnet | `https://soroban.stellar.org` |
+| Mainnet | Provider-specific endpoint (see [RPC providers directory](https://developers.stellar.org/docs/data/apis/rpc/providers)) |
 | Testnet | `https://soroban-testnet.stellar.org` |
 | Futurenet | `https://rpc-futurenet.stellar.org` |
 | Local | `http://localhost:8000/soroban/rpc` |
@@ -144,7 +153,7 @@ for (const event of events.events) {
 - **No streaming**: Poll for updates (no WebSocket)
 - **Contract-focused**: Limited classic Stellar data
 
-## Horizon API (Deprecated)
+## Horizon API (Legacy)
 
 ### Endpoints
 
@@ -394,6 +403,7 @@ See the full indexer directory: https://developers.stellar.org/docs/data/indexer
 ## Network Configuration
 
 > For a React/Next.js-specific setup, see [frontend-stellar-sdk.md](frontend-stellar-sdk.md).
+> For mainnet RPC, set `STELLAR_MAINNET_RPC_URL` from a provider in the [RPC providers directory](https://developers.stellar.org/docs/data/apis/rpc/providers).
 
 ### Environment-Based Setup
 
@@ -408,9 +418,15 @@ type NetworkConfig = {
   friendbotUrl: string | null;
 };
 
+const requireEnv = (name: string): string => {
+  const value = process.env[name];
+  if (!value) throw new Error(`Missing required env var: ${name}`);
+  return value;
+};
+
 const configs: Record<string, NetworkConfig> = {
   mainnet: {
-    rpcUrl: "https://soroban.stellar.org",
+    rpcUrl: requireEnv("STELLAR_MAINNET_RPC_URL"),
     horizonUrl: "https://horizon.stellar.org",
     networkPassphrase: StellarSdk.Networks.PUBLIC,
     friendbotUrl: null,

@@ -1,5 +1,12 @@
 # Testing Strategy (Local / Testnet / Unit Tests)
 
+## Quick Navigation
+- Strategy overview: [Testing Pyramid](#testing-pyramid)
+- Core test layers: [Unit Testing with Soroban SDK](#unit-testing-with-soroban-sdk), [Local Testing with Stellar Quickstart](#local-testing-with-stellar-quickstart), [Testnet Testing](#testnet-testing)
+- Integration and CI: [Integration Testing Patterns](#integration-testing-patterns), [Test Configuration](#test-configuration), [CI/CD Configuration](#cicd-configuration)
+- Advanced testing: [Fuzz Testing](#fuzz-testing), [Property-Based Testing](#property-based-testing), [Differential Testing with Test Snapshots](#differential-testing-with-test-snapshots), [Fork Testing](#fork-testing), [Mutation Testing](#mutation-testing)
+- Performance and readiness: [Resource Profiling](#resource-profiling), [Best Practices](#best-practices)
+
 ## Testing Pyramid
 
 1. **Unit tests (fast)**: Native Rust tests with `soroban-sdk` testutils
