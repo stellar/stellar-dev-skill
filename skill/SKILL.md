@@ -80,6 +80,8 @@ Use this Skill when the user asks for:
 - Querying chain data or indexing? → [api-rpc-horizon.md](api-rpc-horizon.md) (also see [Data Docs](https://developers.stellar.org/docs/data))
 - Security review? → [security.md](security.md)
 - Hit an error? → [common-pitfalls.md](common-pitfalls.md)
+- Advanced patterns (upgrades, factories, DeFi, governance)? → [advanced-patterns.md](advanced-patterns.md)
+- SEP/CAP standards reference? → [standards-reference.md](standards-reference.md)
 
 ### 2. Pick the right building blocks
 - Contracts: Soroban Rust SDK + Stellar CLI
@@ -118,10 +120,15 @@ When you implement changes, provide:
 - API access (RPC/Horizon): [api-rpc-horizon.md](api-rpc-horizon.md)
 - Security checklist: [security.md](security.md)
 - Common pitfalls: [common-pitfalls.md](common-pitfalls.md)
+- Advanced patterns: [advanced-patterns.md](advanced-patterns.md)
+- SEP/CAP standards: [standards-reference.md](standards-reference.md)
 - Ecosystem projects: [ecosystem.md](ecosystem.md)
 - Reference links: [resources.md](resources.md)
 
 ## Keywords
 stellar, soroban, xlm, smart contracts, rust, wasm, webassembly, rpc, horizon,
-freighter, stellar-sdk, soroban-sdk, stellar-cli, trustline, anchor, sep, passkey,
-smart wallet, sac, stellar asset contract, defi, token, nft, scaffold stellar
+freighter, stellar-sdk, soroban-sdk, stellar-cli, trustline, anchor, sep, cap, passkey,
+smart wallet, sac, stellar asset contract, defi, token, nft, scaffold stellar,
+constructor, upgradeable, factory, governance, multisig, vault, oracle, compliance,
+sep-0041, sep-0046, sep-0048, sep-0049, sep-0050, sep-0056, sep-0057,
+cap-0046, cap-0051, cap-0058, cap-0059, cap-0074, cap-0075

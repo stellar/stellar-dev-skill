@@ -541,23 +541,22 @@ pub struct PriceData {
     pub decimals: u32,
 }
 
-// Oracle interface
+// Import oracle contract (requires the compiled WASM)
 mod oracle {
-    use soroban_sdk::{contractclient, Address, Env, Symbol};
-    use super::PriceData;
-
-    #[contractclient(name = "OracleClient")]
-    pub trait OracleInterface {
-        fn get_price(env: Env, asset: Symbol) -> PriceData;
-        fn get_prices(env: Env, assets: soroban_sdk::Vec<Symbol>) -> soroban_sdk::Vec<PriceData>;
-    }
+    soroban_sdk::contractimport!(
+        file = "../oracle/target/wasm32-unknown-unknown/release/oracle.wasm"
+    );
 }
+
+#[contract]
+pub struct MyDeFiContract;
 
 #[contractimpl]
 impl MyDeFiContract {
     pub fn get_collateral_value(env: Env, oracle_addr: Address, asset: Symbol, amount: i128) -> i128 {
-        let oracle = oracle::OracleClient::new(&env, &oracle_addr);
-        let price_data = oracle.get_price(&asset);
+        // Create client for oracle contract
+        let oracle_client = oracle::Client::new(&env, &oracle_addr);
+        let price_data: PriceData = oracle_client.get_price(&asset);
 
         // Check price is fresh (within last ~10 minutes)
         let max_age: u64 = 120; // ledgers
@@ -876,13 +875,19 @@ impl ClawbackToken {
         env.storage().persistent().set(&DataKey::Balance(from.clone()), &balance);
 
         // Emit clawback event for audit trail
-        env.events().publish(
-            (Symbol::new(&env, "clawback"),),
-            (from, amount),
-        );
+        ClawbackEvent(
+            from: from.clone(),
+            amount,
+        ).publish(&env);
     }
 }
+
 ```
+
+### Burn Pattern
+
+```rust
+
 
 ## Cross-Contract Call Patterns
 
