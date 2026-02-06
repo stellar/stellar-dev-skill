@@ -81,107 +81,6 @@ inherits = "release"
 debug-assertions = true
 ```
 
-## Contract Constructors (CAP-0058, Protocol 22+)
-
-Constructors provide **atomic initialization** - the contract is guaranteed to be initialized when created, preventing front-running attacks.
-
-### Defining a Constructor
-```rust
-#![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
-
-#[contracttype]
-pub enum DataKey {
-    Admin,
-    Value,
-}
-
-#[contract]
-pub struct MyContract;
-
-#[contractimpl]
-impl MyContract {
-    /// Constructor - called automatically when contract is deployed.
-    /// Must return () (void). Cannot be called after deployment.
-    pub fn __constructor(env: Env, admin: Address, initial_value: u32) {
-        env.storage().instance().set(&DataKey::Admin, &admin);
-        env.storage().instance().set(&DataKey::Value, &initial_value);
-    }
-
-    pub fn get_value(env: Env) -> u32 {
-        env.storage().instance().get(&DataKey::Value).unwrap()
-    }
-}
-```
-
-### Deploying with Constructor Arguments
-
-**CLI:**
-```bash
-# Deploy with constructor arguments
-stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
-  --source alice \
-  --network testnet \
-  -- \
-  --admin alice \
-  --initial_value 100
-```
-
-**JavaScript SDK:**
-```typescript
-import {
-  Contract,
-  Keypair,
-  Networks,
-  Operation,
-  SorobanRpc,
-  TransactionBuilder,
-  xdr,
-  nativeToScVal
-} from "@stellar/stellar-sdk";
-
-// Build deploy transaction with constructor args
-const server = new SorobanRpc.Server("https://soroban-testnet.stellar.org");
-const account = await server.getAccount(keypair.publicKey());
-
-const deployOp = Operation.createContractV2({
-  wasmHash: wasmHash,
-  address: keypair.publicKey(),
-  salt: randomBytes(32),
-  constructorArgs: [
-    nativeToScVal(adminAddress, { type: "address" }),
-    nativeToScVal(100, { type: "u32" }),
-  ],
-});
-
-const tx = new TransactionBuilder(account, { fee: "100000" })
-  .setNetworkPassphrase(Networks.TESTNET)
-  .setTimeout(30)
-  .addOperation(deployOp)
-  .build();
-```
-
-### Constructor Rules
-1. Function must be named `__constructor` exactly
-2. Must return `void` (no return value) - returning anything else fails deployment
-3. Only called once during contract creation - NOT called on upgrades
-4. Can take any number of arguments (including zero)
-5. Can access storage, emit events, make cross-contract calls
-6. If constructor fails, contract is not created (atomic)
-7. Contracts without constructors can still be deployed (treated as 0-arg constructor)
-
-### Constructor vs Initialize Pattern
-
-| Aspect | Constructor | Initialize Function |
-|--------|-------------|---------------------|
-| Atomicity | Guaranteed - single transaction | Requires separate tx, can be front-run |
-| Re-initialization | Impossible | Must add protection manually |
-| Upgrade behavior | Not called on upgrade | Can be called on upgrade (if desired) |
-| Protocol support | Protocol 22+ | All versions |
-
-**Recommendation:** Use constructors for new contracts (Protocol 22+). Use initialize pattern only for backwards compatibility or when re-initialization on upgrade is needed.
-
 ## Core Contract Structure
 
 ### Basic Contract
@@ -242,6 +141,59 @@ impl CounterContract {
     }
 }
 ```
+
+## Contract Constructors (CAP-0058, Protocol 22+)
+
+Constructors provide **atomic initialization** - the contract is guaranteed to be initialized when created, preventing front-running attacks.
+
+### Defining a Constructor
+```rust
+#![no_std]
+use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
+
+#[contracttype]
+pub enum DataKey {
+    Admin,
+    Value,
+}
+
+#[contract]
+pub struct MyContract;
+
+#[contractimpl]
+impl MyContract {
+    /// Constructor - called automatically when contract is deployed.
+    /// Must return () (void). Cannot be called after deployment.
+    pub fn __constructor(env: Env, admin: Address, initial_value: u32) {
+        env.storage().instance().set(&DataKey::Admin, &admin);
+        env.storage().instance().set(&DataKey::Value, &initial_value);
+    }
+
+    pub fn get_value(env: Env) -> u32 {
+        env.storage().instance().get(&DataKey::Value).unwrap()
+    }
+}
+```
+
+### Constructor Rules
+1. Function must be named `__constructor` exactly
+2. Must return `void` (no return value) - returning anything else fails deployment
+3. Only called once during contract creation - NOT called on upgrades
+4. Can take any number of arguments (including zero)
+5. Can access storage, emit events, make cross-contract calls
+6. If constructor fails, contract is not created (atomic)
+7. Contracts without constructors can still be deployed (treated as 0-arg constructor)
+
+### Constructor vs Initialize Pattern
+
+| Aspect | Constructor | Initialize Function |
+|--------|-------------|---------------------|
+| Atomicity | Guaranteed - single transaction | Requires separate tx, can be front-run |
+| Re-initialization | Impossible | Must add protection manually |
+| Upgrade behavior | Not called on upgrade | Can be called on upgrade (if desired) |
+| Protocol support | Protocol 22+ | All versions |
+
+**Recommendation:** Use constructors for new contracts (Protocol 22+). Use initialize pattern only for backwards compatibility or when re-initialization on upgrade is needed.
 
 ## Storage Types
 
@@ -482,7 +434,7 @@ stellar contract build
 # Generate and fund a new identity
 stellar keys generate --global alice --network testnet --fund
 
-# Deploy contract
+# Deploy contract (without constructor)
 stellar contract deploy \
   --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
   --source alice \
@@ -491,7 +443,19 @@ stellar contract deploy \
 # Returns: CONTRACT_ID (starts with 'C')
 ```
 
-### Initialize Contract
+### Deploy with Constructor Arguments (Protocol 22+)
+```bash
+# Deploy with constructor arguments
+stellar contract deploy \
+  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
+  --source alice \
+  --network testnet \
+  -- \
+  --admin alice \
+  --initial_value 100
+```
+
+### Initialize Contract (legacy pattern)
 ```bash
 stellar contract invoke \
   --id CONTRACT_ID \
@@ -624,3 +588,5 @@ ZK-friendly hash functions (two orders of magnitude fewer ZK constraints than SH
 - [BLS Signature](https://github.com/stellar/soroban-examples) — BLS12-381 signature verification
 
 > **Note**: BLS12-381 curve operations were added in Protocol 22 via CAP-0059. Protocol 25 adds BN254 as a complement, matching Ethereum's curve for easier migration of EVM ZK applications.
+
+> See [zk-proofs.md](zk-proofs.md) for Groth16 verification patterns, Poseidon usage, Noir/RISC Zero integration, and complete implementation guidance.

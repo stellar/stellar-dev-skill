@@ -9,27 +9,7 @@ Use this guide when you need:
 - Gas/resource optimization strategies
 - Compliance and regulated token patterns
 
-## Deployment Patterns
-
-### Deploying Contracts via CLI
-```bash
-# Deploy with constructor arguments (Protocol 22+)
-stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
-  --source alice \
-  --network testnet \
-  -- \
-  --admin alice \
-  --initial_value 100
-
-# Deploy without constructor
-stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
-  --source alice \
-  --network testnet
-```
-
-### Factory Pattern (Deploying from Contracts)
+## Factory Pattern (Deploying from Contracts)
 Use `env.deployer()` to programmatically deploy contracts from within another contract.
 
 ```rust
@@ -119,6 +99,9 @@ pub struct MyContract;
 ```rust
 use soroban_sdk::{contract, contractimpl, Address, BytesN, Env};
 
+#[contract]
+pub struct MyContract;
+
 #[contractimpl]
 impl MyContract {
     /// Upgrade contract WASM. Only callable by admin.
@@ -137,7 +120,7 @@ impl MyContract {
 Handle storage layout changes after upgrades.
 
 ```rust
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, Symbol};
+use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
 
 #[contracttype]
 pub enum DataKey {
@@ -147,6 +130,9 @@ pub enum DataKey {
     // V2 adds new storage keys
     NewFeatureEnabled,
 }
+
+#[contract]
+pub struct MyContract;
 
 #[contractimpl]
 impl MyContract {
@@ -264,6 +250,9 @@ pub enum DataKey {
 
 const DEFAULT_DELAY: u64 = 17280; // ~1 day
 
+#[contract]
+pub struct TimelockContract;
+
 #[contractimpl]
 impl TimelockContract {
     /// Propose an upgrade (starts timelock)
@@ -344,6 +333,9 @@ pub enum DataKey {
     ProposalCount,
     Proposal(u64),
 }
+
+#[contract]
+pub struct MultisigContract;
 
 #[contractimpl]
 impl MultisigContract {
@@ -468,6 +460,9 @@ pub enum DataKey {
     TotalAssets,
     Shares(Address), // user shares
 }
+
+#[contract]
+pub struct Vault;
 
 #[contractimpl]
 impl Vault {
@@ -613,6 +608,9 @@ pub enum DataKey {
 }
 
 const FEE_BPS: i128 = 30; // 0.3% fee
+
+#[contract]
+pub struct LiquidityPool;
 
 #[contractimpl]
 impl LiquidityPool {
@@ -766,6 +764,9 @@ impl StorageOptimized {
 Only load data when needed.
 
 ```rust
+#[contract]
+pub struct LazyContract;
+
 #[contractimpl]
 impl LazyContract {
     pub fn process_if_needed(env: Env, user: Address) {
@@ -806,6 +807,9 @@ pub enum DataKey {
     Whitelist(Address),
     TransfersPaused,
 }
+
+#[contract]
+pub struct RegulatedToken;
 
 #[contractimpl]
 impl RegulatedToken {
@@ -889,6 +893,9 @@ pub struct ClawbackEvent {
     pub from: Address,
     pub amount: i128,
 }
+
+#[contract]
+pub struct ClawbackToken;
 
 #[contractimpl]
 impl ClawbackToken {
