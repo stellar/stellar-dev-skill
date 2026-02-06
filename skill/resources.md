@@ -109,6 +109,26 @@ For vulnerability patterns, checklists, and detailed tooling guides, see [securi
 - [CoinFabrik Audit Reports](https://www.coinfabrik.com/smart-contract-audit-reports/)
 - [Certora Security Reports](https://github.com/Certora/SecurityReports) - Includes Stellar verifications
 
+## Zero-Knowledge Proofs (Protocol 25 X-Ray)
+
+For comprehensive ZK development guidance, see [zk-proofs.md](zk-proofs.md).
+
+### Protocol & Specifications
+- [X-Ray Announcement](https://stellar.org/blog/developers/announcing-stellar-x-ray-protocol-25) - Protocol 25 overview
+- [CAP-0074](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0074.md) - BN254 elliptic curve specification
+- [CAP-0075](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0075.md) - Poseidon hash function specification
+
+### SDK Documentation
+- [Soroban SDK BN254](https://docs.rs/soroban-sdk/latest/soroban_sdk/crypto/bn254/) - BN254 types and functions
+- [Soroban SDK Crypto](https://docs.rs/soroban-sdk/latest/soroban_sdk/crypto/) - Full crypto module reference
+
+### Proving Systems & Tooling
+- [Noir Documentation](https://noir-lang.org/docs/) - Aztec's ZK domain-specific language
+- [RISC Zero](https://dev.risczero.com/) - General-purpose zkVM for Rust programs
+
+### Example Contracts
+- [Soroban Examples](https://github.com/stellar/soroban-examples) - Official examples (includes `groth16_verifier`, `privacy-pools`, `import_ark_bn254`)
+
 ## Testing
 
 ### Testing Guides
