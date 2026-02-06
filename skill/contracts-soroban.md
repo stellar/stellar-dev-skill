@@ -122,39 +122,38 @@ stellar contract deploy \
   --initial_value 100
 ```
 
-**From another contract:**
-```rust
-use soroban_sdk::{vec, Address, BytesN, Env, IntoVal};
-
-pub fn deploy_child(env: Env, deployer: Address, wasm_hash: BytesN<32>, salt: BytesN<32>) -> Address {
-    deployer.require_auth();
-
-    // Constructor arguments as Vec<Val>
-    let init_args = vec![
-        &env,
-        deployer.clone().into_val(&env),  // admin
-        100u32.into_val(&env),             // initial_value
-    ];
-
-    // deploy_v2 calls constructor with arguments
-    env.deployer()
-        .with_address(deployer, salt)
-        .deploy_v2(wasm_hash, init_args)
-}
-```
-
 **JavaScript SDK:**
 ```typescript
-import { Contract, Networks, TransactionBuilder } from "@stellar/stellar-sdk";
+import {
+  Contract,
+  Keypair,
+  Networks,
+  Operation,
+  SorobanRpc,
+  TransactionBuilder,
+  xdr,
+  nativeToScVal
+} from "@stellar/stellar-sdk";
 
-// Constructor args are passed in the deploy transaction
-const deployTx = await contract.deploy({
+// Build deploy transaction with constructor args
+const server = new SorobanRpc.Server("https://soroban-testnet.stellar.org");
+const account = await server.getAccount(keypair.publicKey());
+
+const deployOp = Operation.createContractV2({
   wasmHash: wasmHash,
+  address: keypair.publicKey(),
+  salt: randomBytes(32),
   constructorArgs: [
     nativeToScVal(adminAddress, { type: "address" }),
     nativeToScVal(100, { type: "u32" }),
   ],
 });
+
+const tx = new TransactionBuilder(account, { fee: "100000" })
+  .setNetworkPassphrase(Networks.TESTNET)
+  .setTimeout(30)
+  .addOperation(deployOp)
+  .build();
 ```
 
 ### Constructor Rules

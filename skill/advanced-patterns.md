@@ -11,66 +11,52 @@ Use this guide when you need:
 
 ## Deployment Patterns
 
-### Factory Pattern
-Deploy multiple contract instances from a single factory contract.
+### Deploying Contracts via CLI
+Contracts are typically deployed using the Stellar CLI, not from other contracts.
+
+```bash
+# Deploy with constructor arguments (Protocol 22+)
+stellar contract deploy \
+  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
+  --source alice \
+  --network testnet \
+  -- \
+  --admin alice \
+  --initial_value 100
+
+# Deploy without constructor
+stellar contract deploy \
+  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
+  --source alice \
+  --network testnet
+```
+
+### Cross-Contract Communication Pattern
+Instead of factory patterns, Soroban contracts typically communicate via imported clients.
 
 ```rust
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Address, BytesN, Env, Vec, Val};
+use soroban_sdk::{contract, contractimpl, Address, Env};
+
+// Import another contract to call it
+mod other_contract {
+    soroban_sdk::contractimport!(
+        file = "../other/target/wasm32-unknown-unknown/release/other.wasm"
+    );
+}
 
 #[contract]
-pub struct Factory;
+pub struct MyContract;
 
 #[contractimpl]
-impl Factory {
-    /// Deploy a new contract instance with constructor arguments
-    pub fn deploy(
-        env: Env,
-        deployer: Address,
-        wasm_hash: BytesN<32>,
-        salt: BytesN<32>,
-        init_args: Vec<Val>,
-    ) -> Address {
-        deployer.require_auth();
+impl MyContract {
+    pub fn call_other(env: Env, other_address: Address, value: i128) -> i128 {
+        // Create client for the other contract
+        let client = other_contract::Client::new(&env, &other_address);
 
-        // Deploy with constructor (Protocol 22+)
-        let contract_address = env.deployer().with_address(deployer, salt).deploy_v2(
-            wasm_hash,
-            init_args,
-        );
-
-        contract_address
+        // Call method on other contract
+        client.some_method(&value)
     }
-
-    /// Deploy without constructor (legacy or no-arg constructors)
-    pub fn deploy_legacy(
-        env: Env,
-        deployer: Address,
-        wasm_hash: BytesN<32>,
-        salt: BytesN<32>,
-    ) -> Address {
-        deployer.require_auth();
-
-        env.deployer().with_address(deployer, salt).deploy(wasm_hash)
-    }
-}
-```
-
-### Deterministic Deployment
-Predict contract addresses before deployment using salt.
-
-```rust
-use soroban_sdk::{Address, BytesN, Env, xdr::Hash};
-
-/// Compute the contract address that will result from deployment
-pub fn predict_address(
-    env: &Env,
-    deployer: &Address,
-    salt: &BytesN<32>,
-) -> Address {
-    // Address is derived from: deployer + salt + network passphrase
-    // Use this to pre-compute addresses for cross-contract references
-    env.deployer().with_address(deployer.clone(), salt.clone()).deployed_address()
 }
 ```
 
