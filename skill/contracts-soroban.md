@@ -81,6 +81,102 @@ inherits = "release"
 debug-assertions = true
 ```
 
+## Contract Constructors (CAP-0058, Protocol 22+)
+
+Constructors provide **atomic initialization** - the contract is guaranteed to be initialized when created, preventing front-running attacks.
+
+### Defining a Constructor
+```rust
+#![no_std]
+use soroban_sdk::{contract, contractimpl, Address, Env};
+
+#[contract]
+pub struct MyContract;
+
+#[contractimpl]
+impl MyContract {
+    /// Constructor - called automatically when contract is deployed.
+    /// Must return () (void). Cannot be called after deployment.
+    pub fn __constructor(env: Env, admin: Address, initial_value: u32) {
+        env.storage().instance().set(&DataKey::Admin, &admin);
+        env.storage().instance().set(&DataKey::Value, &initial_value);
+    }
+
+    pub fn get_value(env: Env) -> u32 {
+        env.storage().instance().get(&DataKey::Value).unwrap()
+    }
+}
+```
+
+### Deploying with Constructor Arguments
+
+**CLI:**
+```bash
+# Deploy with constructor arguments
+stellar contract deploy \
+  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
+  --source alice \
+  --network testnet \
+  -- \
+  --admin alice \
+  --initial_value 100
+```
+
+**From another contract:**
+```rust
+use soroban_sdk::{vec, Address, BytesN, Env, IntoVal};
+
+pub fn deploy_child(env: Env, deployer: Address, wasm_hash: BytesN<32>, salt: BytesN<32>) -> Address {
+    deployer.require_auth();
+
+    // Constructor arguments as Vec<Val>
+    let init_args = vec![
+        &env,
+        deployer.clone().into_val(&env),  // admin
+        100u32.into_val(&env),             // initial_value
+    ];
+
+    // deploy_v2 calls constructor with arguments
+    env.deployer()
+        .with_address(deployer, salt)
+        .deploy_v2(wasm_hash, init_args)
+}
+```
+
+**JavaScript SDK:**
+```typescript
+import { Contract, Networks, TransactionBuilder } from "@stellar/stellar-sdk";
+
+// Constructor args are passed in the deploy transaction
+const deployTx = await contract.deploy({
+  wasmHash: wasmHash,
+  constructorArgs: [
+    nativeToScVal(adminAddress, { type: "address" }),
+    nativeToScVal(100, { type: "u32" }),
+  ],
+});
+```
+
+### Constructor Rules
+1. Function must be named `__constructor` exactly
+2. Must return `void` (no return value) - returning anything else fails deployment
+3. Only called once during contract creation - NOT called on upgrades
+4. Can take any number of arguments (including zero)
+5. Can access storage, emit events, make cross-contract calls
+6. If constructor fails, contract is not created (atomic)
+7. Contracts without constructors can still be deployed (treated as 0-arg constructor)
+
+### Constructor vs Initialize Pattern
+
+| Aspect | Constructor | Initialize Function |
+|--------|-------------|---------------------|
+| Atomicity | Guaranteed - single transaction | Requires separate tx, can be front-run |
+| Re-initialization | Impossible | Must add protection manually |
+| Upgrade behavior | Not called on upgrade | Can be called on upgrade (if desired) |
+| Protocol support | Protocol 22+ | All versions |
+
+**Recommendation:** Use constructors for new contracts (Protocol 22+). Use initialize pattern only for backwards compatibility or when re-initialization on upgrade is needed.
+
 ## Core Contract Structure
 
 ### Basic Contract
