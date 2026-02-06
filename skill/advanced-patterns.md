@@ -12,8 +12,6 @@ Use this guide when you need:
 ## Deployment Patterns
 
 ### Deploying Contracts via CLI
-Contracts are typically deployed using the Stellar CLI, not from other contracts.
-
 ```bash
 # Deploy with constructor arguments (Protocol 22+)
 stellar contract deploy \
@@ -31,14 +29,55 @@ stellar contract deploy \
   --network testnet
 ```
 
+### Factory Pattern (Deploying from Contracts)
+Use `env.deployer()` to programmatically deploy contracts from within another contract.
+
+```rust
+#![no_std]
+use soroban_sdk::{contract, contractimpl, symbol_short, Address, BytesN, Env, Symbol, Val, Vec};
+
+#[contract]
+pub struct Deployer;
+
+const ADMIN: Symbol = symbol_short!("admin");
+
+#[contractimpl]
+impl Deployer {
+    /// Initialize the deployer with an admin
+    pub fn __constructor(env: Env, admin: Address) {
+        env.storage().instance().set(&ADMIN, &admin);
+    }
+
+    /// Deploy a new contract with constructor arguments
+    pub fn deploy(
+        env: Env,
+        wasm_hash: BytesN<32>,
+        salt: BytesN<32>,
+        constructor_args: Vec<Val>,
+    ) -> Address {
+        let admin: Address = env.storage().instance().get(&ADMIN).unwrap();
+        admin.require_auth();
+
+        // Deploy the contract using the uploaded Wasm with given hash
+        // The contract address is derived from: deployer address + salt
+        let deployed_address = env
+            .deployer()
+            .with_address(env.current_contract_address(), salt)
+            .deploy_v2(wasm_hash, constructor_args);
+
+        deployed_address
+    }
+}
+```
+
 ### Cross-Contract Communication Pattern
-Instead of factory patterns, Soroban contracts typically communicate via imported clients.
+Use `contractimport!` to generate type-safe clients for calling other contracts.
 
 ```rust
 #![no_std]
 use soroban_sdk::{contract, contractimpl, Address, Env};
 
-// Import another contract to call it
+// Import another contract's WASM to generate client
 mod other_contract {
     soroban_sdk::contractimport!(
         file = "../other/target/wasm32-unknown-unknown/release/other.wasm"
@@ -141,7 +180,7 @@ impl MyContract {
 Use a separate contract to perform upgrade and migration atomically (SEP-0049 recommended).
 
 ```rust
-use soroban_sdk::{contract, contractimpl, Address, BytesN, Env, Symbol, Vec, Val};
+use soroban_sdk::{contract, contractimpl, Address, BytesN, Env};
 
 mod upgradeable {
     soroban_sdk::contractimport!(file = "../target/wasm32-unknown-unknown/release/upgradeable.wasm");
@@ -152,23 +191,24 @@ pub struct Upgrader;
 
 #[contractimpl]
 impl Upgrader {
+    /// Upgrade and migrate atomically in one transaction
     pub fn upgrade_and_migrate(
         env: Env,
         contract_address: Address,
         operator: Address,
         new_wasm_hash: BytesN<32>,
-        migration_args: Vec<Val>,
+        new_version: u32,
     ) {
         operator.require_auth();
 
+        // Create client using contractimport!
         let client = upgradeable::Client::new(&env, &contract_address);
 
         // Step 1: Upgrade the contract
         client.upgrade(&new_wasm_hash);
 
         // Step 2: Call migrate in same transaction (atomic)
-        let migrate_fn = Symbol::new(&env, "migrate");
-        env.invoke_contract::<()>(&contract_address, &migrate_fn, migration_args);
+        client.migrate(&new_version);
     }
 }
 ```
@@ -523,7 +563,7 @@ use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, Symbol};
 #[derive(Clone)]
 pub struct PriceData {
     pub price: i128,      // price with decimals
-    pub timestamp: u64,   // ledger timestamp
+    pub timestamp: u64,   // Unix timestamp
     pub decimals: u32,
 }
 
@@ -545,9 +585,9 @@ impl MyDeFiContract {
         let price_data: PriceData = oracle_client.get_price(&asset);
 
         // Check price is fresh (within last ~10 minutes)
-        let max_age: u64 = 120; // ledgers
-        let current_ledger = env.ledger().sequence();
-        if current_ledger - price_data.timestamp > max_age {
+        let max_age: u64 = 600; // 600 seconds = 10 minutes
+        let current_time: u64 = env.ledger().timestamp();
+        if current_time - price_data.timestamp > max_age {
             panic!("stale price");
         }
 
@@ -662,7 +702,7 @@ impl LiquidityPool {
 Combine multiple operations to reduce transaction overhead.
 
 ```rust
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, Vec};
+use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env, Vec};
 
 #[contracttype]
 #[derive(Clone)]
@@ -671,14 +711,22 @@ pub struct Transfer {
     pub amount: i128,
 }
 
+#[contracttype]
+pub enum DataKey {
+    Token,
+}
+
+#[contract]
+pub struct BatchContract;
+
 #[contractimpl]
 impl BatchContract {
     /// Batch multiple transfers in one call
     pub fn batch_transfer(env: Env, from: Address, transfers: Vec<Transfer>) {
         from.require_auth();
 
-        let token: Address = env.storage().instance().get(&DataKey::Token).unwrap();
-        let token_client = token::Client::new(&env, &token);
+        let token_addr: Address = env.storage().instance().get(&DataKey::Token).unwrap();
+        let token_client = token::Client::new(&env, &token_addr);
 
         for transfer in transfers.iter() {
             token_client.transfer(&from, &transfer.to, &transfer.amount);
@@ -834,6 +882,14 @@ impl RegulatedToken {
 Allow authorized recovery of tokens (for compliance).
 
 ```rust
+use soroban_sdk::{contractevent, Address, Env};
+
+#[contractevent]
+pub struct ClawbackEvent {
+    pub from: Address,
+    pub amount: i128,
+}
+
 #[contractimpl]
 impl ClawbackToken {
     /// Clawback tokens from an address (compliance/legal requirement)
@@ -861,58 +917,75 @@ impl ClawbackToken {
         env.storage().persistent().set(&DataKey::Balance(from.clone()), &balance);
 
         // Emit clawback event for audit trail
-        ClawbackEvent(
+        ClawbackEvent {
             from: from.clone(),
             amount,
-        ).publish(&env);
+        }.publish(&env);
     }
 }
-
 ```
-
-### Burn Pattern
-
-```rust
-
 
 ## Cross-Contract Call Patterns
 
-### Callback Pattern
-Handle async-style operations.
+### Standard Pattern: contractimport!
+Use `contractimport!` to generate a type-safe client. This is the recommended pattern for all cross-contract calls.
 
 ```rust
-use soroban_sdk::{contract, contractimpl, Address, Env, Symbol, Val, Vec};
+use soroban_sdk::{contract, contractimpl, Address, Env};
 
-#[contractimpl]
-impl CallbackContract {
-    /// Initiate operation that will call back
-    pub fn start_operation(env: Env, callback_contract: Address, callback_fn: Symbol) {
-        // Do some work...
-        let result: i128 = 42;
-
-        // Call back to the initiator
-        let args: Vec<Val> = Vec::from_array(&env, [result.into_val(&env)]);
-        env.invoke_contract::<()>(&callback_contract, &callback_fn, args);
-    }
+// Import the target contract's WASM to generate client
+mod target_contract {
+    soroban_sdk::contractimport!(
+        file = "../target/wasm32-unknown-unknown/release/target_contract.wasm"
+    );
 }
+
+#[contract]
+pub struct CallerContract;
 
 #[contractimpl]
 impl CallerContract {
-    pub fn initiate(env: Env, target: Address) {
-        let callback_client = CallbackContractClient::new(&env, &target);
-        callback_client.start_operation(
-            &env.current_contract_address(),
-            &Symbol::new(&env, "on_complete"),
-        );
-    }
+    pub fn call_target(env: Env, target_address: Address, value: i128) -> i128 {
+        // Create client using the generated Client type
+        let client = target_contract::Client::new(&env, &target_address);
 
-    /// Called by the target contract when operation completes
-    pub fn on_complete(env: Env, result: i128) {
-        // Verify caller is the expected contract
-        // Handle result...
+        // Call method on the target contract - type-safe
+        client.process_value(&value)
     }
 }
 ```
+
+### Token Client (SEP-0041)
+For calling standard token contracts, use the built-in `token::Client`.
+
+```rust
+use soroban_sdk::{contract, contractimpl, token, Address, Env};
+
+#[contract]
+pub struct MyContract;
+
+#[contractimpl]
+impl MyContract {
+    pub fn transfer_tokens(env: Env, token_address: Address, from: Address, to: Address, amount: i128) {
+        from.require_auth();
+
+        // Use built-in token client for SEP-0041 compliant tokens
+        let token_client = token::Client::new(&env, &token_address);
+        token_client.transfer(&from, &to, &amount);
+    }
+
+    pub fn get_balance(env: Env, token_address: Address, account: Address) -> i128 {
+        let token_client = token::Client::new(&env, &token_address);
+        token_client.balance(&account)
+    }
+}
+```
+
+### Key Points
+- `contractimport!` generates a `Client` type from the WASM file
+- The WASM must be available at compile time
+- The client provides type-safe method calls
+- For tokens, use `token::Client` from the SDK
 
 ## Related Standards
 

@@ -88,7 +88,13 @@ Constructors provide **atomic initialization** - the contract is guaranteed to b
 ### Defining a Constructor
 ```rust
 #![no_std]
-use soroban_sdk::{contract, contractimpl, Address, Env};
+use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
+
+#[contracttype]
+pub enum DataKey {
+    Admin,
+    Value,
+}
 
 #[contract]
 pub struct MyContract;
