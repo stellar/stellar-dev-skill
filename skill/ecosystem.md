@@ -213,7 +213,13 @@ Formal verification for Soroban — first WASM platform supported by Certora.
 
 #### Runtime Verification — Komet
 Formal verification and testing tool designed for Soroban (SCF-funded).
-- **Blog**: https://runtimeverification.com/blog/introducing-komet-smart-contract-testing-and-verification-tool-for-soroban-created-by-runtime-verification
+- **Docs**: https://docs.runtimeverification.com/komet
+- **Repo**: https://github.com/runtimeverification/komet
+- **Spec Language**: Rust — property-based tests written in the same language as Soroban contracts
+- **Operates at**: WASM bytecode level via [KWasm semantics](https://github.com/runtimeverification/wasm-semantics) (eliminates compiler trust assumptions)
+- **Features**: Fuzzing, testing, formal verification
+- **Reports**: [TokenOps audit and verification report](https://github.com/runtimeverification/publications/blob/main/reports/smart-contracts/TokenOps.pdf)
+- **Blog**: [Introducing Komet](https://runtimeverification.com/blog/introducing-komet-smart-contract-testing-and-verification-tool-for-soroban-created-by-runtime-verification)
 
 #### Soroban Security Portal (Inferara)
 Community security knowledge base (SCF-funded).

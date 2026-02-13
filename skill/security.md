@@ -456,7 +456,14 @@ Purpose-built formal verification for Soroban — first WASM platform supported 
 
 #### Runtime Verification — Komet
 Formal verification and testing tool built specifically for Soroban (SCF-funded).
-- **Blog**: https://runtimeverification.com/blog/introducing-komet-smart-contract-testing-and-verification-tool-for-soroban-created-by-runtime-verification
+- **Docs**: https://docs.runtimeverification.com/komet
+- **Repo**: https://github.com/runtimeverification/komet
+- **Spec Language**: Rust — property-based tests written in the same language as Soroban contracts
+- **Operates at**: WASM bytecode level via [KWasm semantics](https://github.com/runtimeverification/wasm-semantics) (eliminates compiler trust assumptions)
+- **Features**: Fuzzing, testing, formal verification
+- **Reports**: [RV publications](https://github.com/runtimeverification/publications)
+- **Example**: [TokenOps audit and verification report](https://github.com/runtimeverification/publications/blob/main/reports/smart-contracts/TokenOps.pdf)
+- **Blog**: [Introducing Komet](https://runtimeverification.com/blog/introducing-komet-smart-contract-testing-and-verification-tool-for-soroban-created-by-runtime-verification)
 
 ### Security Knowledge Base
 
