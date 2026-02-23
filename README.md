@@ -111,3 +111,7 @@ Contributions are welcome! Please ensure any updates reflect current Stellar eco
 ## License
 
 Apache-2.0 License - see [LICENSE](LICENSE) for details.
+
+---
+
+> **Note:** This repository is not in scope for the Stellar Development Foundation bug bounty program. Vulnerabilities found in this repo are not eligible for rewards.
