@@ -207,14 +207,14 @@ console.log("Channel closed:", txHash);
 npm install @stellar/mpp mppx @stellar/stellar-sdk
 ```
 
-| Import path | Exports |
-|-------------|---------|
-| `@stellar/mpp/charge/server` | `stellar`, `charge` |
-| `@stellar/mpp/charge/client` | `stellar`, `charge` |
-| `@stellar/mpp/channel/server` | `stellar`, `channel`, `close`, `getChannelState`, `watchChannel` |
-| `@stellar/mpp/channel/client` | `stellar`, `channel` |
-| `@stellar/mpp/channel` | Zod schema definitions |
-| `mppx` | `Mppx`, `Store` |
+| Import path | Recommended import pattern |
+|-------------|----------------------------|
+| `@stellar/mpp/charge/server` | `import * as stellar from "@stellar/mpp/charge/server"` — use `stellar.charge(...)` |
+| `@stellar/mpp/charge/client` | `import * as stellar from "@stellar/mpp/charge/client"` — use `stellar.charge(...)` |
+| `@stellar/mpp/channel/server` | `import * as stellar from "@stellar/mpp/channel/server"` — use `stellar.channel(...)`, `stellar.close(...)`, `stellar.getChannelState(...)`, `stellar.watchChannel(...)` |
+| `@stellar/mpp/channel/client` | `import * as stellar from "@stellar/mpp/channel/client"` — use `stellar.channel(...)` |
+| `@stellar/mpp/channel` | Zod schema definitions for channel types |
+| `mppx` | `import { Mppx, Store } from "mppx"` |
 
 ## Testnet runbook
 
