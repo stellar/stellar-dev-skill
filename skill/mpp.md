@@ -31,7 +31,7 @@ npm pkg set type=module
 import express from "express";
 import { Mppx } from "mppx";
 import * as stellar from "@stellar/mpp/charge/server";
-import { Keypair } from "@stellar/stellar-sdk";
+import * as StellarSdk from "@stellar/stellar-sdk";
 
 const USDC_SAC_TESTNET = "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
 const RECIPIENT = process.env.STELLAR_RECIPIENT; // G... address
@@ -45,7 +45,7 @@ const mppx = Mppx.create({
       network: "stellar:testnet",
       // optional: server pays network fees so clients don't need XLM
       feePayer: process.env.FEE_PAYER_SECRET
-        ? { envelopeSigner: Keypair.fromSecret(process.env.FEE_PAYER_SECRET) }
+        ? { envelopeSigner: StellarSdk.Keypair.fromSecret(process.env.FEE_PAYER_SECRET) }
         : undefined,
     }),
   ],
@@ -70,9 +70,9 @@ app.listen(3002, () => console.log("MPP charge server on http://localhost:3002")
 // charge-client.js
 import { Mppx } from "mppx";
 import * as stellar from "@stellar/mpp/charge/client";
-import { Keypair } from "@stellar/stellar-sdk";
+import * as StellarSdk from "@stellar/stellar-sdk";
 
-const keypair = Keypair.fromSecret(process.env.STELLAR_SECRET_KEY);
+const keypair = StellarSdk.Keypair.fromSecret(process.env.STELLAR_SECRET_KEY);
 
 const mppx = Mppx.create({
   methods: [
