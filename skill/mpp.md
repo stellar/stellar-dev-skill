@@ -156,10 +156,10 @@ app.listen(3003);
 // channel-client.js
 import { Mppx } from "mppx";
 import * as stellar from "@stellar/mpp/channel/client";
-import { Keypair } from "@stellar/stellar-sdk";
+import * as StellarSdk from "@stellar/stellar-sdk";
 
 // commitment key must be a raw ed25519 seed — NOT a standard Stellar secret key
-const commitmentKey = Keypair.fromRawEd25519Seed(
+const commitmentKey = StellarSdk.Keypair.fromRawEd25519Seed(
   Buffer.from(process.env.COMMITMENT_SECRET, "hex") // 64-char hex secret
 );
 
