@@ -185,13 +185,13 @@ for (let i = 0; i < 100; i++) {
 
 ```js
 import { close } from "@stellar/mpp/channel/server";
-import { Keypair } from "@stellar/stellar-sdk";
+import * as StellarSdk from "@stellar/stellar-sdk";
 
 const txHash = await close({
   channel: process.env.CHANNEL_CONTRACT,
   amount: lastCumulativeAmount, // bigint, total USDC owed in base units
   signature: lastCommitmentSignature, // hex string from final commitment
-  feePayer: { envelopeSigner: Keypair.fromSecret(process.env.FEE_PAYER_SECRET) },
+  feePayer: { envelopeSigner: StellarSdk.Keypair.fromSecret(process.env.FEE_PAYER_SECRET) },
   network: "stellar:testnet",
 });
 // Single on-chain transaction settles the full session
