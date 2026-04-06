@@ -19,6 +19,7 @@ Use this Skill when the user asks for:
 - Privacy-preserving applications (privacy pools, confidential tokens)
 - Local testing and deployment
 - Security hardening and audit-style reviews
+- Agentic payments: paid APIs (x402) and AI agent payment clients (x402, MPP charge, MPP channel)
 
 ## What this Skill is NOT for
 - Bitcoin, Ethereum, Solana, or other non-Stellar blockchain development
@@ -88,6 +89,25 @@ Use this Skill when the user asks for:
 - Hit an error? → [common-pitfalls.md](common-pitfalls.md)
 - Need upgrade/factory/governance/DeFi architecture patterns? → [advanced-patterns.md](advanced-patterns.md)
 - Need SEP/CAP guidance and standards links? → [standards-reference.md](standards-reference.md)
+- Building a paid API or AI agent payment client? → [x402.md](x402.md) or [mpp.md](mpp.md) (see comparison below)
+
+### Agentic payments: x402 vs MPP
+
+| | x402 | MPP Charge | MPP Channel |
+|--|------|------------|-------------|
+| Per-request on-chain tx? | Yes (via facilitator) | Yes (Soroban SAC) | No (off-chain commits) |
+| Needs facilitator? | Yes (OZ Channels) | No | No |
+| Client needs XLM? | No (fees sponsored) | Optional (`feePayer`) | Yes |
+| Setup complexity | Low | Low | Medium (deploy contract first) |
+| Best for | Quickest setup, fee-free clients | No third-party dep | High-frequency agents |
+
+- Selling an API, want zero-XLM clients → [x402.md](x402.md) Seller
+- Calling an x402 API from an agent → [x402.md](x402.md) Buyer
+- Selling an API, no facilitator dependency → [mpp.md](mpp.md) Charge mode
+- Agent making many requests per session → [mpp.md](mpp.md) Channel mode
+- Unsure → x402 (lowest friction to get started)
+
+All protocols use USDC (SEP-41 SAC) by default; `stellar:testnet` / `stellar:pubnet` CAIP-2 network IDs.
 
 ### 2. Pick the right building blocks
 - Contracts: Soroban Rust SDK + Stellar CLI
@@ -131,9 +151,12 @@ When you implement changes, provide:
 - SEP/CAP standards map: [standards-reference.md](standards-reference.md)
 - Ecosystem projects: [ecosystem.md](ecosystem.md)
 - Reference links: [resources.md](resources.md)
+- x402 paid APIs + agent clients: [x402.md](x402.md)
+- MPP agentic payments (charge + channel): [mpp.md](mpp.md)
 
 ## Keywords
 stellar, soroban, xlm, smart contracts, rust, wasm, webassembly, rpc, horizon,
 freighter, stellar-sdk, soroban-sdk, stellar-cli, trustline, anchor, sep, passkey,
 smart wallet, sac, stellar asset contract, defi, token, nft, scaffold stellar, constructor, upgrade, factory, governance, standards,
-zero-knowledge, zk, zk-snark, groth16, bn254, poseidon, pairing, privacy, confidential, noir, risc zero, privacy pool, merkle tree
+zero-knowledge, zk, zk-snark, groth16, bn254, poseidon, pairing, privacy, confidential, noir, risc zero, privacy pool, merkle tree,
+x402, mpp, machine payments protocol, agentic payments, paid api, payment channel, ai agent payments, usdc, sep-41, oz channels, openzeppelin relayer, http 402, per-request payments, soroban auth entries, fee sponsorship, payment middleware
