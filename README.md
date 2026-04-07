@@ -46,7 +46,7 @@ npx skills add https://github.com/stellar/stellar-dev-skill
 git clone https://github.com/stellar/stellar-dev-skill
 ```
 
-Copy the `skill/` directory contents to your assistant's skills location.
+Copy the `skills/stellar-dev/` directory contents to your assistant's skills location.
 
 | Agent | Skill Directory | Docs |
 |-------|-----------------|------|
@@ -58,20 +58,21 @@ Copy the `skill/` directory contents to your assistant's skills location.
 ## Skill Structure
 
 ```
-skill/
-├── SKILL.md                    # Main skill definition (required)
-├── contracts-soroban.md        # Soroban smart contract development
-├── frontend-stellar-sdk.md     # Frontend integration patterns
-├── testing.md                  # Testing strategies
-├── stellar-assets.md           # Asset issuance and management
-├── zk-proofs.md                # ZK proof architecture and verification patterns
-├── api-rpc-horizon.md          # API access (RPC/Horizon)
-├── security.md                 # Security checklist
-├── common-pitfalls.md          # Common issues and solutions
-├── advanced-patterns.md        # Advanced Soroban architecture patterns
-├── standards-reference.md      # SEP/CAP standards quick reference
-├── ecosystem.md                # DeFi protocols, wallets, tools, projects
-└── resources.md                # Curated reference links
+skills/
+└── stellar-dev/
+    ├── SKILL.md                    # Main skill definition (required)
+    ├── contracts-soroban.md        # Soroban smart contract development
+    ├── frontend-stellar-sdk.md     # Frontend integration patterns
+    ├── testing.md                  # Testing strategies
+    ├── stellar-assets.md           # Asset issuance and management
+    ├── zk-proofs.md                # ZK proof architecture and verification patterns
+    ├── api-rpc-horizon.md          # API access (RPC/Horizon)
+    ├── security.md                 # Security checklist
+    ├── common-pitfalls.md          # Common issues and solutions
+    ├── advanced-patterns.md        # Advanced Soroban architecture patterns
+    ├── standards-reference.md      # SEP/CAP standards quick reference
+    ├── ecosystem.md                # DeFi protocols, wallets, tools, projects
+    └── resources.md                # Curated reference links
 ```
 
 The skill uses a progressive disclosure pattern. The main `SKILL.md` provides core guidance, and the AI reads the specialized markdown files only when needed for specific tasks.
