@@ -1,8 +1,9 @@
 {
   "name": "stellar-dev",
   "description": "End-to-end Stellar development: Soroban smart contracts (Rust), stellar-sdk (JS/Python/Go), RPC/Horizon APIs, Stellar Assets, wallet integration, testing, security, and ecosystem",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": {
     "name": "Stellar Development Foundation"
-  }
+  },
+  "skills": "./skill/"
 }
