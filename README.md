@@ -84,6 +84,8 @@ The skill uses a progressive disclosure pattern. The main `SKILL.md` provides co
 "How do I deploy a contract to Stellar Testnet?"
 "Create unit tests for my Soroban contract"
 "Review this contract for security issues"
+"Build a paid API using x402 on Stellar"
+"Set up MPP charge and channel modes for agent payments"
 ```
 
 ## Contributing
