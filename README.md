@@ -64,6 +64,8 @@ skill/
 ├── frontend-stellar-sdk.md     # Frontend integration patterns
 ├── testing.md                  # Testing strategies
 ├── stellar-assets.md           # Asset issuance and management
+├── x402.md                     # Pay-per-request payments (Coinbase)
+├── mpp.md                      # Machine Payments Protocol (Stellar/Stripe)
 ├── zk-proofs.md                # ZK proof architecture and verification patterns
 ├── api-rpc-horizon.md          # API access (RPC/Horizon)
 ├── security.md                 # Security checklist
@@ -84,6 +86,8 @@ The skill uses a progressive disclosure pattern. The main `SKILL.md` provides co
 "How do I deploy a contract to Stellar Testnet?"
 "Create unit tests for my Soroban contract"
 "Review this contract for security issues"
+"Build a paid API using x402 on Stellar"
+"Set up MPP charge and channel modes for agent payments"
 ```
 
 ## Contributing
