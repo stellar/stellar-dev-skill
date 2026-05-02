@@ -186,7 +186,7 @@ Always verify CAP status and network support before treating any ZK primitive as
 - [SDP Documentation](https://developers.stellar.org/docs/category/use-the-stellar-disbursement-platform)
 
 ### Programmable Escrow (EaaS)
-- [Trustless Work](https://trustlesswork.com) — Escrow-as-a-service on Soroban (non-custodial; milestones, disputes)
+- [Trustless Work](https://trustlesswork.com) - Escrow-as-a-service on Soroban (non-custodial; milestones, disputes)
 - [Documentation](https://docs.trustlesswork.com/trustless-work)
 - [React SDK](https://docs.trustlesswork.com/trustless-work/escrow-react-sdk/introduction)
 - [Escrow Blocks SDK](https://docs.trustlesswork.com/trustless-work/escrow-blocks-sdk/introduction)
