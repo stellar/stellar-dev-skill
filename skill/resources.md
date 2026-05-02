@@ -185,6 +185,14 @@ Always verify CAP status and network support before treating any ZK primitive as
 - [Stellar Disbursement Platform](https://github.com/stellar/stellar-disbursement-platform)
 - [SDP Documentation](https://developers.stellar.org/docs/category/use-the-stellar-disbursement-platform)
 
+### Programmable Escrow (EaaS)
+- [Trustless Work](https://trustlesswork.com) - Escrow-as-a-service on Soroban (non-custodial; milestones, disputes)
+- [Documentation](https://docs.trustlesswork.com/trustless-work)
+- [React SDK](https://docs.trustlesswork.com/trustless-work/escrow-react-sdk/introduction)
+- [Escrow Blocks SDK](https://docs.trustlesswork.com/trustless-work/escrow-blocks-sdk/introduction)
+- [Agent Skill](https://docs.trustlesswork.com/trustless-work/ai/skill)
+- [MCP](https://docs.trustlesswork.com/trustless-work/ai/mcp)
+
 ### RPC Providers
 - [RPC Provider Directory](https://developers.stellar.org/docs/data/apis/rpc/providers) - Full list of providers
 - [Quasar (Lightsail Network)](https://quasar.lightsail.network) - Stellar-native RPC, Archive RPC, hosted Galexie Data Lake
