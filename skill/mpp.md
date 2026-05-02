@@ -252,3 +252,133 @@ npm install @stellar/mpp mppx @stellar/stellar-sdk
 **`Store.memory()` in production**
 - Symptom: server loses track of channel state on restart, enables double-spend
 - Fix: replace `Store.memory()` with a persistent store (database-backed) before going to production.
+
+## Production patterns
+
+### Combining charge + channel in the same server
+
+In production, expose both intents on different route prefixes. Clients choose based on their usage pattern — occasional callers use charge, high-frequency agents use channel:
+
+```js
+// dual-mode-server.js
+import express from "express";
+import { Mppx, Store } from "mppx";
+import * as chargeServer from "@stellar/mpp/charge/server";
+import * as channelServer from "@stellar/mpp/channel/server";
+import * as StellarSdk from "@stellar/stellar-sdk";
+
+const NETWORK = "stellar:testnet";
+const USDC_SAC = "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
+const RECIPIENT = process.env.STELLAR_RECIPIENT;
+
+// Charge mode — per-request payments
+const chargeMppx = Mppx.create({
+  secretKey: process.env.MPP_SECRET_KEY,
+  methods: [
+    chargeServer.stellar.charge({
+      recipient: RECIPIENT,
+      currency: USDC_SAC,
+      network: NETWORK,
+    }),
+  ],
+});
+
+// Channel mode — off-chain cumulative payments
+const channelMppx = process.env.CHANNEL_CONTRACT
+  ? Mppx.create({
+      secretKey: process.env.MPP_SECRET_KEY,
+      methods: [
+        channelServer.stellar.channel({
+          channel: process.env.CHANNEL_CONTRACT,
+          commitmentKey: process.env.COMMITMENT_PUBKEY,
+          network: NETWORK,
+          store: Store.memory(), // use persistent store in production
+        }),
+      ],
+    })
+  : null;
+
+const app = express();
+app.use(express.json());
+
+// Charge routes
+app.use("/api/charge", chargeMppx.middleware());
+app.get("/api/charge/data", (_req, res) => res.json({ mode: "charge" }));
+
+// Channel routes (graceful degradation if not configured)
+if (channelMppx) {
+  app.use("/api/channel", channelMppx.middleware());
+  app.get("/api/channel/data", (_req, res) => res.json({ mode: "channel" }));
+}
+
+// Discovery endpoint — clients check which intents are available
+app.get("/api/info", (_req, res) => {
+  res.json({
+    protocol: "mpp",
+    intents: {
+      charge: { enabled: true, routes: { data: "/api/charge/data" } },
+      channel: {
+        enabled: !!channelMppx,
+        contract: process.env.CHANNEL_CONTRACT || null,
+        routes: channelMppx ? { data: "/api/channel/data" } : {},
+      },
+    },
+  });
+});
+
+app.listen(3002);
+```
+
+### Per-route pricing with middleware factories
+
+Instead of global middleware, create per-route middleware functions for different price tiers:
+
+```js
+function chargeMiddleware(amount, description) {
+  return async (req, res, next) => {
+    if (!chargeMppx) {
+      res.setHeader("X-MPP-Warning", "MPP not configured");
+      return next();
+    }
+    try {
+      const handler = chargeMppx.charge({ amount, description });
+      // Use Mppx.toNodeListener to bridge Web API ↔ Express
+      const nodeHandler = Mppx.toNodeListener(handler);
+      await nodeHandler(req, res);
+      if (res.statusCode !== 402) next();
+    } catch (err) {
+      res.status(500).json({ error: "Payment processing error" });
+    }
+  };
+}
+
+// Different prices per endpoint
+app.get("/signals", chargeMiddleware("0.01", "Market signals"), signalsHandler);
+app.get("/market", chargeMiddleware("0.01", "Market data"), marketHandler);
+app.post("/execute", chargeMiddleware("0.05", "Strategy execution"), executeHandler);
+```
+
+### Recipient key auto-resolution
+
+In containerized deployments (Railway, Docker), environment variables sometimes contain the secret key instead of the public key. Detect and derive automatically:
+
+```js
+import { Keypair } from "@stellar/stellar-sdk";
+
+function resolveRecipient() {
+  let raw = (process.env.STELLAR_RECIPIENT || "").trim().replace(/['"]/g, "");
+  if (!raw) return "";
+
+  if (raw.startsWith("S")) {
+    try {
+      const pub = Keypair.fromSecret(raw).publicKey();
+      console.warn(`[MPP] Derived public key from secret: ${pub.slice(0, 8)}...`);
+      return pub;
+    } catch {
+      console.error("[MPP] STELLAR_RECIPIENT looks like a secret but failed to parse");
+      return "";
+    }
+  }
+  return raw;
+}
+```
