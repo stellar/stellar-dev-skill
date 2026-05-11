@@ -1,4 +1,29 @@
-# API Access (Stellar RPC + Horizon)
+---
+name: data
+description: Querying Stellar chain data via Stellar RPC (preferred) and Horizon (legacy). Covers RPC JSON-RPC methods, Horizon REST endpoints, streaming, pagination, historical queries, Hubble/Galexie for deep history, and the RPC/Horizon migration story. Use when reading balances, transactions, operations, ledgers, contract events, or building any indexer/analytics workflow.
+user-invocable: true
+argument-hint: "[data task]"
+---
+
+# Stellar Data: RPC + Horizon
+
+API access for reading chain state. Stellar RPC is the preferred entry point for new projects; Horizon remains for legacy and historical-query workflows. For deeper history beyond RPC's 7-day window, use Hubble/Galexie.
+
+## When to use this skill
+- Calling Stellar RPC methods (`getLatestLedger`, `getLedgerEntries`, `getEvents`, `simulateTransaction`, `sendTransaction`)
+- Querying Horizon endpoints (accounts, transactions, operations, effects, ledgers)
+- Streaming live events or operations
+- Pulling historical data beyond RPC's 7-day window (Hubble, Galexie)
+- Choosing between RPC and Horizon for a given workflow
+
+## Related skills
+- Building transactions to send → `../dapp/SKILL.md`
+- Soroban contract simulation and event emission → `../soroban/SKILL.md`
+- Asset balance and trustline lookups → `../assets/SKILL.md`
+- Standards (SEP-7 deeplinks, SEP-10 auth) → `../standards/SKILL.md`
+
+---
+
 
 ## Overview
 
@@ -402,7 +427,7 @@ See the full indexer directory: https://developers.stellar.org/docs/data/indexer
 
 ## Network Configuration
 
-> For a React/Next.js-specific setup, see [frontend-stellar-sdk.md](frontend-stellar-sdk.md).
+> For a React/Next.js-specific setup, see [frontend-stellar-sdk.md](../dapp/SKILL.md).
 > For mainnet RPC, set `STELLAR_MAINNET_RPC_URL` from a provider in the [RPC providers directory](https://developers.stellar.org/docs/data/apis/rpc/providers).
 
 ### Environment-Based Setup

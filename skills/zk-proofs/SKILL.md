@@ -1,4 +1,35 @@
-# Zero-Knowledge Proofs on Stellar (Status-Sensitive)
+---
+name: zk-proofs
+description: Zero-knowledge cryptography and privacy patterns on Stellar/Soroban. Covers Groth16 verification, BLS12-381 (CAP-0059, available), BN254 + Poseidon host functions (CAP-0074/0075, status-sensitive), Noir / RISC Zero integration, privacy pools, confidential tokens, Merkle tree commitments, and status-sensitive guidance for protocol/SDK readiness. Use when building privacy-preserving applications or ZK-verifier contracts on Stellar.
+user-invocable: true
+argument-hint: "[zk task]"
+---
+
+# Zero-Knowledge Proofs & Privacy
+
+Privacy patterns and ZK verification on Stellar/Soroban. Capability is protocol- and SDK-version dependent — always verify CAP status, network version, and `soroban-sdk` host-function support before relying on a primitive.
+
+## When to use this skill
+- Implementing a Groth16 (or other SNARK) verifier as a Soroban contract
+- Using BLS12-381 host functions
+- Planning for BN254 / Poseidon (currently proposed via CAP-0074/0075)
+- Integrating Noir or RISC Zero proofs
+- Building privacy pools, confidential tokens, or Merkle-tree-backed commitments
+
+## Status-sensitive — always verify
+1. CAP status (`Accepted`/`Implemented` vs draft)
+2. Target network software + protocol version
+3. `soroban-sdk` release support for the target host functions
+4. Available feature flags + graceful fallback paths
+
+## Related skills
+- Soroban verifier contract patterns + tests → `../soroban/SKILL.md`
+- Confidential-token integration with classic assets → `../assets/SKILL.md`
+- Off-chain proof verification UI → `../dapp/SKILL.md`
+- CAPs referenced here → `../standards/SKILL.md`
+
+---
+
 
 ## When to use this guide
 Use this guide when the user asks for:
@@ -126,9 +157,9 @@ Mitigation:
 ## Example starting points
 - [Soroban examples](https://github.com/stellar/soroban-examples)
 - [Groth16 verifier example](https://github.com/stellar/soroban-examples/tree/main/groth16_verifier)
-- [Security guide](security.md)
-- [Advanced patterns](advanced-patterns.md)
-- [Standards reference](standards-reference.md)
+- [Security guide](../soroban/SKILL.md)
+- [Advanced patterns](../soroban/SKILL.md)
+- [Standards reference](../standards/SKILL.md)
 
 ## What not to do
 - Do not claim specific primitives are production-ready without checking CAP status and network support.

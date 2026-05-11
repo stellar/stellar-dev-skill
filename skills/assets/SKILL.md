@@ -1,4 +1,29 @@
-# Stellar Assets (Classic + Soroban Interop)
+---
+name: assets
+description: Stellar Assets (classic) + trustlines + Stellar Asset Contract (SAC) bridge to Soroban. Covers asset issuance, distribution, authorization flags, clawback, regulated assets, trustline management, and the SAC interop layer that exposes classic assets as Soroban tokens. Use when tokenizing real-world assets, issuing stablecoins, managing trustlines, or bridging classic assets to Soroban contracts.
+user-invocable: true
+argument-hint: "[asset task]"
+---
+
+# Stellar Assets, Trustlines, and SAC
+
+Stellar's native token mechanism: classic asset issuance, trustlines, and the Stellar Asset Contract (SAC) bridge that makes classic assets usable from Soroban. Default to classic assets over custom Soroban tokens unless you need custom logic.
+
+## When to use this skill
+- Issuing a new asset (stablecoin, security token, utility token)
+- Setting up trustlines from a client or contract
+- Managing issuer flags (auth required, auth revocable, clawback)
+- Bridging a classic asset into a Soroban contract via SAC
+- Building regulated-asset flows (compliance, KYC, freeze)
+
+## Related skills
+- Custom token contracts (when classic isn't enough) → `../soroban/SKILL.md`
+- UI flows for trustline creation and asset display → `../dapp/SKILL.md`
+- Looking up balances and trustline state → `../data/SKILL.md`
+- Token-related SEPs (SEP-41, SEP-7, etc.) → `../standards/SKILL.md`
+
+---
+
 
 ## Overview
 

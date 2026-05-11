@@ -1,4 +1,30 @@
-# Frontend with Stellar SDK (Next.js / React)
+---
+name: dapp
+description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, Soroban contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar or Soroban.
+user-invocable: true
+argument-hint: "[dapp task]"
+---
+
+# Stellar dApp / Frontend
+
+Client-side development with `@stellar/stellar-sdk`, wallet connection, signing, and submitting transactions. Covers both classic Stellar operations and Soroban contract invocation from the browser or Node.js.
+
+## When to use this skill
+- Connecting Freighter or other wallets via Stellar Wallets Kit
+- Building, simulating, signing, and submitting transactions
+- Invoking Soroban contracts from a frontend
+- Implementing smart accounts with passkeys
+- Handling network passphrases (Mainnet / Testnet / local)
+
+## Related skills
+- Writing the contract being invoked → `../soroban/SKILL.md`
+- Issuing assets and managing trustlines → `../assets/SKILL.md`
+- Querying chain state via RPC / Horizon → `../data/SKILL.md`
+- Building paid APIs or agent payment clients → `../agentic-payments/SKILL.md`
+- SEPs the wallet/anchor flows depend on → `../standards/SKILL.md`
+
+---
+
 
 ## Goals
 - Single SDK instance for the app (RPC/Horizon + transaction building)
@@ -26,7 +52,7 @@ npm install @stellar/stellar-sdk @creit.tech/stellar-wallets-kit
 
 ## SDK Initialization
 
-> For the full API reference (RPC methods, Horizon endpoints, migration guide), see [api-rpc-horizon.md](api-rpc-horizon.md).
+> For the full API reference (RPC methods, Horizon endpoints, migration guide), see [api-rpc-horizon.md](../data/SKILL.md).
 
 ### Basic Setup
 ```typescript

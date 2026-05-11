@@ -46,7 +46,7 @@ npx skills add https://github.com/stellar/stellar-dev-skill
 git clone https://github.com/stellar/stellar-dev-skill
 ```
 
-Copy the `skill/` directory contents to your assistant's skills location.
+Copy the `skills/` directory contents to your assistant's skills location.
 
 | Agent | Skill Directory | Docs |
 |-------|-----------------|------|
@@ -58,23 +58,17 @@ Copy the `skill/` directory contents to your assistant's skills location.
 ## Skill Structure
 
 ```
-skill/
-├── SKILL.md                    # Main skill definition (required)
-├── contracts-soroban.md        # Soroban smart contract development
-├── frontend-stellar-sdk.md     # Frontend integration patterns
-├── testing.md                  # Testing strategies
-├── stellar-assets.md           # Asset issuance and management
-├── zk-proofs.md                # ZK proof architecture and verification patterns
-├── api-rpc-horizon.md          # API access (RPC/Horizon)
-├── security.md                 # Security checklist
-├── common-pitfalls.md          # Common issues and solutions
-├── advanced-patterns.md        # Advanced Soroban architecture patterns
-├── standards-reference.md      # SEP/CAP standards quick reference
-├── ecosystem.md                # DeFi protocols, wallets, tools, projects
-└── resources.md                # Curated reference links
+skills/
+├── soroban/SKILL.md           # Soroban contracts + testing + security + patterns + pitfalls
+├── dapp/SKILL.md              # Frontend, wallets (Freighter, Wallets Kit), signing, smart accounts
+├── assets/SKILL.md            # Stellar Assets, trustlines, SAC bridge
+├── data/SKILL.md              # Stellar RPC (preferred) + Horizon (legacy), indexing
+├── agentic-payments/SKILL.md  # x402 + MPP (Charge + Channel) for AI/machine payments
+├── zk-proofs/SKILL.md         # ZK verification, BLS12-381, BN254/Poseidon (status-sensitive)
+└── standards/SKILL.md         # SEPs, CAPs, ecosystem projects, curated reference links
 ```
 
-The skill uses a progressive disclosure pattern. The main `SKILL.md` provides core guidance, and the AI reads the specialized markdown files only when needed for specific tasks.
+Each sub-skill is a self-contained Agent Skill with its own frontmatter. Cross-references link related skills (e.g., the `agentic-payments` skill points to `soroban` for the Soroban SACs the protocols call, and to `assets` for USDC). The AI reads only the sub-skills relevant to the task at hand.
 
 ## Example Prompts
 
