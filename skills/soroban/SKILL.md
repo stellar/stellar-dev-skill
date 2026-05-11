@@ -1891,7 +1891,7 @@ Use this guide for higher-complexity contract architecture:
 - Regulated token/compliance workflows
 - Resource and storage optimization
 
-Use `contracts-soroban.md` for core contract syntax and day-to-day patterns.
+For core contract syntax and day-to-day patterns, refer to the earlier sections in this guide covering contract structure, storage, authorization, cross-contract calls, events, error handling, and testing.
 
 ## Design principles
 - Prefer simple state machines over implicit behavior.
