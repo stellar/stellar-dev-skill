@@ -18,6 +18,20 @@
   display: block !important;
 }
 
+// Screen-reader-only utility for aria-live announcements (e.g. CopyButton's
+// "copied" state). Matches the standard WAI-ARIA visually-hidden pattern.
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 // Error / not-found page layout
 .ErrorContent {
   display: flex;

@@ -6,7 +6,8 @@
     "prettier"
   ],
   "rules": {
-    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "import/first": "error",
     "import/named": "off"
   }
 }

@@ -8,10 +8,10 @@
   },
   "scripts": {
     "sync:skills": "node scripts/copy-skills.mjs",
-    "generate:llms-txt": "node scripts/generate-llms-txt.mjs",
-    "predev": "node scripts/copy-skills.mjs --cached --lenient && node scripts/generate-llms-txt.mjs",
+    "generate:llms-txt": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-llms-txt.mjs",
+    "predev": "node scripts/copy-skills.mjs --cached --lenient && pnpm generate:llms-txt",
     "dev": "next dev",
-    "prebuild": "node scripts/copy-skills.mjs && node scripts/generate-llms-txt.mjs",
+    "prebuild": "node scripts/copy-skills.mjs && pnpm generate:llms-txt",
     "build": "next build",
     "lint": "next lint",
     "lint:ts": "tsc --noEmit"

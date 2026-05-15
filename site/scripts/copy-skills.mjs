@@ -20,6 +20,7 @@ import {
   mkdirSync,
   readFileSync,
   rmSync,
+  statSync,
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -54,7 +55,23 @@ if (sources.length === 0) {
   process.exit(1);
 }
 
-if (cached && sources.every((s) => existsSync(join(PUBLIC_DIR, s)))) {
+// `--cached` skips the copy when every dest exists AND every dest is at
+// least as fresh as its upstream source. Without the mtime check, editing
+// a SKILL.md during `pnpm dev` wouldn't show up until the next manual
+// `pnpm sync:skills`.
+const isFresh = (source) => {
+  const dest = join(PUBLIC_DIR, source);
+  if (!existsSync(dest)) return false;
+  const src = join(REPO_ROOT, source);
+  if (!existsSync(src)) {
+    // Upstream missing; --lenient will warn later. Treat as fresh so we
+    // don't trigger a full re-copy just to discover the same missing file.
+    return true;
+  }
+  return statSync(dest).mtimeMs >= statSync(src).mtimeMs;
+};
+
+if (cached && sources.every(isFresh)) {
   console.log(
     `[copy-skills] cached (${sources.length} files) — run \`pnpm sync:skills\` to refresh`,
   );

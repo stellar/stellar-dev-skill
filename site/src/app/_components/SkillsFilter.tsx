@@ -41,8 +41,10 @@ export const SkillsFilter = ({
   const panelId = `${baseId}-panel`;
   const tabId = (filter: string) => `${baseId}-tab-${filter}`;
 
+  // Callers always pass at least one filter; the `?? ""` is a type-level
+  // guard against `noUncheckedIndexedAccess` and never hits at runtime.
   const [activeFilter, setActiveFilter] = useState<string>(
-    defaultFilter ?? filters[0],
+    defaultFilter ?? filters[0] ?? "",
   );
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -64,6 +66,9 @@ export const SkillsFilter = ({
     if (nextIndex !== null) {
       event.preventDefault();
       const nextFilter = filters[nextIndex];
+      // `% filters.length` guarantees in-bounds; guard satisfies
+      // `noUncheckedIndexedAccess` without changing runtime behavior.
+      if (nextFilter === undefined) return;
       setActiveFilter(nextFilter);
       tabRefs.current[nextFilter]?.focus();
     }

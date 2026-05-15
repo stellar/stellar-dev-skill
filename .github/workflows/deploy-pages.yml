@@ -5,6 +5,9 @@ name: Deploy site to GitHub Pages
 # the same branch — see `preview-pr.yml`. `keep_files: true` preserves
 # those subdirectories when main republishes.
 #
+# Both workflows share the `gh-pages-write` concurrency group so they
+# can't push to `gh-pages` at the same time and clobber each other.
+#
 # `SITE_ORIGIN` and `SITE_BASE_PATH` default to the project-Pages URL
 # derived from repo metadata. Override via repo variables
 # (Settings → Secrets and variables → Actions → Variables) when cutting
@@ -24,7 +27,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: pages-main
+  group: gh-pages-write
   cancel-in-progress: false
 
 defaults:
@@ -34,6 +37,7 @@ defaults:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       SITE_ORIGIN: ${{ vars.SITE_ORIGIN || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
       NEXT_BASE_PATH: ${{ vars.SITE_BASE_PATH || format('/{0}', github.event.repository.name) }}
@@ -52,19 +56,31 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - run: pnpm lint
+
+      - run: pnpm lint:ts
+
       - run: pnpm build
 
-      - name: Verify hero text matches SITE_ORIGIN
+      - name: Verify hero text matches SITE_ORIGIN (no subpath leak)
         run: |
           HOST="${SITE_ORIGIN#https://}"
           HOST="${HOST#http://}"
-          if ! grep -qF "Read ${HOST} before you start building on Stellar" out/index.html; then
-            echo "::error::Hero text in out/index.html doesn't match SITE_ORIGIN=${SITE_ORIGIN}"
+          # Single exact-match check: the hero pill text is wrapped by
+          # tag boundaries, so requiring `>...<` rejects both a missing
+          # match AND any subpath leak (`/pr/N`, etc.) that would change
+          # the content between the tags.
+          if ! grep -qF ">Read ${HOST} before you start building on Stellar.<" out/index.html; then
+            echo "::error::Hero pill text in out/index.html doesn't exactly match SITE_ORIGIN=${SITE_ORIGIN}"
             exit 1
           fi
 
+      # peaceiris/actions-gh-pages@v4.1.0 pinned to commit SHA for
+      # supply-chain safety. Bump intentionally when reviewing release
+      # notes. Dependabot can automate this once `github-actions`
+      # updates are enabled.
       - name: Publish to gh-pages
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: site/out

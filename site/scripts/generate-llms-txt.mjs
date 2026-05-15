@@ -12,63 +12,36 @@
  * src/app/page.tsx); overrides in skills.ts take precedence. Runs
  * after the skill markdown has been written to public/skills/ by the
  * `copy-skills.mjs` predev / prebuild step.
+ *
+ * skills.ts is imported directly via Node's native type stripping
+ * (`--experimental-strip-types`, enabled by the npm scripts that invoke
+ * this file). The page (src/app/page.tsx) and this script therefore
+ * share one source of truth (no regex parsing, no second copy).
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { INSTALLERS } from "../src/data/installers.mjs";
 import { readSkillMeta } from "../src/lib/skill-meta.mjs";
+import {
+  ECOSYSTEM_CARDS,
+  FILTERS,
+  SKILL_CARD_SOURCES,
+} from "../src/data/skills.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = dirname(__dirname);
-const SKILLS_DATA_FILE = join(ROOT, "src/data/skills.ts");
 const OUT_FILE = join(ROOT, "public", "llms.txt");
 
 const ORIGIN = process.env.SITE_ORIGIN || "http://localhost:3000";
 
-const source = readFileSync(SKILLS_DATA_FILE, "utf8");
-
-const parseArray = (arrayName) => {
-  const re = new RegExp(
-    `${arrayName}[^=]*=\\s*\\[([\\s\\S]*?)\\]\\s*as\\s+const`,
-  );
-  const m = re.exec(source);
-  if (!m) return [];
-  const body = m[1];
-  const entries = [];
-  const objectRe = /\{([\s\S]*?)\},/g;
-  let om;
-  while ((om = objectRe.exec(body)) !== null) {
-    const fields = om[1];
-    const get = (key) => {
-      const fr = new RegExp(`\\b${key}:\\s*"([^"]+)"`);
-      const fm = fr.exec(fields);
-      return fm ? fm[1] : null;
-    };
-    entries.push({
-      source: get("source"),
-      title: get("title"),
-      description: get("description"),
-      copyValue: get("copyValue"),
-      category: get("category"),
-    });
-  }
-  return entries;
-};
-
-const parseFilters = () => {
-  const re = /FILTERS:\s*readonly[^=]*=\s*\[([\s\S]*?)\]\s*as\s+const/;
-  const m = re.exec(source);
-  if (!m) return [];
-  return [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
-};
-
-const skillCards = parseArray("SKILL_CARD_SOURCES").map((c) => {
-  const meta = c.source ? readSkillMeta(c.source) : { title: null, description: null };
+const skillCards = SKILL_CARD_SOURCES.map((c) => {
+  const meta = readSkillMeta(c.source);
   return {
-    ...c,
-    path: c.source ? `/${c.source}` : null,
+    source: c.source,
+    category: c.category,
+    path: `/${c.source}`,
     title: c.title ?? meta.title ?? c.source,
     // llms.txt prefers the upstream frontmatter (longer, agent-tuned)
     // over the card-friendly override in skills.ts. Override is only
@@ -76,8 +49,13 @@ const skillCards = parseArray("SKILL_CARD_SOURCES").map((c) => {
     description: meta.description ?? c.description ?? "",
   };
 });
-const ecosystemCards = parseArray("ECOSYSTEM_CARDS");
-const filters = parseFilters();
+const ecosystemCards = ECOSYSTEM_CARDS.map((c) => ({
+  title: c.title,
+  description: c.description,
+  copyValue: c.copyValue,
+  category: c.category,
+}));
+const filters = [...FILTERS];
 
 if (skillCards.length === 0) {
   console.error("[generate-llms-txt] no SKILL_CARD_SOURCES entries parsed");

@@ -14,9 +14,12 @@ import { SkillCard } from "./_components/SkillCard";
 import { SkillsFilter } from "./_components/SkillsFilter";
 import { ThemeSwitchIsland } from "./_components/ThemeSwitchIsland";
 
-const INSTALL_TABS = ["Use without installing", "Install Stellar Skills"] as const;
-
 import "./styles.scss";
+
+const INSTALL_TABS = [
+  "Use without installing",
+  "Install Stellar Skills",
+] as const;
 
 /**
  * Build-time environment. All values have local-dev-safe defaults so

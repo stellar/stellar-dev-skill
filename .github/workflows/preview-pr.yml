@@ -16,6 +16,11 @@ name: Deploy PR preview
 # Fork PRs are intentionally skipped (see the `if:` guard below): they
 # can't safely receive the repo's GITHUB_TOKEN, and our `peaceiris` +
 # `rossjrw` steps need write access to push to `gh-pages` and comment.
+#
+# Concurrency: both this workflow and `deploy-pages.yml` use the shared
+# `gh-pages-write` group so two simultaneous pushes to `gh-pages` can't
+# collide. `cancel-in-progress: false` keeps each preview build to
+# completion; PRs in rapid succession queue rather than thrash.
 
 on:
   pull_request:
@@ -27,8 +32,8 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: pages-pr-${{ github.event.number }}
-  cancel-in-progress: true
+  group: gh-pages-write
+  cancel-in-progress: false
 
 defaults:
   run:
@@ -39,6 +44,7 @@ jobs:
     # Skip PRs opened from forks (no write token, can't deploy).
     if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     env:
       # Production origin (same as main) — see header comment.
       SITE_ORIGIN: ${{ vars.SITE_ORIGIN || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
@@ -50,10 +56,20 @@ jobs:
       GITHUB_SOURCE_REF: ${{ github.event.pull_request.head.sha }}
       GITHUB_PR_NUMBER: ${{ github.event.number }}
     steps:
-      - uses: actions/checkout@v4
+      # Explicitly check out the PR head, not the auto-generated merge
+      # commit. The merge commit can drift from the PR's actual state
+      # (e.g., when base advances), so building head.sha makes the
+      # preview match exactly what was pushed to the PR.
+      - if: github.event.action != 'closed'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
-      # Build steps only run for open/reopen/synchronize — closing a PR
-      # just needs the cleanup step at the bottom.
+      # On `closed` events we don't build. We just need a checkout for
+      # the cleanup step to run from.
+      - if: github.event.action == 'closed'
+        uses: actions/checkout@v4
+
       - if: github.event.action != 'closed'
         uses: pnpm/action-setup@v4
         with:
@@ -70,6 +86,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - if: github.event.action != 'closed'
+        run: pnpm lint
+
+      - if: github.event.action != 'closed'
+        run: pnpm lint:ts
+
+      - if: github.event.action != 'closed'
         run: pnpm build
 
       - name: Verify hero text matches production SITE_ORIGIN (no PR path leak)
@@ -77,21 +99,20 @@ jobs:
         run: |
           HOST="${SITE_ORIGIN#https://}"
           HOST="${HOST#http://}"
-          if ! grep -qF "Read ${HOST} before you start building on Stellar" out/index.html; then
-            echo "::error::Hero text in out/index.html doesn't match production SITE_ORIGIN=${SITE_ORIGIN}"
-            exit 1
-          fi
-          # Defensive: catch any future regression where SITE_ORIGIN
-          # accidentally varies per env and leaks the preview path into
-          # displayed text. Asset paths (in <script src=…/_next/…>) are
-          # excluded by requiring the match to live inside a text node.
-          if grep -qE "Read [^<]*pr/[0-9]" out/index.html; then
-            echo "::error::Hero text contains 'pr/' — preview URL leaked into displayed content"
+          # Single exact-match check: requiring tag boundaries on either
+          # side rejects subpath leaks (`pr/<N>/`, asset prefixes, etc.)
+          # that would otherwise pass a loose `grep -qF`.
+          if ! grep -qF ">Read ${HOST} before you start building on Stellar.<" out/index.html; then
+            echo "::error::Hero pill text in out/index.html doesn't exactly match SITE_ORIGIN=${SITE_ORIGIN}"
             exit 1
           fi
 
+      # rossjrw/pr-preview-action@v1.8.1 pinned to commit SHA for
+      # supply-chain safety. Bump intentionally when reviewing release
+      # notes. Dependabot can automate this once `github-actions`
+      # updates are enabled.
       - name: Deploy / remove preview
-        uses: rossjrw/pr-preview-action@v1
+        uses: rossjrw/pr-preview-action@ffa7509e91a3ec8dfc2e5536c4d5c1acdf7a6de9
         with:
           source-dir: site/out
           preview-branch: gh-pages
