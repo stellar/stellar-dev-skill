@@ -91,12 +91,15 @@ URLs once Pages is live:
 ### Switching to a custom domain later
 
 Both workflows derive `SITE_ORIGIN` and the base path from repo
-metadata by default. To cut over to a custom apex domain, set repo
-variables in **Settings → Secrets and variables → Actions →
+metadata by default. To cut over to a custom apex domain, set one
+repo variable in **Settings → Secrets and variables → Actions →
 Variables**:
 
 - `SITE_ORIGIN` = `https://<your-domain>`
-- `SITE_BASE_PATH` = (empty)
+
+When `SITE_ORIGIN` is set, both workflows drop the GitHub-Pages
+project subpath so assets resolve from the root of the custom
+domain.
 
 Then:
 
@@ -105,7 +108,7 @@ Then:
 3. Point DNS at GitHub Pages (`A` records for the apex or a `CNAME`
    for a subdomain).
 
-No workflow edits needed; both workflows read the same variables, so
+No workflow edits needed; both workflows read the same variable, so
 main and previews stay in lockstep.
 
 ### Build-time env vars

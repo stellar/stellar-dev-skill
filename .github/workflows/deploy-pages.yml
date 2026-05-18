@@ -8,10 +8,10 @@ name: Deploy site to GitHub Pages
 # Both workflows share the `gh-pages-write` concurrency group so they
 # can't push to `gh-pages` at the same time and clobber each other.
 #
-# `SITE_ORIGIN` and `SITE_BASE_PATH` default to the project-Pages URL
-# derived from repo metadata. Override via repo variables
-# (Settings → Secrets and variables → Actions → Variables) when cutting
-# over to a custom domain — both workflows read the same vars, so a
+# `SITE_ORIGIN` defaults to the project-Pages URL derived from repo
+# metadata, and the basePath defaults to `/<repo>` to match. Set
+# `vars.SITE_ORIGIN` to a custom domain to cut over — both workflows
+# drop the basePath automatically when `SITE_ORIGIN` is set, so a
 # single edit keeps main and previews in lockstep.
 
 on:
@@ -40,9 +40,22 @@ jobs:
     timeout-minutes: 10
     env:
       SITE_ORIGIN: ${{ vars.SITE_ORIGIN || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
-      NEXT_BASE_PATH: ${{ vars.SITE_BASE_PATH || format('/{0}', github.event.repository.name) }}
     steps:
       - uses: actions/checkout@v4
+
+      # When `vars.SITE_ORIGIN` is set, the site is served from a custom
+      # domain at the apex, so no Next.js basePath is needed. Otherwise
+      # the site lives at the project-Pages URL and assets must be
+      # prefixed with `/<repo>`. We can't express "use empty string when
+      # the variable is set" in a YAML `||` expression because GitHub
+      # Actions treats `''` as falsy, so the fallback always wins.
+      - name: Resolve NEXT_BASE_PATH
+        run: |
+          if [[ -n "${{ vars.SITE_ORIGIN }}" ]]; then
+            echo "NEXT_BASE_PATH=" >> "$GITHUB_ENV"
+          else
+            echo "NEXT_BASE_PATH=/${{ github.event.repository.name }}" >> "$GITHUB_ENV"
+          fi
 
       - uses: pnpm/action-setup@v4
         with:

@@ -48,8 +48,6 @@ jobs:
     env:
       # Production origin (same as main) — see header comment.
       SITE_ORIGIN: ${{ vars.SITE_ORIGIN || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
-      # Preview-scoped path so assets resolve under pr/<N>/.
-      NEXT_BASE_PATH: ${{ vars.SITE_BASE_PATH || format('/{0}', github.event.repository.name) }}/pr/${{ github.event.number }}
       IS_PREVIEW: "true"
       # PR head SHA so card "view source" links resolve for newly-added
       # files that aren't on main yet.
@@ -69,6 +67,22 @@ jobs:
       # the cleanup step to run from.
       - if: github.event.action == 'closed'
         uses: actions/checkout@v4
+
+      # Preview-scoped basePath. When `vars.SITE_ORIGIN` is set the site
+      # is served from a custom domain at the apex, so previews live at
+      # `<custom-domain>/pr/<N>/`. Otherwise they live under the
+      # project-Pages subpath at `<repo>/pr/<N>/`. We can't compute this
+      # with a YAML `||` expression because GitHub Actions treats `''`
+      # as falsy, so the fallback would always win.
+      - name: Resolve NEXT_BASE_PATH
+        if: github.event.action != 'closed'
+        run: |
+          if [[ -n "${{ vars.SITE_ORIGIN }}" ]]; then
+            base=""
+          else
+            base="/${{ github.event.repository.name }}"
+          fi
+          echo "NEXT_BASE_PATH=${base}/pr/${{ github.event.number }}" >> "$GITHUB_ENV"
 
       - if: github.event.action != 'closed'
         uses: pnpm/action-setup@v4
