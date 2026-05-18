@@ -1,0 +1,103 @@
+name: Deploy site to GitHub Pages
+
+# Builds the Next.js static export from `site/` and publishes it to the
+# `gh-pages` branch (project root). PR previews live under `pr/<N>/` on
+# the same branch — see `preview-pr.yml`. `keep_files: true` preserves
+# those subdirectories when main republishes.
+#
+# Both workflows share the `gh-pages-write` concurrency group so they
+# can't push to `gh-pages` at the same time and clobber each other.
+#
+# `SITE_ORIGIN` defaults to the project-Pages URL derived from repo
+# metadata, and the basePath defaults to `/<repo>` to match. Set
+# `vars.SITE_ORIGIN` to a custom domain to cut over — both workflows
+# drop the basePath automatically when `SITE_ORIGIN` is set, so a
+# single edit keeps main and previews in lockstep.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "skills/**"
+      - "site/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages-write
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: site
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE_ORIGIN: ${{ vars.SITE_ORIGIN || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # When `vars.SITE_ORIGIN` is set, the site is served from a custom
+      # domain at the apex, so no Next.js basePath is needed. Otherwise
+      # the site lives at the project-Pages URL and assets must be
+      # prefixed with `/<repo>`. We can't express "use empty string when
+      # the variable is set" in a YAML `||` expression because GitHub
+      # Actions treats `''` as falsy, so the fallback always wins.
+      - name: Resolve NEXT_BASE_PATH
+        run: |
+          if [[ -n "${{ vars.SITE_ORIGIN }}" ]]; then
+            echo "NEXT_BASE_PATH=" >> "$GITHUB_ENV"
+          else
+            echo "NEXT_BASE_PATH=/${{ github.event.repository.name }}" >> "$GITHUB_ENV"
+          fi
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm lint:ts
+
+      - run: pnpm build
+
+      - name: Verify hero text matches SITE_ORIGIN (no subpath leak)
+        run: |
+          HOST="${SITE_ORIGIN#https://}"
+          HOST="${HOST#http://}"
+          # Single exact-match check: the hero pill text is wrapped by
+          # tag boundaries, so requiring `>...<` rejects both a missing
+          # match AND any subpath leak (`/pr/N`, etc.) that would change
+          # the content between the tags.
+          if ! grep -qF ">Read ${HOST} before you start building on Stellar.<" out/index.html; then
+            echo "::error::Hero pill text in out/index.html doesn't exactly match SITE_ORIGIN=${SITE_ORIGIN}"
+            exit 1
+          fi
+
+      # peaceiris/actions-gh-pages@v4.1.0 pinned to commit SHA for
+      # supply-chain safety. Bump intentionally when reviewing release
+      # notes. Dependabot can automate this once `github-actions`
+      # updates are enabled.
+      - name: Publish to gh-pages
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: site/out
+          publish_branch: gh-pages
+          # Don't wipe pr/<N>/ subdirectories owned by preview-pr.yml.
+          keep_files: true
+          commit_message: "deploy: main @ ${{ github.sha }}"
