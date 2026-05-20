@@ -117,7 +117,7 @@ Use the CAP preamble status fields as the source of truth for implementation rea
 - Contract implementation details: [`../soroban/SKILL.md`](../soroban/SKILL.md)
 - Advanced architecture guidance: [`../soroban/SKILL.md`](../soroban/SKILL.md)
 - RPC and data access: [`../data/SKILL.md`](../data/SKILL.md)
-- Security considerations: [`../security/SKILL.md`](../security/SKILL.md)
+- Security considerations: [`../soroban/SKILL.md`](../soroban/SKILL.md#part-3-security)
 
 ---
 

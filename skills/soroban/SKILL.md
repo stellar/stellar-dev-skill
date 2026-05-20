@@ -507,7 +507,7 @@ use soroban_sdk::Env;
 #[test]
 fn test_increment() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, CounterContract);
+    let contract_id = env.register(CounterContract, ());
     let client = CounterContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
@@ -524,7 +524,7 @@ fn test_transfer_with_auth() {
     let env = Env::default();
     env.mock_all_auths();  // Auto-approve all auth requests
 
-    let contract_id = env.register_contract(None, TokenContract);
+    let contract_id = env.register(TokenContract, ());
     let client = TokenContractClient::new(&env, &contract_id);
 
     let alice = Address::generate(&env);
@@ -631,7 +631,7 @@ fn test_basic_functionality() {
     let env = Env::default();
 
     // Register contract
-    let contract_id = env.register_contract(None, Contract);
+    let contract_id = env.register(Contract, ());
 
     // Create typed client
     let client = ContractClient::new(&env, &contract_id);
@@ -657,7 +657,7 @@ fn test_with_auth() {
     // Mock all authorizations automatically
     env.mock_all_auths();
 
-    let contract_id = env.register_contract(None, TokenContract);
+    let contract_id = env.register(TokenContract, ());
     let client = TokenContractClient::new(&env, &contract_id);
 
     let admin = Address::generate(&env);
@@ -687,7 +687,7 @@ fn test_with_auth() {
 #[test]
 fn test_specific_auth() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, Contract);
+    let contract_id = env.register(Contract, ());
     let client = ContractClient::new(&env, &contract_id);
 
     let user = Address::generate(&env);
@@ -713,7 +713,7 @@ fn test_specific_auth() {
 #[test]
 fn test_time_based() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, VestingContract);
+    let contract_id = env.register(VestingContract, ());
     let client = VestingContractClient::new(&env, &contract_id);
 
     let beneficiary = Address::generate(&env);
@@ -762,7 +762,7 @@ fn test_ledger_manipulation() {
 #[test]
 fn test_events() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, Contract);
+    let contract_id = env.register(Contract, ());
     let client = ContractClient::new(&env, &contract_id);
 
     client.do_something();
@@ -786,7 +786,7 @@ fn test_events() {
 #[test]
 fn test_storage_ttl() {
     let env = Env::default();
-    let contract_id = env.register_contract(None, Contract);
+    let contract_id = env.register(Contract, ());
     let client = ContractClient::new(&env, &contract_id);
 
     client.store_data();
@@ -809,8 +809,8 @@ fn test_cross_contract() {
     let env = Env::default();
 
     // Register both contracts
-    let token_id = env.register_contract_wasm(None, token::WASM);
-    let vault_id = env.register_contract(None, VaultContract);
+    let token_id = env.register(token::WASM, ());
+    let vault_id = env.register(VaultContract, ());
 
     let token_client = token::Client::new(&env, &token_id);
     let vault_client = VaultContractClient::new(&env, &vault_id);
@@ -921,8 +921,8 @@ stellar contract deploy \
   --source my-testnet-key \
   --network testnet
 
-# Install contract code (separate from deployment)
-stellar contract install \
+# Upload contract code (separate from deployment)
+stellar contract upload \
   --wasm target/wasm32-unknown-unknown/release/contract.wasm \
   --source my-testnet-key \
   --network testnet
@@ -1131,7 +1131,7 @@ use soroban_sdk::{testutils::Address as _, Address, Env};
 use crate::{Contract, ContractClient};
 
 pub fn setup_contract(env: &Env) -> (Address, ContractClient) {
-    let contract_id = env.register_contract(None, Contract);
+    let contract_id = env.register(Contract, ());
     let client = ContractClient::new(env, &contract_id);
     let admin = Address::generate(env);
 
@@ -1274,7 +1274,7 @@ fn test_upgrade_compatibility() {
     env.mock_all_auths();
 
     // Register both versions
-    let old_id = env.register_contract_wasm(None, deployed::WASM);
+    let old_id = env.register(deployed::WASM, ());
     let new_id = env.register(NewContract, ());
 
     let old_client = deployed::Client::new(&env, &old_id);
@@ -2407,22 +2407,22 @@ const preparedTx = StellarSdk.rpc.assembleTransaction(
 
 **Solution**:
 ```typescript
-import { isConnected, isAllowed } from "@stellar/freighter-api";
+import { isConnected, isAllowed, requestAccess } from "@stellar/freighter-api";
 
 async function checkFreighter() {
   // Check if extension is installed
-  const connected = await isConnected();
-  if (!connected) {
+  const { isConnected: installed, error } = await isConnected();
+  if (error || !installed) {
     // Prompt user to install
     window.open("https://freighter.app", "_blank");
     return;
   }
 
-  // Check if app is allowed
-  const allowed = await isAllowed();
-  if (!allowed) {
-    // Need to request permission
-    await setAllowed();
+  // Check if this app is already authorized
+  const { isAllowed: granted } = await isAllowed();
+  if (!granted) {
+    // requestAccess prompts the user and returns { address, error }
+    await requestAccess();
   }
 }
 ```
