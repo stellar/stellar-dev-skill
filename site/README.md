@@ -71,9 +71,15 @@ ephemeral preview URLs that 404 on PR close. Previews vary only
 `NEXT_BASE_PATH` so Next.js routes assets to the preview subpath; a
 small banner identifies preview builds.
 
+URLs:
+
+- Main: `https://skills.stellar.org/`
+- PR-N: `https://skills.stellar.org/pr/<N>/`
+
 ### One-time repo setup
 
-After merging the workflow files, do this once in repo settings:
+Already configured on `stellar/stellar-dev-skill`. For reference, or
+when bootstrapping a fork:
 
 1. **Settings → Pages → Build and deployment → Source:** choose
    **Deploy from a branch**, branch `gh-pages`, folder `/ (root)`. The
@@ -82,34 +88,16 @@ After merging the workflow files, do this once in repo settings:
 2. **Settings → Actions → General → Workflow permissions:** confirm
    **Read and write permissions** (the workflows also declare
    `contents: write` per-job, so this is belt-and-braces).
+3. **Custom domain:** `site/public/CNAME` ships
+   `skills.stellar.org`, so every build republishes it to the
+   `gh-pages` root. Set the same domain under **Settings → Pages →
+   Custom domain** and point DNS at GitHub Pages (`A` records for the
+   apex or a `CNAME` for a subdomain).
 
-URLs once Pages is live:
-
-- Main: `https://<owner>.github.io/<repo>/`
-- PR-N: `https://<owner>.github.io/<repo>/pr/<N>/`
-
-### Switching to a custom domain later
-
-Both workflows derive `SITE_ORIGIN` and the base path from repo
-metadata by default. To cut over to a custom apex domain, set one
-repo variable in **Settings → Secrets and variables → Actions →
-Variables**:
-
-- `SITE_ORIGIN` = `https://<your-domain>`
-
-When `SITE_ORIGIN` is set, both workflows drop the GitHub-Pages
-project subpath so assets resolve from the root of the custom
-domain.
-
-Then:
-
-1. Add `public/CNAME` with one line: your apex domain.
-2. In repo Settings → Pages, set the custom domain.
-3. Point DNS at GitHub Pages (`A` records for the apex or a `CNAME`
-   for a subdomain).
-
-No workflow edits needed; both workflows read the same variable, so
-main and previews stay in lockstep.
+To redeploy a fork at a different origin, set the repo variable
+`SITE_ORIGIN` under **Settings → Secrets and variables → Actions →
+Variables** (apex URL, no trailing slash). The override is read by
+both workflows, so main and previews stay in lockstep.
 
 ### Build-time env vars
 
@@ -117,8 +105,8 @@ All have local-dev-safe defaults — `pnpm dev` needs no env setup.
 
 | Env var | Set by | Purpose |
 |---|---|---|
-| `SITE_ORIGIN` | both workflows | Canonical public origin in displayed/copied URLs and `llms.txt`. Default: `http://localhost:3000` |
-| `NEXT_BASE_PATH` | both workflows | Next.js asset path prefix |
+| `SITE_ORIGIN` | both workflows | Canonical public origin in displayed/copied URLs and `llms.txt`. Default: `http://localhost:3000` locally; `https://skills.stellar.org` in CI |
+| `NEXT_BASE_PATH` | preview-pr.yml only | Next.js asset path prefix for PR previews (`/pr/<N>`). Unset for main builds |
 | `IS_PREVIEW` | preview-pr.yml | Renders the preview banner when `"true"` |
 | `GITHUB_SOURCE_REF` | preview-pr.yml | Git ref for card "view source" links. Default: `main` |
 | `GITHUB_PR_NUMBER` | preview-pr.yml | PR number for the banner link |

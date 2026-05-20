@@ -123,8 +123,11 @@ then append to `SKILL_CARD_SOURCES`:
 
 `.github/workflows/deploy-pages.yml` at the repo root. Triggered on
 push to `main` when `skills/**` or `site/**` changes. Builds the
-static export and publishes to GitHub Pages.
+static export and publishes to the `gh-pages` branch root, served at
+`https://skills.stellar.org` via a custom domain. `site/public/CNAME`
+ships the domain so every build republishes it.
 
-Deploy URL and basePath are controlled by `NEXT_BASE_PATH` and
-`SITE_ORIGIN` env vars in that workflow — see `README.md` → Deploying
-for the cutover from project Pages URL to custom domain.
+PR previews live at `https://skills.stellar.org/pr/<N>/`. Only
+`NEXT_BASE_PATH` differs between main and previews — `SITE_ORIGIN` is
+the same so reviewers see canonical URLs in the hero pill and copy
+buttons. See `README.md` → Deploying for the full setup.

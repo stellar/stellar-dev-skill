@@ -12,10 +12,12 @@ const GA_TRACKING_ENABLED =
   process.env.NODE_ENV === "production" &&
   !IS_PREVIEW;
 
-// SITE_ORIGIN can carry a project-Pages path prefix (e.g.
-// `https://owner.github.io/repo`). For metadataBase we need a pure
-// origin; the canonical path picks up whatever prefix was in SITE_ORIGIN
-// (with a trailing slash so URL resolution stays deterministic).
+// Production SITE_ORIGIN is an apex URL (https://skills.stellar.org),
+// so the canonical path is just "/". We still derive it from the URL
+// in case a fork overrides SITE_ORIGIN with a subpath build —
+// metadataBase needs a pure origin and the canonical path picks up
+// whatever prefix the URL carried (with a trailing slash so URL
+// resolution stays deterministic).
 const siteOriginUrl = new URL(SITE_ORIGIN);
 const canonicalPath = siteOriginUrl.pathname.endsWith("/")
   ? siteOriginUrl.pathname
