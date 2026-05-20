@@ -1,10 +1,9 @@
 /** @type {import('next').NextConfig} */
 
-// When deploying to a project-level GitHub Pages URL
-// (https://<org>.github.io/<repo>/), every asset and route has to be
-// prefixed with `/<repo>`. The deploy workflow sets NEXT_BASE_PATH for
-// that case. Once a custom domain is in place (CNAME serves the site
-// at the apex), drop the env var and the basePath block goes with it.
+// Production serves from skills.stellar.org at the apex, so main builds
+// run with NEXT_BASE_PATH unset and no basePath is applied. PR previews
+// live at skills.stellar.org/pr/<N>/, so preview-pr.yml sets
+// NEXT_BASE_PATH=/pr/<N> to prefix every asset and route accordingly.
 const basePath = process.env.NEXT_BASE_PATH;
 
 const nextConfig = {

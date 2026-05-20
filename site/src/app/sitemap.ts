@@ -9,9 +9,10 @@ export const dynamic = "force-static";
 const SITE_ORIGIN = process.env.SITE_ORIGIN || "http://localhost:3000";
 const IS_PREVIEW = process.env.IS_PREVIEW === "true";
 
-// SITE_ORIGIN may include a basePath (e.g. https://owner.github.io/repo)
-// or be a bare origin (custom domain). Either way, joining with a leading
-// slash gives the right absolute URL for the deployed site.
+// Production SITE_ORIGIN is a bare apex origin (skills.stellar.org).
+// Joining with a leading slash gives the right absolute URL; we still
+// strip/normalize separators so a fork override with a trailing slash
+// or subpath doesn't produce double slashes.
 const join = (path: string) =>
   `${SITE_ORIGIN.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
 
