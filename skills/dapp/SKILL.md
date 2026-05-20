@@ -134,10 +134,11 @@ export function useFreighter() {
 
     // getAddress returns address: "" until the app has been granted access,
     // so a non-empty address means we're already authorized.
-    const { address: addr } = await getAddress();
-    if (!addr) return;
+    const { address: addr, error: addressError } = await getAddress();
+    if (addressError || !addr) return;
 
-    const { network: net } = await getNetwork();
+    const { network: net, error: networkError } = await getNetwork();
+    if (networkError) return;
     setConnected(true);
     setAddress(addr);
     setNetwork(net);
@@ -153,7 +154,8 @@ export function useFreighter() {
     const { address: addr, error: accessError } = await requestAccess();
     if (accessError) throw new Error(accessError.message);
 
-    const { network: net } = await getNetwork();
+    const { network: net, error: networkError } = await getNetwork();
+    if (networkError) throw new Error(networkError.message);
     setConnected(true);
     setAddress(addr);
     setNetwork(net);

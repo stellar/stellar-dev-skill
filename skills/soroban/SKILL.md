@@ -2422,7 +2422,8 @@ async function checkFreighter() {
   const { isAllowed: granted } = await isAllowed();
   if (!granted) {
     // requestAccess prompts the user and returns { address, error }
-    await requestAccess();
+    const { error: accessError } = await requestAccess();
+    if (accessError) throw new Error(accessError.message);
   }
 }
 ```
@@ -2442,7 +2443,8 @@ async function checkFreighter() {
 import { getNetwork } from "@stellar/freighter-api";
 
 async function validateNetwork() {
-  const walletNetwork = await getNetwork();
+  const { network: walletNetwork, error } = await getNetwork();
+  if (error) throw new Error(error.message);
   const appNetwork = process.env.NEXT_PUBLIC_STELLAR_NETWORK;
 
   if (walletNetwork !== appNetwork) {
