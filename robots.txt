@@ -1,4 +1,4 @@
 User-Agent: *
 Allow: /
 
-Sitemap: https://stellar.github.io/stellar-dev-skill/sitemap.xml
+Sitemap: https://skills.stellar.org/sitemap.xml
