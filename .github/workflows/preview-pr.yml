@@ -69,10 +69,13 @@ jobs:
         uses: actions/checkout@v4
 
       # Preview-scoped basePath. The site is served from skills.stellar.org
-      # at the apex, so previews live at `skills.stellar.org/pr/<N>/`.
+      # at the apex, so previews live at `skills.stellar.org/pr/pr-<N>/`.
+      # `rossjrw/pr-preview-action` deploys under `<umbrella-dir>/pr-<N>`
+      # by default, so the basePath must include the `pr-` prefix on the
+      # number to match — otherwise asset URLs baked into the HTML 404.
       - name: Resolve NEXT_BASE_PATH
         if: github.event.action != 'closed'
-        run: echo "NEXT_BASE_PATH=/pr/${{ github.event.number }}" >> "$GITHUB_ENV"
+        run: echo "NEXT_BASE_PATH=/pr/pr-${{ github.event.number }}" >> "$GITHUB_ENV"
 
       - if: github.event.action != 'closed'
         uses: pnpm/action-setup@v4
