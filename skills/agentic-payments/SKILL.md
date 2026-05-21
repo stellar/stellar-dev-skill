@@ -70,10 +70,21 @@ npm pkg set type=module
 
 ```js
 // server.js
+import "dotenv/config";
 import express from "express";
 import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactStellarScheme } from "@x402/stellar/exact/server";
+
+// Drive the CAIP-2 network ID from one place. Switching to mainnet means
+// flipping STELLAR_NETWORK and FACILITATOR_URL in .env, nothing in code.
+const NETWORK = process.env.STELLAR_NETWORK || "stellar:testnet";
+
+if (!process.env.OZ_API_KEY) {
+  throw new Error(
+    "OZ_API_KEY is required. Generate one at https://channels.openzeppelin.com/testnet/gen (testnet) or https://channels.openzeppelin.com/gen (mainnet)."
+  );
+}
 
 const facilitator = new HTTPFacilitatorClient({
   url: process.env.FACILITATOR_URL ?? "https://channels.openzeppelin.com/x402/testnet",
@@ -85,7 +96,7 @@ const facilitator = new HTTPFacilitatorClient({
 });
 
 const resourceServer = new x402ResourceServer(facilitator)
-  .register("stellar:testnet", new ExactStellarScheme());
+  .register(NETWORK, new ExactStellarScheme());
 
 const app = express();
 
@@ -96,7 +107,7 @@ app.use(
         accepts: {
           scheme: "exact",
           price: "$0.001", // human-readable, auto-converts to 7-decimal USDC units
-          network: "stellar:testnet",
+          network: NETWORK,
           payTo: process.env.STELLAR_RECIPIENT, // recipient G... account
         },
         description: "Current weather data",
@@ -110,13 +121,14 @@ app.get("/weather", (_req, res) => {
   res.json({ city: "San Francisco", temp: 18, conditions: "Foggy" });
 });
 
-app.listen(3001, () => console.log("x402 server on http://localhost:3001"));
+app.listen(3001, () => console.log(`x402 server on http://localhost:3001 (${NETWORK})`));
 ```
 
 **Env vars:**
+- `STELLAR_NETWORK` — CAIP-2 network ID; defaults to `stellar:testnet`. Set to `stellar:pubnet` for mainnet.
 - `STELLAR_RECIPIENT` — your G... address (receives USDC, needs a USDC trustline)
 - `OZ_API_KEY` — OZ Channels API key (**required on both testnet and mainnet**; generate at the link in the runbook below)
-- `FACILITATOR_URL` — defaults to testnet URL above
+- `FACILITATOR_URL` — defaults to testnet URL above; set to `https://channels.openzeppelin.com/x402` for mainnet
 
 **Price format options:**
 - `"$0.001"` — human-readable, auto-converts to 7-decimal USDC units
@@ -133,19 +145,22 @@ npm pkg set type=module
 
 ```js
 // client.js
+import "dotenv/config";
 import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
 import { createEd25519Signer } from "@x402/stellar";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
 
+const NETWORK = process.env.STELLAR_NETWORK || "stellar:testnet";
+
 // createEd25519Signer takes the raw S... secret string and the CAIP-2 network ID.
 // Do NOT pre-wrap with Keypair.fromSecret or call getNetworkPassphrase yourself —
 // the signer does both internally.
-const signer = createEd25519Signer(process.env.STELLAR_SECRET_KEY, "stellar:testnet");
+const signer = createEd25519Signer(process.env.STELLAR_SECRET_KEY, NETWORK);
 
 // wrapFetchWithPaymentFromConfig returns a fetch that handles 402 negotiation
 // and auth-entry signing transparently.
 const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
-  schemes: [{ network: "stellar:testnet", client: new ExactStellarScheme(signer) }],
+  schemes: [{ network: NETWORK, client: new ExactStellarScheme(signer) }],
 });
 
 const res = await fetchWithPayment("http://localhost:3001/weather");
@@ -154,6 +169,7 @@ console.log(await res.json());
 ```
 
 **Env vars:**
+- `STELLAR_NETWORK` — CAIP-2 network ID; defaults to `stellar:testnet`. Must match the server's network.
 - `STELLAR_SECRET_KEY` — your S... secret key (needs USDC trustline + balance)
 
 **Browser frontends:** this client uses Node `fetch` and `createEd25519Signer`, both of which run in Node. A vanilla browser cannot sign Soroban auth entries through a typical wallet extension without additional glue. For a browser payer, run the x402 client server-side and expose a thin proxy endpoint to the page, or wire up Wallets-Kit / Freighter with custom auth-entry signing.
@@ -212,6 +228,7 @@ Two steps are web-only (Captcha or auth form) and cannot be scripted: the Circle
 
 6. **Fill in `.env`**
    ```
+   STELLAR_NETWORK=stellar:testnet
    STELLAR_RECIPIENT=G... (recipient public key)
    STELLAR_SECRET_KEY=S... (payer secret key)
    OZ_API_KEY=...
@@ -294,7 +311,7 @@ import { USDC_TESTNET_ADDRESS, USDC_PUBNET_ADDRESS } from "@x402/stellar";
 | OZ Channels API key | Required ([channels.openzeppelin.com/gen](https://channels.openzeppelin.com/gen)) |
 | Funding | Real USDC on mainnet (CEX, DEX, or bridge) |
 
-Always test on testnet first. Switch by changing `network` and `FACILITATOR_URL`. Both networks require an OZ Channels API key in the `Authorization: Bearer` header.
+Always test on testnet first. To switch a working setup to mainnet, change only the `.env` (`STELLAR_NETWORK=stellar:pubnet`, `FACILITATOR_URL=https://channels.openzeppelin.com/x402`, mainnet `OZ_API_KEY`, and a mainnet `STELLAR_RECIPIENT`); the samples derive their network from `STELLAR_NETWORK`, so no code changes are needed. Both networks require an OZ Channels API key in the `Authorization: Bearer` header.
 
 ## Key concepts
 
