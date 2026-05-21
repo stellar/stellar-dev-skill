@@ -70,36 +70,50 @@ npm pkg set type=module
 
 ```js
 // server.js
+import "dotenv/config";
 import express from "express";
-import { paymentMiddlewareFromConfig } from "@x402/express";
+import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactStellarScheme } from "@x402/stellar/exact/server";
 
-const app = express();
+// Drive the CAIP-2 network ID from one place. Switching to mainnet means
+// flipping STELLAR_NETWORK and FACILITATOR_URL in .env, nothing in code.
+const NETWORK = process.env.STELLAR_NETWORK || "stellar:testnet";
+
+if (!process.env.OZ_API_KEY) {
+  throw new Error(
+    "OZ_API_KEY is required. Generate one at https://channels.openzeppelin.com/testnet/gen (testnet) or https://channels.openzeppelin.com/gen (mainnet)."
+  );
+}
 
 const facilitator = new HTTPFacilitatorClient({
   url: process.env.FACILITATOR_URL ?? "https://channels.openzeppelin.com/x402/testnet",
-  // omit createAuthHeaders on testnet if you don't have an API key yet
-  createAuthHeaders: process.env.OZ_API_KEY
-    ? async () => {
-        const h = { Authorization: `Bearer ${process.env.OZ_API_KEY}` };
-        return { verify: h, settle: h, supported: h };
-      }
-    : undefined,
+  // OZ Channels requires Bearer auth on both testnet and mainnet
+  createAuthHeaders: async () => {
+    const h = { Authorization: `Bearer ${process.env.OZ_API_KEY}` };
+    return { verify: h, settle: h, supported: h };
+  },
 });
 
+const resourceServer = new x402ResourceServer(facilitator)
+  .register(NETWORK, new ExactStellarScheme());
+
+const app = express();
+
 app.use(
-  paymentMiddlewareFromConfig(
+  paymentMiddleware(
     {
       "GET /weather": {
+        accepts: {
+          scheme: "exact",
+          price: "$0.001", // human-readable, auto-converts to 7-decimal USDC units
+          network: NETWORK,
+          payTo: process.env.STELLAR_RECIPIENT, // recipient G... account
+        },
         description: "Current weather data",
-        // human-readable price string — auto-converts to USDC base units
-        price: "$0.001",
-        network: "stellar:testnet",
-        payTo: process.env.STELLAR_RECIPIENT, // your G... address
       },
     },
-    { facilitator, schemes: [ExactStellarScheme] }
+    resourceServer
   )
 );
 
@@ -107,91 +121,184 @@ app.get("/weather", (_req, res) => {
   res.json({ city: "San Francisco", temp: 18, conditions: "Foggy" });
 });
 
-app.listen(3001, () => console.log("x402 server on http://localhost:3001"));
+app.listen(3001, () => console.log(`x402 server on http://localhost:3001 (${NETWORK})`));
 ```
 
 **Env vars:**
-- `STELLAR_RECIPIENT` — your G... address (receives USDC)
-- `OZ_API_KEY` — OZ Channels API key (optional on testnet, required on mainnet)
-- `FACILITATOR_URL` — defaults to testnet URL above
+- `STELLAR_NETWORK` — CAIP-2 network ID; defaults to `stellar:testnet`. Set to `stellar:pubnet` for mainnet.
+- `STELLAR_RECIPIENT` — your G... address (receives USDC, needs a USDC trustline)
+- `OZ_API_KEY` — OZ Channels API key (**required on both testnet and mainnet**; generate at the link in the runbook below)
+- `FACILITATOR_URL` — defaults to testnet URL above; set to `https://channels.openzeppelin.com/x402` for mainnet
 
 **Price format options:**
 - `"$0.001"` — human-readable, auto-converts to 7-decimal USDC units
 - `{ amount: "1000", asset: "ASSET_SAC_CONTRACT_ID" }` — explicit base units for non-USDC assets
 
+**`payTo` is the recipient's classic Stellar account (`G...`), not the USDC SAC contract address.** Sending USDC lands in the classic balance of the `payTo` account, which is why that account also needs a USDC trustline. The SAC contract address is what the protocol invokes `transfer` on; see "Two USDC addresses" below.
+
 ## Buyer: agent client
 
 ```bash
-npm install @x402/fetch @x402/stellar @stellar/stellar-sdk dotenv
+npm install @x402/fetch @x402/stellar dotenv
 npm pkg set type=module
 ```
 
 ```js
 // client.js
-import { x402HTTPClient } from "@x402/fetch";
-import { createEd25519Signer, getNetworkPassphrase } from "@x402/stellar";
+import "dotenv/config";
+import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
+import { createEd25519Signer } from "@x402/stellar";
 import { ExactStellarScheme } from "@x402/stellar/exact/client";
-import * as StellarSdk from "@stellar/stellar-sdk";
 
-const keypair = StellarSdk.Keypair.fromSecret(process.env.STELLAR_SECRET_KEY);
-const network = "stellar:testnet";
+const NETWORK = process.env.STELLAR_NETWORK || "stellar:testnet";
 
-// createEd25519Signer wraps the keypair for auth-entry signing
-const signer = createEd25519Signer(keypair, getNetworkPassphrase(network));
+// createEd25519Signer takes the raw S... secret string and the CAIP-2 network ID.
+// Do NOT pre-wrap with Keypair.fromSecret or call getNetworkPassphrase yourself —
+// the signer does both internally.
+const signer = createEd25519Signer(process.env.STELLAR_SECRET_KEY, NETWORK);
 
-// x402HTTPClient wraps fetch — handles 402 negotiation transparently
-const client = x402HTTPClient({ signer, schemes: [ExactStellarScheme] });
+// wrapFetchWithPaymentFromConfig returns a fetch that handles 402 negotiation
+// and auth-entry signing transparently.
+const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [{ network: NETWORK, client: new ExactStellarScheme(signer) }],
+});
 
-const res = await client.fetch("http://localhost:3001/weather");
+const res = await fetchWithPayment("http://localhost:3001/weather");
 console.log(await res.json());
-// Paid automatically: 402 negotiation + auth-entry signing happens under the hood
+// Paid automatically: 402 negotiation + auth-entry signing under the hood
 ```
 
 **Env vars:**
+- `STELLAR_NETWORK` — CAIP-2 network ID; defaults to `stellar:testnet`. Must match the server's network.
 - `STELLAR_SECRET_KEY` — your S... secret key (needs USDC trustline + balance)
+
+**Browser frontends:** this client uses Node `fetch` and `createEd25519Signer`, both of which run in Node. A vanilla browser cannot sign Soroban auth entries through a typical wallet extension without additional glue. For a browser payer, run the x402 client server-side and expose a thin proxy endpoint to the page, or wire up Wallets-Kit / Freighter with custom auth-entry signing.
 
 ## Testnet runbook
 
-1. **Generate a keypair**
+You need two Stellar testnet accounts: a **client/payer** (signs and pays from a USDC balance) and a **server/recipient** (the `payTo` in your route config). Both need a USDC trustline.
+
+Two steps are web-only (Captcha or auth form) and cannot be scripted: the Circle USDC faucet and the OZ Channels key generator. Everything else can be automated. A complete `setup.js` sketch lives at the end of this section.
+
+1. **Generate two keypairs**
    ```bash
-   node -e "const { Keypair } = require('@stellar/stellar-sdk'); const kp = Keypair.random(); console.log('Public:', kp.publicKey()); console.log('Secret:', kp.secret());"
+   node -e "const { Keypair } = require('@stellar/stellar-sdk'); for (const n of ['RECIPIENT','PAYER']) { const k = Keypair.random(); console.log(n, k.publicKey(), k.secret()); }"
    ```
 
-2. **Fund with testnet XLM**
+2. **Fund both with testnet XLM (friendbot)**
    ```bash
-   curl "https://friendbot.stellar.org?addr=YOUR_PUBLIC_KEY"
+   curl "https://friendbot.stellar.org?addr=RECIPIENT_G..."
+   curl "https://friendbot.stellar.org?addr=PAYER_G..."
    ```
 
-3. **Add USDC trustline** — open [Stellar Lab](https://laboratory.stellar.org/#account-creator?network=test), or via SDK:
+3. **Add a USDC trustline to BOTH accounts** — open [Stellar Lab](https://lab.stellar.org/account/fund?network=test) and add a USDC trustline to each `G...`, or run via SDK for each keypair:
    ```js
    import * as StellarSdk from "@stellar/stellar-sdk";
 
-   const server = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
-   const keypair = process.env.STELLAR_SECRET_KEY
-     ? StellarSdk.Keypair.fromSecret(process.env.STELLAR_SECRET_KEY)
-     : StellarSdk.Keypair.random();
+   const horizon = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
+   // Circle's classic USDC issuer on Stellar testnet
+   const USDC_ISSUER = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
 
-   const account = await server.loadAccount(keypair.publicKey());
-   const tx = new StellarSdk.TransactionBuilder(account, {
-     fee: "100",
-     networkPassphrase: StellarSdk.Networks.TESTNET,
-   })
-     .addOperation(
-       StellarSdk.Operation.changeTrust({
-         asset: new StellarSdk.Asset("USDC", "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"),
-       }),
-     )
-     .setTimeout(30)
-     .build();
-   tx.sign(keypair);
-   await server.submitTransaction(tx);
+   async function addTrustline(secret) {
+     const kp = StellarSdk.Keypair.fromSecret(secret);
+     const acc = await horizon.loadAccount(kp.publicKey());
+     const tx = new StellarSdk.TransactionBuilder(acc, {
+       fee: StellarSdk.BASE_FEE,
+       networkPassphrase: StellarSdk.Networks.TESTNET,
+     })
+       .addOperation(StellarSdk.Operation.changeTrust({
+         asset: new StellarSdk.Asset("USDC", USDC_ISSUER),
+       }))
+       .setTimeout(60)
+       .build();
+     tx.sign(kp);
+     return horizon.submitTransaction(tx);
+   }
+
+   // Repeat for both the recipient secret and the payer secret.
+   await addTrustline(process.env.RECIPIENT_SECRET);
+   await addTrustline(process.env.PAYER_SECRET);
    ```
 
-4. **Get testnet USDC** — use the [Circle testnet faucet](https://faucet.circle.com/) (select Stellar testnet)
+   Without a trustline on the recipient, the SAC `transfer` settles into nothing and the request fails with `op_no_trust`.
 
-5. **Get an OZ Channels testnet API key** (optional for testnet, required for mainnet):
-   - Testnet: [channels.openzeppelin.com/testnet/gen](https://channels.openzeppelin.com/testnet/gen)
-   - Mainnet: [channels.openzeppelin.com/gen](https://channels.openzeppelin.com/gen)
+4. **Fund the PAYER with testnet USDC** — open the [Circle testnet faucet](https://faucet.circle.com/), select **Stellar testnet**, paste the payer's `G...`. Web Captcha; no API.
+
+5. **Generate an OZ Channels testnet API key** ([channels.openzeppelin.com/testnet/gen](https://channels.openzeppelin.com/testnet/gen)). **Required, not optional.** Without it the server crashes at startup with `Failed to initialize: no supported payment kinds loaded from any facilitator`.
+
+6. **Fill in `.env`**
+   ```
+   STELLAR_NETWORK=stellar:testnet
+   STELLAR_RECIPIENT=G... (recipient public key)
+   STELLAR_SECRET_KEY=S... (payer secret key)
+   OZ_API_KEY=...
+   ```
+
+7. **Run it**
+   ```bash
+   node server.js
+   # in another terminal
+   node client.js
+   ```
+
+### Optional: setup.js to automate steps 1–3
+
+Drop this in your project and run once. It generates keys, friendbots, and adds USDC trustlines, then writes a starter `.env` so you only need to do the two manual web steps afterward.
+
+```js
+// setup.js
+import fs from "fs/promises";
+import {
+  Keypair, Horizon, Networks, TransactionBuilder, Operation, Asset, BASE_FEE,
+} from "@stellar/stellar-sdk";
+
+const USDC_ISSUER = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+const horizon = new Horizon.Server("https://horizon-testnet.stellar.org");
+
+const friendbot = (addr) => fetch(`https://friendbot.stellar.org?addr=${addr}`);
+
+async function addTrustline(kp) {
+  const acc = await horizon.loadAccount(kp.publicKey());
+  const tx = new TransactionBuilder(acc, { fee: BASE_FEE, networkPassphrase: Networks.TESTNET })
+    .addOperation(Operation.changeTrust({ asset: new Asset("USDC", USDC_ISSUER) }))
+    .setTimeout(60).build();
+  tx.sign(kp);
+  return horizon.submitTransaction(tx);
+}
+
+const recipient = Keypair.random();
+const payer = Keypair.random();
+await Promise.all([friendbot(recipient.publicKey()), friendbot(payer.publicKey())]);
+await new Promise(r => setTimeout(r, 2000));
+await Promise.all([addTrustline(recipient), addTrustline(payer)]);
+
+await fs.writeFile(".env", `STELLAR_RECIPIENT=${recipient.publicKey()}
+STELLAR_SECRET_KEY=${payer.secret()}
+OZ_API_KEY=
+`);
+
+console.log(`Fund payer with USDC: https://faucet.circle.com  →  ${payer.publicKey()}`);
+console.log(`Get OZ key:          https://channels.openzeppelin.com/testnet/gen  →  paste into OZ_API_KEY`);
+```
+
+## Two USDC addresses (don't confuse them)
+
+USDC on Stellar has two addresses, used in different places. Mixing them up is a common stumble.
+
+| Address | Format | Used for |
+|---------|--------|----------|
+| Classic asset issuer | `G...` (32-byte ed25519 public key) | The `issuer` of the classic USDC asset; used when adding a trustline (`new Asset("USDC", G...)`) |
+| SAC (Soroban Asset Contract) | `C...` (32-byte contract address) | The Soroban contract the protocol invokes `transfer` on; used in payment requirements |
+
+Use the exported constants instead of hard-coding when possible:
+
+```js
+import { USDC_TESTNET_ADDRESS, USDC_PUBNET_ADDRESS } from "@x402/stellar";
+// USDC_TESTNET_ADDRESS = "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA"
+// USDC_PUBNET_ADDRESS  = "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75"
+```
+
+`payTo` in your route config is always a classic recipient account (`G...`). The SAC address only appears if you set a custom `asset` in the price config for a non-USDC token.
 
 ## Mainnet checklist
 
@@ -200,10 +307,11 @@ console.log(await res.json());
 | Network ID | `stellar:pubnet` |
 | RPC URL | Provider-specific endpoint (see [Stellar RPC providers directory](https://developers.stellar.org/docs/data/apis/rpc/providers)) |
 | Facilitator URL | `https://channels.openzeppelin.com/x402` |
-| USDC SAC | `CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75` |
+| USDC SAC | `USDC_PUBNET_ADDRESS` from `@x402/stellar` (currently `CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75`) |
+| OZ Channels API key | Required ([channels.openzeppelin.com/gen](https://channels.openzeppelin.com/gen)) |
 | Funding | Real USDC on mainnet (CEX, DEX, or bridge) |
 
-Always test on testnet first. Switch by changing `network` and `FACILITATOR_URL`.
+Always test on testnet first. To switch a working setup to mainnet, change only the `.env` (`STELLAR_NETWORK=stellar:pubnet`, `FACILITATOR_URL=https://channels.openzeppelin.com/x402`, mainnet `OZ_API_KEY`, and a mainnet `STELLAR_RECIPIENT`); the samples derive their network from `STELLAR_NETWORK`, so no code changes are needed. Both networks require an OZ Channels API key in the `Authorization: Bearer` header.
 
 ## Key concepts
 
@@ -237,9 +345,27 @@ Always test on testnet first. Switch by changing `network` and `FACILITATOR_URL`
 - Symptom: `op_no_trust` error during settlement
 - Fix: add a USDC `changeTrust` operation before attempting any x402 payment (see testnet runbook above)
 
-**OZ Channels 401 on mainnet**
-- Symptom: facilitator rejects with 401
-- Fix: mainnet requires an API key in the `Authorization: Bearer` header — generate one at channels.openzeppelin.com/gen
+**OZ Channels 401 on testnet or mainnet**
+- Symptom: facilitator rejects with 401, server logs `Failed to initialize: no supported payment kinds loaded from any facilitator`
+- Fix: an API key is required on **both** networks (this is a recent change). Generate one at [channels.openzeppelin.com/testnet/gen](https://channels.openzeppelin.com/testnet/gen) (testnet) or [channels.openzeppelin.com/gen](https://channels.openzeppelin.com/gen) (mainnet), then set `OZ_API_KEY` and pass it via `createAuthHeaders` (see the Seller example).
+
+**Trustline missing on the recipient**
+- Symptom: `op_no_trust` during settlement, even though the client has USDC
+- Fix: the `payTo` account needs a USDC trustline too. The SAC `transfer` settles the underlying classic asset, which the recipient cannot hold without a trustline. Add `changeTrust` to both accounts during setup.
+
+**Trying to sign auth entries from a browser**
+- Symptom: bundling errors, or a browser wallet that has no API to sign Soroban auth entries
+- Fix: run the x402 client server-side (e.g. an Express route the browser calls), or use Wallets-Kit / Freighter with custom auth-entry signing. `@x402/fetch` + `createEd25519Signer` target Node and assume a raw secret key.
+
+**Passing a `Keypair` (or a network passphrase) to `createEd25519Signer`**
+- Symptom: `TypeError: encoded argument must be of type String`, or `Error: Unknown Stellar network: Test SDF Network ; September 2015`
+- Fix: the signer takes the raw `S...` secret string and a CAIP-2 network ID. Do **not** wrap with `Keypair.fromSecret` first, and do **not** pre-convert with `getNetworkPassphrase` — both are done internally.
+  ```js
+  // wrong
+  const signer = createEd25519Signer(Keypair.fromSecret(s), getNetworkPassphrase("stellar:testnet"));
+  // right
+  const signer = createEd25519Signer(s, "stellar:testnet");
+  ```
 
 ---
 
