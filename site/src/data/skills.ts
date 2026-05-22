@@ -170,4 +170,13 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "https://github.com/Trustless-Work/trustless-work-dev-skill/blob/main/SKILL.md",
     category: "Ecosystem",
   },
+  {
+    title: "ROZO Intents",
+    description:
+      "Send USDC and USDT across Stellar, Ethereum, Arbitrum, Base, BSC, Polygon, and Solana using natural language. Covers cross-chain bridging, wallet detection, fee estimation, tiered confirmation logic, and QR code payment parsing inside Claude Code.",
+    pathLabel: "rozoai/rozo-intents",
+    copyValue:
+      "https://github.com/RozoAI/rozo-intents-skills/blob/main/README.md",
+    category: "Ecosystem",
+  },
 ] as const;
