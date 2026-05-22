@@ -34,6 +34,12 @@ These skills work with any agent that supports the [Agent Skills](https://agents
 /plugin install stellar-dev@stellar-dev
 ```
 
+### [OpenAI Codex](https://developers.openai.com/codex/skills/)
+
+```bash
+git clone https://github.com/stellar/stellar-dev-skill ~/.codex/skills/stellar-dev-skill
+```
+
 ### [npx skills](https://skills.sh)
 
 ```bash

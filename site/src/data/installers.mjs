@@ -31,6 +31,13 @@ export const INSTALLERS = [
     commands: ["stellar/stellar-dev-skill"],
   },
   {
+    name: "OpenAI Codex",
+    description: "Clone the repo into your Codex skills directory:",
+    commands: [
+      "git clone https://github.com/stellar/stellar-dev-skill ~/.codex/skills/stellar-dev-skill",
+    ],
+  },
+  {
     name: "npx skills",
     description: "Install using the npx skills CLI:",
     commands: ["npx skills add https://github.com/stellar/stellar-dev-skill"],
