@@ -22,7 +22,7 @@ Install using the plugin marketplace:
 
 ```
 /plugin marketplace add stellar/stellar-dev-skill
-/plugin install stellar-dev@stellar-dev-skill
+/plugin install stellar-dev@stellar-dev
 ```
 
 ### Cursor
@@ -31,6 +31,14 @@ Install from the Cursor Marketplace, or add manually via Settings → Rules → 
 
 ```
 stellar/stellar-dev-skill
+```
+
+### OpenAI Codex
+
+Clone the repo into your Codex skills directory:
+
+```
+git clone https://github.com/stellar/stellar-dev-skill ~/.codex/skills/stellar-dev-skill
 ```
 
 ### npx skills
