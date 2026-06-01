@@ -1,6 +1,6 @@
 # Stellar Development Skill
 
-A comprehensive AI skill for modern Stellar development with current best practices.
+A comprehensive AI skill for modern Stellar development with current best practices. https://skills.stellar.org/
 
 Inspired by [solana-foundation/solana-dev-skill](https://github.com/solana-foundation/solana-dev-skill) and [cloudflare/skills](https://github.com/cloudflare/skills).
 
