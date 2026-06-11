@@ -113,9 +113,8 @@ export const rpc = new StellarSdk.rpc.Server(config.rpcUrl);
 import { useState, useEffect, useCallback } from "react";
 import {
   isConnected,
-  isAllowed,
-  setAllowed,
-  getPublicKey,
+  getAddress,
+  requestAccess,
   signTransaction,
   getNetwork,
 } from "@stellar/freighter-api";
@@ -130,34 +129,38 @@ export function useFreighter() {
   }, []);
 
   const checkConnection = async () => {
-    const freighterConnected = await isConnected();
-    if (!freighterConnected) return;
+    const { isConnected: installed, error } = await isConnected();
+    if (error || !installed) return;
 
-    const allowed = await isAllowed();
-    if (allowed) {
-      const pubKey = await getPublicKey();
-      const net = await getNetwork();
-      setConnected(true);
-      setAddress(pubKey);
-      setNetwork(net);
-    }
+    // getAddress returns address: "" until the app has been granted access,
+    // so a non-empty address means we're already authorized.
+    const { address: addr, error: addressError } = await getAddress();
+    if (addressError || !addr) return;
+
+    const { network: net, error: networkError } = await getNetwork();
+    if (networkError) return;
+    setConnected(true);
+    setAddress(addr);
+    setNetwork(net);
   };
 
   const connect = useCallback(async () => {
-    const freighterConnected = await isConnected();
-    if (!freighterConnected) {
+    const { isConnected: installed, error } = await isConnected();
+    if (error || !installed) {
       throw new Error("Freighter extension not installed");
     }
 
-    await setAllowed();
-    const pubKey = await getPublicKey();
-    const net = await getNetwork();
+    // requestAccess prompts the user and returns the granted address.
+    const { address: addr, error: accessError } = await requestAccess();
+    if (accessError) throw new Error(accessError.message);
 
+    const { network: net, error: networkError } = await getNetwork();
+    if (networkError) throw new Error(networkError.message);
     setConnected(true);
-    setAddress(pubKey);
+    setAddress(addr);
     setNetwork(net);
 
-    return pubKey;
+    return addr;
   }, []);
 
   const disconnect = useCallback(() => {
@@ -169,7 +172,11 @@ export function useFreighter() {
   const sign = useCallback(
     async (xdr: string, networkPassphrase: string) => {
       if (!connected) throw new Error("Wallet not connected");
-      return signTransaction(xdr, { networkPassphrase });
+      const { signedTxXdr, error } = await signTransaction(xdr, {
+        networkPassphrase,
+      });
+      if (error) throw new Error(error.message);
+      return signedTxXdr;
     },
     [connected]
   );
