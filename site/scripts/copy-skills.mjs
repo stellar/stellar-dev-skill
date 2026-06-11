@@ -89,8 +89,12 @@ for (const source of sources) {
     missing.push(source);
     continue;
   }
+  // Copy the whole skill directory, not just the SKILL.md: skills may
+  // split deep-dive content into companion files (e.g.
+  // skills/soroban/development.md) referenced by relative links, and
+  // those must be served at the same paths.
   mkdirSync(dirname(dest), { recursive: true });
-  cpSync(src, dest, { dereference: false });
+  cpSync(dirname(src), dirname(dest), { recursive: true, dereference: false });
 }
 
 // Apache-2.0 attribution alongside the content.

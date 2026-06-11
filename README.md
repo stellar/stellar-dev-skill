@@ -11,13 +11,13 @@ Inspired by [solana-foundation/solana-dev-skill](https://github.com/solana-found
 
 This skill provides AI assistants with deep knowledge of the current Stellar development ecosystem:
 
-- **Smart Contracts**: Soroban (Rust SDK, WebAssembly)
+- **Smart Contracts**: Stellar smart contracts (Rust soroban-sdk, WebAssembly)
 - **Client SDKs**: stellar-sdk (JavaScript), Python, Go, Rust
 - **APIs**: Stellar RPC (preferred), Horizon (legacy)
 - **Assets**: Stellar Assets, Stellar Asset Contract (SAC)
 - **Wallets**: Freighter, Stellar Wallets Kit, Smart Accounts (passkeys)
 - **Testing**: Local Quickstart, Testnet, Unit tests
-- **Security**: Soroban-specific patterns, audit checklists
+- **Security**: Smart contract security patterns, audit checklists
 - **Ecosystem**: DeFi protocols, developer tools, community projects
 
 ## Installing
@@ -65,24 +65,24 @@ Copy the `skills/` directory contents to your assistant's skills location.
 
 ```
 skills/
-├── soroban/SKILL.md           # Soroban contracts + testing + security + patterns + pitfalls
+├── soroban/                   # Stellar smart contracts — SKILL.md entry + development/testing/security files
 ├── dapp/SKILL.md              # Frontend, wallets (Freighter, Wallets Kit), signing, smart accounts
 ├── assets/SKILL.md            # Stellar Assets, trustlines, SAC bridge
 ├── data/SKILL.md              # Stellar RPC (preferred) + Horizon (legacy), indexing
 ├── agentic-payments/SKILL.md  # x402 + MPP (Charge + Channel) for AI/machine payments
-├── zk-proofs/SKILL.md         # ZK verification, BLS12-381, BN254/Poseidon (status-sensitive)
+├── zk-proofs/SKILL.md         # ZK verification (BLS12-381 Groth16), Circom/Noir/RISC Zero walkthroughs
 └── standards/SKILL.md         # SEPs, CAPs, ecosystem projects, curated reference links
 ```
 
-Each sub-skill is a self-contained Agent Skill with its own frontmatter. Cross-references link related skills (e.g., the `agentic-payments` skill points to `soroban` for the Soroban SACs the protocols call, and to `assets` for USDC). The AI reads only the sub-skills relevant to the task at hand.
+Each sub-skill is a self-contained Agent Skill with its own frontmatter. Cross-references link related skills (e.g., the `agentic-payments` skill points to `soroban` for the SACs the protocols call, and to `assets` for USDC). The AI reads only the sub-skills relevant to the task at hand.
 
 ## Example Prompts
 
 ```
-"Help me write a Soroban smart contract for a token"
+"Help me write a Stellar smart contract for a token"
 "Set up a Next.js app with Freighter wallet connection"
 "How do I deploy a contract to Stellar Testnet?"
-"Create unit tests for my Soroban contract"
+"Create unit tests for my smart contract"
 "Review this contract for security issues"
 ```
 

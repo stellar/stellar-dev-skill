@@ -1,18 +1,18 @@
 ---
 name: dapp
-description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, Soroban contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar or Soroban.
+description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts.
 user-invocable: true
 argument-hint: "[dapp task]"
 ---
 
 # Stellar dApp / Frontend
 
-Client-side development with `@stellar/stellar-sdk`, wallet connection, signing, and submitting transactions. Covers both classic Stellar operations and Soroban contract invocation from the browser or Node.js.
+Client-side development with `@stellar/stellar-sdk`, wallet connection, signing, and submitting transactions. Covers both classic Stellar operations and smart contract invocation from the browser or Node.js.
 
 ## When to use this skill
 - Connecting Freighter or other wallets via Stellar Wallets Kit
 - Building, simulating, signing, and submitting transactions
-- Invoking Soroban contracts from a frontend
+- Invoking Stellar smart contracts from a frontend
 - Implementing smart accounts with passkeys
 - Handling network passphrases (Mainnet / Testnet / local)
 
@@ -263,7 +263,7 @@ export async function buildPaymentTx(
 }
 ```
 
-### Soroban Contract Invocation
+### Smart Contract Invocation
 ```typescript
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { rpc, config } from "@/lib/stellar";
@@ -342,7 +342,7 @@ export async function submitTransaction(signedXdr: string) {
     config.networkPassphrase
   );
 
-  // For Soroban transactions, use RPC
+  // For smart contract transactions, use RPC
   if (transaction.operations.some(op => op.type === "invokeHostFunction")) {
     return submitSorobanTransaction(signedXdr);
   }
@@ -652,7 +652,7 @@ const client = new RPChannels.ChannelsClient({
   apiKey: "your-api-key",
 });
 
-// Submit a Soroban contract call with fee sponsorship
+// Submit a smart contract call with fee sponsorship
 const response = await client.submitSorobanTransaction({
   func: contractFunc,
   auth: contractAuth,
