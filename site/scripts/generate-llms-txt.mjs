@@ -137,7 +137,7 @@ if (realEcosystem.length > 0) {
   lines.push("## Community Built");
   lines.push("");
   lines.push(
-    "Other community-built skills that may be helpful for your build. These aren't installed via the methods above; each project has its own setup, so follow the link on each entry. Not endorsed by the Stellar Foundation; do your own research.",
+    "Other community-built skills that may be helpful for your build. These aren't installed via the methods above; each project has its own setup, so follow the link on each entry. Not endorsed by the Stellar Foundation; do your own research. To get a skill listed here, open a pull request adding it to ECOSYSTEM_CARDS in site/src/data/skills.ts of https://github.com/stellar/stellar-dev-skill.",
   );
   lines.push("");
   for (const c of realEcosystem) {

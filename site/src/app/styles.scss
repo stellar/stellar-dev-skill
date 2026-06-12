@@ -557,6 +557,84 @@ p.SkillsLanding__sectionDescription {
   }
 }
 
+// Community search input (client island; the cards stay server-rendered).
+.SkillsLanding__communitySearch {
+  max-width: pxToRem(360px);
+  margin-bottom: pxToRem(16px);
+}
+
+// Each grid cell wraps one server-rendered card. `display: grid` makes
+// the card stretch to the full row height, like a direct grid child.
+.SkillsLanding__communityItem {
+  display: grid;
+}
+
+// Hidden by search/pagination. The card markup stays in the HTML so
+// non-JS clients (AI agents, crawlers) still see every entry.
+.SkillsLanding__communityItem[data-hidden="true"] {
+  display: none;
+}
+
+.SkillsLanding__communityEmpty {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(12px);
+  line-height: pxToRem(18px);
+  color: var(--sds-clr-gray-11);
+  margin: pxToRem(8px) 0 0 0;
+}
+
+.SkillsLanding__communityPagination {
+  display: flex;
+  justify-content: center;
+  margin-top: pxToRem(16px);
+}
+
+// "Add your skill" block at the bottom of the community panel.
+.SkillsLanding__addSkill {
+  margin-top: pxToRem(24px);
+  padding-top: pxToRem(16px);
+  border-top: 1px solid var(--sds-clr-gray-06);
+}
+
+h3.SkillsLanding__addSkillTitle {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(14px);
+  font-weight: 600;
+  line-height: pxToRem(20px);
+  margin: 0 0 pxToRem(4px) 0;
+  color: var(--sds-clr-gray-12);
+}
+
+p.SkillsLanding__addSkillText {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(12px);
+  font-weight: 400;
+  line-height: pxToRem(18px);
+  margin: 0 0 pxToRem(12px) 0;
+  color: var(--sds-clr-gray-11);
+
+  a {
+    color: var(--sds-clr-gray-12);
+  }
+
+  code {
+    font-family: "Roboto Mono", monospace;
+  }
+}
+
+.SkillsLanding__addSkillSnippet {
+  font-family: "Roboto Mono", monospace;
+  font-size: pxToRem(12px);
+  line-height: pxToRem(18px);
+  color: var(--sds-clr-gray-11);
+  background-color: var(--sds-clr-gray-03);
+  border: 1px solid var(--sds-clr-gray-06);
+  border-radius: pxToRem(8px);
+  padding: pxToRem(12px);
+  margin: 0;
+  overflow-x: auto;
+}
+
 // Installer panel: independent tablist; only the active tab's panel
 // shows. Stacks via flex column because exactly one panel is visible.
 .SkillsLanding__installerPanel {
