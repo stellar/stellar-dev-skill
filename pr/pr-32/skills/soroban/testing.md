@@ -43,7 +43,7 @@ fn test_auth() {
     let contract_id = env.register(Contract, ());
     let client = ContractClient::new(&env, &contract_id);
     let user = Address::generate(&env);
-
+    let other = Address::generate(&env);
     // Approve only this specific invocation
     env.mock_auths(&[MockAuth {
         address: &user,
