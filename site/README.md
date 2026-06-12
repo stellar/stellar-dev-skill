@@ -151,7 +151,6 @@ Append to `ECOSYSTEM_CARDS` in `src/data/skills.ts`:
   description: "Verb-led summary of what the skill does.",
   pathLabel: "owner/repo",
   copyValue: "https://github.com/owner/repo/blob/main/path/to/SKILL.md",
-  category: "Ecosystem",
 }
 ```
 
@@ -160,7 +159,6 @@ Append to `ECOSYSTEM_CARDS` in `src/data/skills.ts`:
 - `copyValue` is the full URL written to the clipboard when the user
   clicks the pill — point it directly at the raw SKILL.md so an agent
   can fetch it.
-- `category` is always `"Ecosystem"` for this section.
 
 Run `pnpm dev` to verify the card renders. No `sync:skills` step
 needed since ecosystem entries aren't mirrored locally.

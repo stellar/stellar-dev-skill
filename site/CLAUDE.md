@@ -93,7 +93,6 @@ other wiring needed.
   description: "Verb-led summary of what the skill does.",
   pathLabel: "owner/repo",
   copyValue: "https://github.com/owner/repo/blob/main/path/to/SKILL.md",
-  category: "Ecosystem",
 }
 ```
 

@@ -53,7 +53,6 @@ const ecosystemCards = ECOSYSTEM_CARDS.map((c) => ({
   title: c.title,
   description: c.description,
   copyValue: c.copyValue,
-  category: c.category,
 }));
 const filters = [...FILTERS];
 

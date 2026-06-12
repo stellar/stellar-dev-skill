@@ -58,7 +58,6 @@ const ADD_SKILL_SNIPPET = `{
   description: "Verb-led summary of what the skill does.",
   pathLabel: "owner/repo",
   copyValue: "https://github.com/owner/repo/blob/main/path/to/SKILL.md",
-  category: "Ecosystem",
 }`;
 
 export default function LandingPage() {
