@@ -589,11 +589,13 @@ p.SkillsLanding__sectionDescription {
   margin: pxToRem(8px) 0 0 0;
 }
 
-// "Showing x of y skills" line under the community grid.
+// "Showing x of y skills" line under the community grid. Sized to match
+// the card description text (.SkillsCard__description).
 .SkillsLanding__communityCount {
   font-family: "Inter", sans-serif;
-  font-size: pxToRem(12px);
-  line-height: pxToRem(18px);
+  font-size: pxToRem(14px);
+  font-weight: 400;
+  line-height: pxToRem(20px);
   color: var(--sds-clr-gray-11);
   margin: pxToRem(12px) 0 0 0;
 }
