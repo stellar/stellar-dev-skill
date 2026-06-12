@@ -18,6 +18,7 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   rmSync,
   statSync,
@@ -55,20 +56,40 @@ if (sources.length === 0) {
   process.exit(1);
 }
 
-// `--cached` skips the copy when every dest exists AND every dest is at
-// least as fresh as its upstream source. Without the mtime check, editing
-// a SKILL.md during `pnpm dev` wouldn't show up until the next manual
-// `pnpm sync:skills`.
+// Returns the newest mtime (ms) among all files under `dir`, or 0 if the
+// directory does not exist / is empty.
+const newestMtimeInDir = (dir) => {
+  if (!existsSync(dir)) return 0;
+  let newest = 0;
+  const scan = (d) => {
+    for (const entry of readdirSync(d, { withFileTypes: true })) {
+      const fullPath = join(d, entry.name);
+      if (entry.isDirectory()) {
+        scan(fullPath);
+      } else {
+        const mtime = statSync(fullPath).mtimeMs;
+        if (mtime > newest) newest = mtime;
+      }
+    }
+  };
+  scan(dir);
+  return newest;
+};
+
+// `--cached` skips the copy when every dest skill directory exists AND its
+// newest file is at least as fresh as the newest file in the upstream source
+// directory. Comparing directories (not just SKILL.md) ensures that edits to
+// companion files like testing.md also trigger a refresh during `pnpm dev`.
 const isFresh = (source) => {
-  const dest = join(PUBLIC_DIR, source);
-  if (!existsSync(dest)) return false;
-  const src = join(REPO_ROOT, source);
-  if (!existsSync(src)) {
+  const srcDir = dirname(join(REPO_ROOT, source));
+  const destDir = dirname(join(PUBLIC_DIR, source));
+  if (!existsSync(destDir)) return false;
+  if (!existsSync(srcDir)) {
     // Upstream missing; --lenient will warn later. Treat as fresh so we
     // don't trigger a full re-copy just to discover the same missing file.
     return true;
   }
-  return statSync(dest).mtimeMs >= statSync(src).mtimeMs;
+  return newestMtimeInDir(destDir) >= newestMtimeInDir(srcDir);
 };
 
 if (cached && sources.every(isFresh)) {
