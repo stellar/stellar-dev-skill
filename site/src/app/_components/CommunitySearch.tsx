@@ -83,6 +83,15 @@ export const CommunitySearch = ({ searchTexts, children }: Props) => {
         </p>
       )}
 
+      <p
+        className="SkillsLanding__communityCount"
+        role="status"
+        aria-live="polite"
+      >
+        Showing {visible.size} of {searchTexts.length} skill
+        {searchTexts.length === 1 ? "" : "s"}
+      </p>
+
       {matches.length > PAGE_SIZE && (
         <div className="SkillsLanding__communityPagination">
           <Pagination
@@ -93,14 +102,6 @@ export const CommunitySearch = ({ searchTexts, children }: Props) => {
           />
         </div>
       )}
-
-      <span role="status" aria-live="polite" className="sr-only">
-        {needle === ""
-          ? ""
-          : `${matches.length} community skill${
-              matches.length === 1 ? "" : "s"
-            } matching`}
-      </span>
     </>
   );
 };

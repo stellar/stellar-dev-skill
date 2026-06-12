@@ -558,9 +558,15 @@ p.SkillsLanding__sectionDescription {
 }
 
 // Community search input (client island; the cards stay server-rendered).
+// Width matches one grid column (50% minus half the 16px column gap) so
+// the input lines up with the card below it.
 .SkillsLanding__communitySearch {
-  max-width: pxToRem(360px);
+  width: calc(50% - #{pxToRem(8px)});
   margin-bottom: pxToRem(16px);
+
+  @media (max-width: 600px) {
+    width: 100%;
+  }
 }
 
 // Each grid cell wraps one server-rendered card. `display: grid` makes
@@ -581,6 +587,15 @@ p.SkillsLanding__sectionDescription {
   line-height: pxToRem(18px);
   color: var(--sds-clr-gray-11);
   margin: pxToRem(8px) 0 0 0;
+}
+
+// "Showing x of y skills" line under the community grid.
+.SkillsLanding__communityCount {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(12px);
+  line-height: pxToRem(18px);
+  color: var(--sds-clr-gray-11);
+  margin: pxToRem(12px) 0 0 0;
 }
 
 .SkillsLanding__communityPagination {
