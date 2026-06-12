@@ -11,9 +11,11 @@ Layers, fastest first:
 
 ## Unit testing
 
-```rust
 #![cfg(test)]
-use soroban_sdk::{testutils::Address as _, Address, Env};
+use soroban_sdk::{
+    testutils::{Address as _, MockAuth, MockAuthInvoke},
+    Address, Env,
+};
 use crate::{Contract, ContractClient};
 
 #[test]
