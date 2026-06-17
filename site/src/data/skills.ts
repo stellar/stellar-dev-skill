@@ -173,7 +173,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
   {
     title: "Anchors",
     description:
-      "Teach your AI coding agent how to integrate with and build Stellar anchors (fiat on/off-ramps).",
+      "Integrate with or build Stellar anchors — fiat on/off-ramps, deposit/withdrawal, KYC, RFQ, cross-border remittance. The implementation layer for SEPs 1/6/10/12/24/31/38: what to build, in what order, and the gotchas (memo contracts, trustline traps, state machine) that bite.",
     pathLabel: "CheesecakeLabs/stellar-anchor-skill",
     copyValue:
       "https://github.com/CheesecakeLabs/stellar-anchor-skill/blob/main/SKILL.md",
