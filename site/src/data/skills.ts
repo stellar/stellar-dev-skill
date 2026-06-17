@@ -170,4 +170,13 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "https://github.com/Trustless-Work/trustless-work-dev-skill/blob/main/SKILL.md",
     category: "Ecosystem",
   },
+  {
+    title: "Anchors",
+    description:
+      "Teach your AI coding agent how to integrate with and build Stellar anchors (fiat on/off-ramps).",
+    pathLabel: "CheesecakeLabs/stellar-anchor-skill",
+    copyValue:
+      "https://github.com/CheesecakeLabs/stellar-anchor-skill/blob/main/SKILL.md",
+    category: "Ecosystem",
+  },
 ] as const;
