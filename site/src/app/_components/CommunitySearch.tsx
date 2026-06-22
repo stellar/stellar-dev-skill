@@ -69,6 +69,7 @@ export const CommunitySearch = ({ searchTexts, children }: Props) => {
       <div className="SkillsLanding__ecosystemGrid">
         {Children.map(children, (child, index) => (
           <div
+            key={index}
             className="SkillsLanding__communityItem"
             data-hidden={!visible.has(index)}
           >
