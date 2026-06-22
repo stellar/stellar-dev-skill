@@ -590,14 +590,14 @@ p.SkillsLanding__sectionDescription {
 }
 
 // "Showing x of y skills" status line under the community grid.
-// Sized like the card description text (14px) and weighted like the
-// "Community skills" section heading (Inter, semibold).
+// Matches the ecosystem card title (h3.SkillsCard__title): 14px Inter
+// semibold in gray-12.
 .SkillsLanding__communityCount {
   font-family: "Inter", sans-serif;
   font-size: pxToRem(14px);
   font-weight: 600;
   line-height: pxToRem(20px);
-  color: var(--sds-clr-gray-11);
+  color: var(--sds-clr-gray-12);
   margin: pxToRem(12px) 0 0 0;
 }
 
