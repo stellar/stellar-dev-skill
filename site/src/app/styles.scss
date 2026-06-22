@@ -589,15 +589,14 @@ p.SkillsLanding__sectionDescription {
   margin: pxToRem(8px) 0 0 0;
 }
 
-// "Showing x of y skills" status line under the community grid. Sized
-// like the panel's other captions (.SkillsLanding__sectionDescription,
-// .SkillsLanding__addSkillText) rather than card body text, so it reads
-// as a quiet status line instead of content.
+// "Showing x of y skills" status line under the community grid.
+// Sized like the card description text (14px) and weighted like the
+// "Community skills" section heading (Inter, semibold).
 .SkillsLanding__communityCount {
   font-family: "Inter", sans-serif;
-  font-size: pxToRem(12px);
-  font-weight: 400;
-  line-height: pxToRem(18px);
+  font-size: pxToRem(14px);
+  font-weight: 600;
+  line-height: pxToRem(20px);
   color: var(--sds-clr-gray-11);
   margin: pxToRem(12px) 0 0 0;
 }
