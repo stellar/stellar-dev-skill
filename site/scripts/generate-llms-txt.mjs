@@ -18,7 +18,7 @@
  * this file). The page (src/app/page.tsx) and this script therefore
  * share one source of truth (no regex parsing, no second copy).
  */
-import { writeFileSync } from "node:fs";
+import { existsSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -81,10 +81,10 @@ lines.push("");
 lines.push("Use Stellar Skills to help when your human asks things like:");
 lines.push("");
 for (const prompt of [
-  "Help me write a Soroban smart contract for a token",
+  "Help me write a Stellar smart contract for a token",
   "Set up a Next.js app with Freighter wallet connection",
   "How do I deploy a contract to Stellar Testnet?",
-  "Create unit tests for my Soroban contract",
+  "Create unit tests for my smart contract",
   "Review this contract for security issues",
 ]) {
   lines.push(`- "${prompt}"`);
@@ -124,6 +124,19 @@ for (const filter of filters) {
   for (const c of cards) {
     if (!c.path) continue;
     lines.push(`- [${c.title}](${ORIGIN}${c.path}): ${c.description}`);
+    // Companion markdown files in the same skill directory (e.g.
+    // skills/smart-contracts/development.md) are part of the skill — index them
+    // as nested entries so agents can fetch them directly.
+    const dir = dirname(c.source);
+    const absDir = join(ROOT, "public", dir);
+    if (!existsSync(absDir)) continue;
+    const companions = readdirSync(absDir)
+      .filter((f) => f.endsWith(".md") && f !== "SKILL.md")
+      .sort();
+    for (const f of companions) {
+      const meta = readSkillMeta(`${dir}/${f}`);
+      lines.push(`  - [${meta.title ?? f}](${ORIGIN}/${dir}/${f})`);
+    }
   }
   lines.push("");
 }

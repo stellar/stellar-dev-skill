@@ -72,7 +72,7 @@ then append to `SKILL_CARD_SOURCES`:
 ```ts
 {
   source: "skills/<your-skill>/SKILL.md",
-  category: "Soroban", // any FilterType value
+  category: "Smart Contracts", // any FilterType value
   // Optional overrides — both default to the upstream SKILL.md's
   // first H1 (title) and frontmatter `description`.
   title: "Your Skill Title",

@@ -17,7 +17,7 @@
 type FilterType =
   | "All"
   | "Agentic Payments"
-  | "Soroban"
+  | "Smart Contracts"
   | "Frontend"
   | "Assets"
   | "APIs"
@@ -30,7 +30,7 @@ type FilterType =
  */
 export const FILTERS: readonly FilterType[] = [
   "All",
-  "Soroban",
+  "Smart Contracts",
   "Agentic Payments",
   "Frontend",
   "Assets",
@@ -46,7 +46,7 @@ export const FILTERS: readonly FilterType[] = [
  * to upstream metadata when they're omitted.
  */
 export type SkillCardSource = {
-  /** Upstream path, e.g. "skills/soroban/SKILL.md". Forms both the
+  /** Upstream path, e.g. "skills/smart-contracts/SKILL.md". Forms both the
    *  fetch source and the site URL ("/" + source). */
   source: string;
   category: FilterType;
@@ -79,9 +79,9 @@ export type EcosystemCardSource = {
  */
 export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
   {
-    source: "skills/soroban/SKILL.md",
-    category: "Soroban",
-    title: "Soroban Smart Contracts",
+    source: "skills/smart-contracts/SKILL.md",
+    category: "Smart Contracts",
+    title: "Stellar Smart Contracts",
     description:
       "Write, test, secure, and ship Rust smart contracts on Stellar. Covers patterns, pitfalls, and architecture.",
   },
@@ -97,7 +97,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "Assets",
     title: "Stellar Assets & SAC",
     description:
-      "Issue and manage classic Stellar assets and trustlines, with the SAC bridge for Soroban interop.",
+      "Issue and manage classic Stellar assets and trustlines, with the SAC bridge for smart contract interop.",
   },
   {
     source: "skills/data/SKILL.md",
@@ -118,7 +118,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "ZK",
     title: "ZK Proofs",
     description:
-      "Verify Groth16 zero-knowledge proofs on Stellar using BLS12-381, BN254, and Poseidon primitives.",
+      "Verify Groth16 proofs on-chain via BLS12-381, with Circom, Noir, and RISC Zero toolchain walkthroughs.",
   },
   {
     source: "skills/standards/SKILL.md",
@@ -137,7 +137,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
   {
     title: "OpenZeppelin Contracts",
     description:
-      "Scaffold a Soroban project with OpenZeppelin's audited Stellar contract libraries. Walks through Rust toolchain setup, Stellar CLI install, workspace dependencies, and applying the pausable and ownable macros to your contract.",
+      "Scaffold a Stellar smart contract project with OpenZeppelin's audited Stellar contract libraries. Walks through Rust toolchain setup, Stellar CLI install, workspace dependencies, and applying the pausable and ownable macros to your contract.",
     pathLabel: "OpenZeppelin/openzeppelin-skills",
     copyValue:
       "https://github.com/OpenZeppelin/openzeppelin-skills/blob/main/skills/setup-stellar-contracts/SKILL.md",
