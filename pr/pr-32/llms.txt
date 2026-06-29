@@ -63,10 +63,10 @@ The skills installed via the methods above, grouped by category.
 
 ### Smart Contracts
 
-- [Stellar Smart Contracts](https://skills.stellar.org/skills/soroban/SKILL.md): Stellar smart contract development (Rust, soroban-sdk). Entry point with project setup, contract anatomy, and build/deploy workflow, routing to three companion files in this directory — development.md (storage, auth, cross-contract calls, events, errors, upgrades, factories, troubleshooting), testing.md (unit, fuzz, property, fork, mutation, integration), and security.md (vulnerability classes, checklists, tooling, audits). Use when writing, testing, securing, or shipping Stellar smart contracts (formerly branded Soroban).
-  - [Development Patterns](https://skills.stellar.org/skills/soroban/development.md)
-  - [Security](https://skills.stellar.org/skills/soroban/security.md)
-  - [Testing](https://skills.stellar.org/skills/soroban/testing.md)
+- [Stellar Smart Contracts](https://skills.stellar.org/skills/smart-contracts/SKILL.md): Stellar smart contract development (Rust, soroban-sdk). Entry point with project setup, contract anatomy, and build/deploy workflow, routing to three companion files in this directory — development.md (storage, auth, cross-contract calls, events, errors, upgrades, factories, troubleshooting), testing.md (unit, fuzz, property, fork, mutation, integration), and security.md (vulnerability classes, checklists, tooling, audits). Use when writing, testing, securing, or shipping Stellar smart contracts (formerly branded Soroban).
+  - [Development Patterns](https://skills.stellar.org/skills/smart-contracts/development.md)
+  - [Security](https://skills.stellar.org/skills/smart-contracts/security.md)
+  - [Testing](https://skills.stellar.org/skills/smart-contracts/testing.md)
 
 ### Agentic Payments
 

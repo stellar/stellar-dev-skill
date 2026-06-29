@@ -17,7 +17,7 @@ Stellar's native token mechanism: classic asset issuance, trustlines, and the St
 - Building regulated-asset flows (compliance, KYC, freeze)
 
 ## Related skills
-- Custom token contracts (when classic isn't enough) → `../soroban/SKILL.md`
+- Custom token contracts (when classic isn't enough) → `../smart-contracts/SKILL.md`
 - UI flows for trustline creation and asset display → `../dapp/SKILL.md`
 - Looking up balances and trustline state → `../data/SKILL.md`
 - Token-related SEPs (SEP-41, SEP-7, etc.) → `../standards/SKILL.md`
@@ -326,6 +326,14 @@ SAC implements the standard SEP-41 token interface:
 - Non-standard token behaviors
 - Integration with custom DeFi contracts
 - NFTs or semi-fungible tokens
+
+> Reach for a fully custom token as a last resort. Many of the cases above
+> (royalties, fees, transfer restrictions) can be built with a regular
+> issued Stellar asset plus a thin "SAC admin" contract that drives the
+> SAC's `mint`, `burn`, and `clawback` functions. That keeps the ecosystem
+> compatibility of a normal asset (DEX, anchors, wallets, trustlines) while
+> still layering on custom logic. Prefer a custom contract token only when
+> you need token behavior the SAC genuinely cannot express.
 
 ### Use SAC When:
 - Need a Stellar asset inside a smart contract
