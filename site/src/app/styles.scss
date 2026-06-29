@@ -581,7 +581,12 @@ p.SkillsLanding__sectionDescription {
   display: none;
 }
 
-.SkillsLanding__communityEmpty {
+// These caption paragraphs are scoped under .SkillsLanding__ecosystem so
+// they outweigh the SDS global `.sds-theme-light p / .sds-theme-dark p`
+// rule (specificity 0,1,1), which otherwise forces every <p> to 16px /
+// 1.75rem line-height. A bare `.SkillsLanding__communityCount` (0,1,0)
+// loses to it; the ancestor prefix (0,2,0) wins.
+.SkillsLanding__ecosystem .SkillsLanding__communityEmpty {
   font-family: "Inter", sans-serif;
   font-size: pxToRem(12px);
   line-height: pxToRem(18px);
@@ -592,7 +597,7 @@ p.SkillsLanding__sectionDescription {
 // "Showing x of y skills" status line under the community grid.
 // Matches the ecosystem card title (h3.SkillsCard__title): 14px Inter
 // semibold in gray-12.
-.SkillsLanding__communityCount {
+.SkillsLanding__ecosystem .SkillsLanding__communityCount {
   font-family: "Inter", sans-serif;
   font-size: pxToRem(14px);
   font-weight: 600;
@@ -623,7 +628,7 @@ h3.SkillsLanding__addSkillTitle {
   color: var(--sds-clr-gray-12);
 }
 
-p.SkillsLanding__addSkillText {
+.SkillsLanding__ecosystem p.SkillsLanding__addSkillText {
   font-family: "Inter", sans-serif;
   font-size: pxToRem(12px);
   font-weight: 400;
