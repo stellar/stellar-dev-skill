@@ -267,7 +267,7 @@ Fees are multidimensional (CPU instructions, ledger reads/writes, bytes, events,
 - Avoid unbounded loops over user-controlled collections
 - Reduce cross-contract calls in hot paths
 - Use events instead of storage for data that only needs off-chain visibility
-- Profile with `stellar contract invoke ... --sim-only` before optimizing blind
+- Profile with `stellar contract invoke ... --send=no` before optimizing blind
 
 ## Troubleshooting
 

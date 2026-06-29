@@ -224,7 +224,7 @@ For Merkle-tree commitments (privacy pools, allowlists): until Poseidon (CAP-007
 
 - Unit: input domain validation, replay protection, event correctness, malformed/tampered proof rejection (negative paths are the important ones)
 - Integration: full prove → submit → verify → state-transition flow against a local network
-- Operational: resource costs for realistic proof sizes via simulation (`--sim-only`) — pairing checks are expensive; budget before committing to per-transaction verification
+- Operational: resource costs for realistic proof sizes via simulation (`--send=no`) — pairing checks are expensive; budget before committing to per-transaction verification
 
 ## References
 
