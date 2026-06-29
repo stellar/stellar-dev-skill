@@ -1,5 +1,5 @@
 ---
-name: soroban
+name: smart-contracts
 description: Stellar smart contract development (Rust, soroban-sdk). Entry point with project setup, contract anatomy, and build/deploy workflow, routing to three companion files in this directory — development.md (storage, auth, cross-contract calls, events, errors, upgrades, factories, troubleshooting), testing.md (unit, fuzz, property, fork, mutation, integration), and security.md (vulnerability classes, checklists, tooling, audits). Use when writing, testing, securing, or shipping Stellar smart contracts (formerly branded Soroban).
 user-invocable: true
 argument-hint: "[contract task]"
