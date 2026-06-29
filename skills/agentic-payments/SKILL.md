@@ -28,7 +28,7 @@ Two complementary protocols for AI-agent and machine-to-machine payments on Stel
 All protocols use USDC (SEP-41 SAC) by default; `stellar:testnet` / `stellar:pubnet` CAIP-2 network IDs.
 
 ## Related skills
-- The SACs the protocols call → `../soroban/SKILL.md`
+- The SACs the protocols call → `../smart-contracts/SKILL.md`
 - USDC and other classic assets → `../assets/SKILL.md`
 - Wallets and signing in the buyer client → `../dapp/SKILL.md`
 - RPC simulation / submission patterns → `../data/SKILL.md`

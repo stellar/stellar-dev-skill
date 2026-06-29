@@ -5,7 +5,7 @@
  *
  * The site lives at `<repo-root>/site/` alongside `<repo-root>/skills/`.
  * Each card in src/data/skills.ts has a `source` field — an
- * upstream-relative path like "skills/soroban/SKILL.md" — that we copy
+ * upstream-relative path like "skills/smart-contracts/SKILL.md" — that we copy
  * verbatim into public/, so the upstream layout drives the site URL.
  *
  * Flags:
@@ -112,7 +112,7 @@ for (const source of sources) {
   }
   // Copy the whole skill directory, not just the SKILL.md: skills may
   // split deep-dive content into companion files (e.g.
-  // skills/soroban/development.md) referenced by relative links, and
+  // skills/smart-contracts/development.md) referenced by relative links, and
   // those must be served at the same paths.
   mkdirSync(dirname(dest), { recursive: true });
   cpSync(dirname(src), dirname(dest), { recursive: true, dereference: false });

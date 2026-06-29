@@ -11,6 +11,7 @@ Layers, fastest first:
 
 ## Unit testing
 
+```rust
 #![cfg(test)]
 use soroban_sdk::{
     testutils::{Address as _, MockAuth, MockAuthInvoke},
@@ -207,7 +208,7 @@ Three techniques worth knowing; each is one command plus a doc link:
 
 ```bash
 stellar contract invoke --id CONTRACT_ID --source alice --network testnet \
-  --sim-only -- function_name --arg value
+  --send=no -- function_name --arg value
 ```
 
 Simulation reports CPU instructions, ledger reads/writes, and fees without submitting.

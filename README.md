@@ -65,7 +65,7 @@ Copy the `skills/` directory contents to your assistant's skills location.
 
 ```
 skills/
-├── soroban/                   # Stellar smart contracts — SKILL.md entry + development/testing/security files
+├── smart-contracts/           # Stellar smart contracts — SKILL.md entry + development/testing/security files
 ├── dapp/SKILL.md              # Frontend, wallets (Freighter, Wallets Kit), signing, smart accounts
 ├── assets/SKILL.md            # Stellar Assets, trustlines, SAC bridge
 ├── data/SKILL.md              # Stellar RPC (preferred) + Horizon (legacy), indexing
@@ -74,7 +74,7 @@ skills/
 └── standards/SKILL.md         # SEPs, CAPs, ecosystem projects, curated reference links
 ```
 
-Each sub-skill is a self-contained Agent Skill with its own frontmatter. Cross-references link related skills (e.g., the `agentic-payments` skill points to `soroban` for the SACs the protocols call, and to `assets` for USDC). The AI reads only the sub-skills relevant to the task at hand.
+Each sub-skill is a self-contained Agent Skill with its own frontmatter. Cross-references link related skills (e.g., the `agentic-payments` skill points to `smart-contracts` for the SACs the protocols call, and to `assets` for USDC). The AI reads only the sub-skills relevant to the task at hand.
 
 ## Example Prompts
 

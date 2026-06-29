@@ -17,7 +17,7 @@ Client-side development with `@stellar/stellar-sdk`, wallet connection, signing,
 - Handling network passphrases (Mainnet / Testnet / local)
 
 ## Related skills
-- Writing the contract being invoked → `../soroban/SKILL.md`
+- Writing the contract being invoked → `../smart-contracts/SKILL.md`
 - Issuing assets and managing trustlines → `../assets/SKILL.md`
 - Querying chain state via RPC / Horizon → `../data/SKILL.md`
 - Building paid APIs or agent payment clients → `../agentic-payments/SKILL.md`

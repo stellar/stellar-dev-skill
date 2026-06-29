@@ -18,7 +18,7 @@ API access for reading chain state. Stellar RPC is the preferred entry point for
 
 ## Related skills
 - Building transactions to send → `../dapp/SKILL.md`
-- Smart contract simulation and event emission → `../soroban/SKILL.md`
+- Smart contract simulation and event emission → `../smart-contracts/SKILL.md`
 - Asset balance and trustline lookups → `../assets/SKILL.md`
 - Standards (SEP-7 deeplinks, SEP-10 auth) → `../standards/SKILL.md`
 

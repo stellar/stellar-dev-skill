@@ -16,8 +16,8 @@ ZK verification on Stellar. Capability is protocol- and SDK-version dependent �
 - Planning for BN254 / Poseidon availability
 
 ## Related skills
-- Contract patterns and deployment → `../soroban/development.md`
-- Verifier security review → `../soroban/security.md`
+- Contract patterns and deployment → `../smart-contracts/development.md`
+- Verifier security review → `../smart-contracts/security.md`
 - CAPs referenced here → `../standards/SKILL.md`
 
 ## What's available — verify before building

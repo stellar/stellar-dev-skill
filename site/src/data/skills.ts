@@ -46,7 +46,7 @@ export const FILTERS: readonly FilterType[] = [
  * to upstream metadata when they're omitted.
  */
 export type SkillCardSource = {
-  /** Upstream path, e.g. "skills/soroban/SKILL.md". Forms both the
+  /** Upstream path, e.g. "skills/smart-contracts/SKILL.md". Forms both the
    *  fetch source and the site URL ("/" + source). */
   source: string;
   category: FilterType;
@@ -80,7 +80,7 @@ export type EcosystemCardSource = {
  */
 export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
   {
-    source: "skills/soroban/SKILL.md",
+    source: "skills/smart-contracts/SKILL.md",
     category: "Smart Contracts",
     title: "Stellar Smart Contracts",
     description:

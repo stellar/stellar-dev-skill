@@ -126,7 +126,7 @@ for (const filter of filters) {
     if (!c.path) continue;
     lines.push(`- [${c.title}](${ORIGIN}${c.path}): ${c.description}`);
     // Companion markdown files in the same skill directory (e.g.
-    // skills/soroban/development.md) are part of the skill — index them
+    // skills/smart-contracts/development.md) are part of the skill — index them
     // as nested entries so agents can fetch them directly.
     const dir = dirname(c.source);
     const absDir = join(ROOT, "public", dir);

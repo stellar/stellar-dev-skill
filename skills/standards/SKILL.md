@@ -16,7 +16,7 @@ Three things bundled because they're all reference material you reach for in the
 - Locating official docs, SDKs, or community resources
 
 ## Related skills
-- Implementing a SEP-41 token interface → `../assets/SKILL.md`, `../soroban/SKILL.md`
+- Implementing a SEP-41 token interface → `../assets/SKILL.md`, `../smart-contracts/SKILL.md`
 - Frontend SEP-7 / SEP-10 flows → `../dapp/SKILL.md`
 - CAPs for cryptography (BLS, BN254, Poseidon) → `../zk-proofs/SKILL.md`
 - x402/MPP protocol context → `../agentic-payments/SKILL.md`
@@ -114,10 +114,10 @@ Use the CAP preamble status fields as the source of truth for implementation rea
 - Step 5: Document dependencies on draft standards explicitly.
 
 ## Related docs
-- Contract implementation details: [`../soroban/SKILL.md`](../soroban/SKILL.md)
-- Advanced architecture guidance: [`../soroban/development.md`](../soroban/development.md)
+- Contract implementation details: [`../smart-contracts/SKILL.md`](../smart-contracts/SKILL.md)
+- Advanced architecture guidance: [`../smart-contracts/development.md`](../smart-contracts/development.md)
 - RPC and data access: [`../data/SKILL.md`](../data/SKILL.md)
-- Security considerations: [`../soroban/security.md`](../soroban/security.md)
+- Security considerations: [`../smart-contracts/security.md`](../smart-contracts/security.md)
 
 ---
 
@@ -640,7 +640,7 @@ For DeFi protocols, wallets, oracles, gaming/NFTs, cross-chain bridges, and buil
 
 ## Security
 
-For vulnerability patterns, checklists, and detailed tooling guides, see [the smart contract security guide](../soroban/security.md).
+For vulnerability patterns, checklists, and detailed tooling guides, see [the smart contract security guide](../smart-contracts/security.md).
 
 ### Bug Bounty Programs
 - [Stellar Bug Bounty (Immunefi)](https://immunefi.com/bug-bounty/stellar/) - Up to $250K, covers core + smart contract stack
