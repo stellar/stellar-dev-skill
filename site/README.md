@@ -33,7 +33,7 @@ pnpm generate:llms-txt  # regenerate public/llms.txt
 
 The site lives in `site/` alongside `skills/` at the repo root. Each
 entry in `src/data/skills.ts` has a `source` field pointing at an
-upstream path (e.g. `skills/soroban/SKILL.md`).
+upstream path (e.g. `skills/smart-contracts/SKILL.md`).
 `scripts/copy-skills.mjs` mirrors that path verbatim into `public/`
 on `predev` / `prebuild`. There's no network fetch and no upstream ref
 to pin: the site always reflects whatever's on disk in `../skills/`,

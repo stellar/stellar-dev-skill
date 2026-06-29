@@ -1,6 +1,6 @@
 ---
 name: agentic-payments
-description: Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs via OZ Channels facilitator, fee-sponsored clients) and MPP (Machine Payments Protocol) in both Charge mode (per-request Soroban SAC) and Channel mode (off-chain commits, high-frequency). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
+description: Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs via OZ Channels facilitator, fee-sponsored clients) and MPP (Machine Payments Protocol) in both Charge mode (per-request SAC) and Channel mode (off-chain commits, high-frequency). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
 user-invocable: true
 argument-hint: "[payment task]"
 ---
@@ -13,7 +13,7 @@ Two complementary protocols for AI-agent and machine-to-machine payments on Stel
 
 | | x402 | MPP Charge | MPP Channel |
 |--|------|------------|-------------|
-| Per-request on-chain tx? | Yes (via facilitator) | Yes (Soroban SAC) | No (off-chain commits) |
+| Per-request on-chain tx? | Yes (via facilitator) | Yes (SAC) | No (off-chain commits) |
 | Needs facilitator? | Yes (OZ Channels) | No | No |
 | Client needs XLM? | No (fees sponsored) | Optional (`feePayer`) | Yes |
 | Setup complexity | Low | Low | Medium (deploy contract first) |
@@ -28,7 +28,7 @@ Two complementary protocols for AI-agent and machine-to-machine payments on Stel
 All protocols use USDC (SEP-41 SAC) by default; `stellar:testnet` / `stellar:pubnet` CAIP-2 network IDs.
 
 ## Related skills
-- The Soroban SACs the protocols call → `../soroban/SKILL.md`
+- The SACs the protocols call → `../smart-contracts/SKILL.md`
 - USDC and other classic assets → `../assets/SKILL.md`
 - Wallets and signing in the buyer client → `../dapp/SKILL.md`
 - RPC simulation / submission patterns → `../data/SKILL.md`
@@ -52,7 +52,7 @@ Trade-off: you depend on OZ Channels (or a self-hosted relayer) for verification
 ```
 Client → GET /resource                               → Server
 Client ← 402 Payment Required (payment requirements) ← Server
-Client builds Soroban SAC USDC transfer
+Client builds SAC USDC transfer
 Client signs auth entries only (not the full tx envelope)
 Client → GET /resource + X-PAYMENT header           → Server
 Server → OZ Channels /verify + /settle              → Stellar (~5s)
@@ -172,7 +172,7 @@ console.log(await res.json());
 - `STELLAR_NETWORK` — CAIP-2 network ID; defaults to `stellar:testnet`. Must match the server's network.
 - `STELLAR_SECRET_KEY` — your S... secret key (needs USDC trustline + balance)
 
-**Browser frontends:** this client uses Node `fetch` and `createEd25519Signer`, both of which run in Node. A vanilla browser cannot sign Soroban auth entries through a typical wallet extension without additional glue. For a browser payer, run the x402 client server-side and expose a thin proxy endpoint to the page, or wire up Wallets-Kit / Freighter with custom auth-entry signing.
+**Browser frontends:** this client uses Node `fetch` and `createEd25519Signer`, both of which run in Node. A vanilla browser cannot sign contract auth entries through a typical wallet extension without additional glue. For a browser payer, run the x402 client server-side and expose a thin proxy endpoint to the page, or wire up Wallets-Kit / Freighter with custom auth-entry signing.
 
 ## Testnet runbook
 
@@ -288,7 +288,7 @@ USDC on Stellar has two addresses, used in different places. Mixing them up is a
 | Address | Format | Used for |
 |---------|--------|----------|
 | Classic asset issuer | `G...` (32-byte ed25519 public key) | The `issuer` of the classic USDC asset; used when adding a trustline (`new Asset("USDC", G...)`) |
-| SAC (Soroban Asset Contract) | `C...` (32-byte contract address) | The Soroban contract the protocol invokes `transfer` on; used in payment requirements |
+| SAC (Stellar Asset Contract) | `C...` (32-byte contract address) | The contract the protocol invokes `transfer` on; used in payment requirements |
 
 Use the exported constants instead of hard-coding when possible:
 
@@ -315,13 +315,13 @@ Always test on testnet first. To switch a working setup to mainnet, change only 
 
 ## Key concepts
 
-**Auth entry signing** — On Stellar, x402 clients sign Soroban authorization entries, not full transaction envelopes. The facilitator assembles the complete transaction. This is lighter than EVM/Solana signing, and means clients never need to manage sequence numbers or pay fees.
+**Auth entry signing** — On Stellar, x402 clients sign contract authorization entries, not full transaction envelopes. The facilitator assembles the complete transaction. This is lighter than EVM/Solana signing, and means clients never need to manage sequence numbers or pay fees.
 
 **Fee sponsorship** — OZ Channels pays all Stellar network fees (~$0.00001/tx). Clients need a funded wallet with USDC but zero XLM.
 
 **`exact-v2` scheme** — The Stellar x402 scheme version. Server advertises `scheme: "exact"` + `x402Version: 2`. Don't mix v1 and v2 packages.
 
-**SAC (Stellar Asset Contract)** — USDC on Stellar is a classic asset wrapped in a Soroban contract. x402 payments invoke `transfer` on the SAC. Any SEP-41 token works; USDC is the default.
+**SAC (Stellar Asset Contract)** — USDC on Stellar is a classic asset wrapped in a smart contract. x402 payments invoke `transfer` on the SAC. Any SEP-41 token works; USDC is the default.
 
 **Ledger expiration** — Auth entries include a `max_ledger` bound. Use `latestLedger + 12` (~1 minute at 5s/ledger). Expired entries fail at settlement.
 
@@ -354,7 +354,7 @@ Always test on testnet first. To switch a working setup to mainnet, change only 
 - Fix: the `payTo` account needs a USDC trustline too. The SAC `transfer` settles the underlying classic asset, which the recipient cannot hold without a trustline. Add `changeTrust` to both accounts during setup.
 
 **Trying to sign auth entries from a browser**
-- Symptom: bundling errors, or a browser wallet that has no API to sign Soroban auth entries
+- Symptom: bundling errors, or a browser wallet that has no API to sign contract auth entries
 - Fix: run the x402 client server-side (e.g. an Express route the browser calls), or use Wallets-Kit / Freighter with custom auth-entry signing. `@x402/fetch` + `createEd25519Signer` target Node and assume a raw secret key.
 
 **Passing a `Keypair` (or a network passphrase) to `createEd25519Signer`**
@@ -374,7 +374,7 @@ Always test on testnet first. To switch a working setup to mainnet, change only 
 
 ## When to use MPP
 MPP is the right choice when:
-- You want **no facilitator dependency** — payments settle directly on Stellar via Soroban SAC transfers
+- You want **no facilitator dependency** — payments settle directly on Stellar via SAC transfers
 - Your AI agent makes **many requests per session** — use channel mode to pay off-chain and settle once
 - You're building a Stellar-native payment stack without relying on third-party infrastructure
 
@@ -389,7 +389,7 @@ If you need zero-XLM clients or the simplest possible setup, use x402 (Part 1 ab
 
 ## Charge mode: per-request payments
 
-Each request triggers a Soroban SAC token transfer settled on-chain. No facilitator. Server can optionally sponsor fees so clients don't need XLM.
+Each request triggers a SAC token transfer settled on-chain. No facilitator. Server can optionally sponsor fees so clients don't need XLM.
 
 ```bash
 npm install express @stellar/mpp mppx @stellar/stellar-sdk dotenv
@@ -487,7 +487,7 @@ The client deploys a one-way payment channel contract, deposits USDC once, then 
 
 ### Prerequisites
 
-- Deploy a one-way-channel Soroban contract to get a `C...` contract address
+- Deploy a one-way-channel smart contract to get a `C...` contract address
 - Generate an ed25519 keypair for commitment signing (see [stellar-mpp SDK](https://github.com/stellar/stellar-mpp-sdk))
 - Fund the channel with USDC before making requests
 
@@ -615,7 +615,7 @@ npm install @stellar/mpp mppx @stellar/stellar-sdk
 
 **Channel: deposit TTL expired**
 - Symptom: `close()` fails or channel appears drained
-- Fix: Soroban contract storage has a TTL. Close the channel before it expires, or extend storage TTL via `bumpContractInstance`. Don't leave channels open indefinitely.
+- Fix: Contract storage has a TTL. Close the channel before it expires, or extend storage TTL via `bumpContractInstance`. Don't leave channels open indefinitely.
 
 **Charge: client has no XLM for fees**
 - Symptom: `op_insufficient_balance` or fee errors on client-submitted transactions
