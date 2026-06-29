@@ -43,7 +43,11 @@ jobs:
             companions=$(find "$d" -type f ! -name SKILL.md | wc -l | tr -d ' ')
             if [ "$companions" -gt 0 ]; then
               # SKILL.md at the archive root, no wrapper directory (RFC requirement).
-              tar -czf "dist/$slug.tar.gz" -C "$d" .
+              # Reproducible bytes (fixed mtime/ownership, sorted entries, gzip -n)
+              # so re-runs are idempotent and the digest is verifiable from the tag.
+              tar --sort=name --format=gnu --mtime='@0' \
+                  --owner=0 --group=0 --numeric-owner \
+                  -C "$d" -cf - . | gzip -n -9 > "dist/$slug.tar.gz"
               digest=$(sha256sum "dist/$slug.tar.gz" | awk '{print $1}')
               printf '%s\tarchive\tsha256:%s\n' "$slug" "$digest" >> dist/skills-digests.txt
             else
