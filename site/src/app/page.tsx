@@ -1,5 +1,3 @@
-import { Badge, Logo } from "@stellar/design-system";
-
 import { INSTALLERS } from "@/data/installers.mjs";
 import {
   ECOSYSTEM_CARDS,
@@ -9,10 +7,10 @@ import {
 import { readSkillMeta } from "@/lib/skill-meta.mjs";
 
 import { CopyButton } from "./_components/CopyButton";
-import { GitHubIcon, LinkExternal01Icon } from "./_components/icons";
 import { SkillCard } from "./_components/SkillCard";
 import { SkillsFilter } from "./_components/SkillsFilter";
-import { ThemeSwitchIsland } from "./_components/ThemeSwitchIsland";
+import { SiteFooter } from "./_components/SiteFooter";
+import { SiteHeader } from "./_components/SiteHeader";
 
 import "./styles.scss";
 
@@ -87,28 +85,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      <header className="SkillsLanding__header">
-        <div className="SkillsLanding__logo">
-          <Logo.Stellar />
-          <Badge variant="secondary" size="md">
-            Skills
-          </Badge>
-        </div>
-
-        <div className="SkillsLanding__headerActions">
-          <ThemeSwitchIsland />
-
-          <a
-            href="https://developers.stellar.org/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="SkillsLanding__headerLink"
-          >
-            Developer docs
-            <LinkExternal01Icon />
-          </a>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="SkillsLanding__main">
         <section className="SkillsLanding__hero">
@@ -180,13 +157,17 @@ export default function LandingPage() {
         <section className="SkillsLanding__ecosystem" aria-label="Community">
           <h2 className="SkillsLanding__sectionTitle">Community skills</h2>
           <p className="SkillsLanding__sectionDescription">
-            Skills built and maintained by the Stellar community. Each project
-            has its own install instructions, so follow the link on a card to
-            set it up with your agent. The resources listed here are
-            community-contributed and are not endorsed by the Stellar
-            Foundation. Always do your own research (DYOR) before using any
-            tool or resource. Inclusion in this list does not imply any
-            warranty, security audit, or official recommendation.
+            Skills built and maintained by members of the Stellar community.
+            Each project has its own install instructions; follow the link on a
+            card to set it up with your agent.
+          </p>
+          <p className="SkillsLanding__sectionDescription">
+            Community skills are independently developed and are not reviewed,
+            endorsed, or maintained by the Stellar Development Foundation.
+            Inclusion in this directory does not imply any warranty, security
+            audit, or recommendation by SDF. You are solely responsible for
+            evaluating any community skill before use, including reviewing its
+            code, license, and security practices.
           </p>
           <div className="SkillsLanding__ecosystemGrid">
             {ECOSYSTEM_CARDS.map((c) => (
@@ -204,28 +185,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="SkillsLanding__footer">
-        <span className="SkillsLanding__footerText">
-          Powered by{" "}
-          <a
-            href="https://stellar.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="SkillsLanding__footerLink"
-          >
-            Stellar
-          </a>
-        </span>
-        <a
-          href="https://github.com/stellar/stellar-dev-skill"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="View source on GitHub"
-          className="SkillsLanding__footerGithub"
-        >
-          <GitHubIcon />
-        </a>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

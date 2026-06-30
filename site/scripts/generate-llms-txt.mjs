@@ -137,7 +137,7 @@ if (realEcosystem.length > 0) {
   lines.push("## Community Built");
   lines.push("");
   lines.push(
-    "Other community-built skills that may be helpful for your build. These aren't installed via the methods above; each project has its own setup, so follow the link on each entry. Not endorsed by the Stellar Foundation; do your own research.",
+    "Community-built skills maintained by their respective authors, not by SDF. Each project has its own setup; follow the link on each entry. These skills are not reviewed, endorsed, or warranted by the Stellar Development Foundation. Evaluate each skill independently before use.",
   );
   lines.push("");
   for (const c of realEcosystem) {
