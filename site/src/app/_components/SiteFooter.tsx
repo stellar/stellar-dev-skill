@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { GitHubIcon } from "./icons";
 
 export function SiteFooter() {
@@ -26,9 +28,9 @@ export function SiteFooter() {
       <span className="SkillsLanding__footerSep" aria-hidden="true">
         ·
       </span>
-      <a href="/terms" className="SkillsLanding__footerLink">
+      <Link href="/terms" className="SkillsLanding__footerLink">
         Terms of Service
-      </a>
+      </Link>
       <span className="SkillsLanding__footerSep" aria-hidden="true">
         ·
       </span>

@@ -45,7 +45,7 @@
 
   a {
     color: var(--sds-clr-lilac-11);
-    text-decoration: none;
+    text-decoration: underline;
     transition: color var(--sds-anim-transition-default);
 
     @media (hover: hover) {

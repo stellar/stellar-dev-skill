@@ -8,7 +8,7 @@ import { ThemeSwitchIsland } from "./ThemeSwitchIsland";
 export function SiteHeader() {
   return (
     <header className="SkillsLanding__header">
-      <Link href="/" className="SkillsLanding__logo">
+      <Link href="/" className="SkillsLanding__logo" aria-label="Stellar Skills home">
         <Logo.Stellar />
         <Badge variant="secondary" size="md">
           Skills
