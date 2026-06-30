@@ -34,10 +34,13 @@ client component.
   `scripts/generate-llms-txt.mjs`.
 - `src/app/page.tsx`: server-rendered landing page.
 - `src/app/_components/`: `SkillCard` (server), `icons` (server, inline
-  SVGs), `CopyButton` / `SkillsFilter` / `ThemeSwitchIsland` (client
-  islands). `SkillsFilter` is used twice — once for the skills grid
-  (`All` + categories) and once for the Installing section's tabs
-  (Claude Code / Cursor / npx skills / Clone repo).
+  SVGs), `CopyButton` / `SkillsFilter` / `CommunitySearch` /
+  `ThemeSwitchIsland` (client islands). `SkillsFilter` is used twice — once
+  for the skills grid (`All` + categories) and once for the Installing
+  section's tabs (Claude Code / Cursor / npx skills / Clone repo).
+  `CommunitySearch` adds search + pagination to the community grid; the
+  cards render server-side and are passed in as children, so every entry
+  stays in the static HTML.
 - `scripts/copy-skills.mjs`: mirrors `../skills/<source>` into
   `public/<source>` on `predev` / `prebuild`. No network; just `cp`.
 - `scripts/generate-llms-txt.mjs`: writes `public/llms.txt` from
@@ -69,7 +72,7 @@ then append to `SKILL_CARD_SOURCES`:
 ```ts
 {
   source: "skills/<your-skill>/SKILL.md",
-  category: "Soroban", // any FilterType value
+  category: "Smart Contracts", // any FilterType value
   // Optional overrides — both default to the upstream SKILL.md's
   // first H1 (title) and frontmatter `description`.
   title: "Your Skill Title",
@@ -80,7 +83,9 @@ then append to `SKILL_CARD_SOURCES`:
 `pnpm sync:skills && pnpm dev` to verify. New category? Add it to the
 `FilterType` union and the `FILTERS` array.
 
-**Ecosystem:** external link, no upstream copy.
+**Ecosystem:** external link, no upstream copy. New entries are picked
+up automatically by the community search, pagination, and llms.txt; no
+other wiring needed.
 
 ```ts
 {
@@ -88,7 +93,6 @@ then append to `SKILL_CARD_SOURCES`:
   description: "Verb-led summary of what the skill does.",
   pathLabel: "owner/repo",
   copyValue: "https://github.com/owner/repo/blob/main/path/to/SKILL.md",
-  category: "Ecosystem",
 }
 ```
 

@@ -6,6 +6,7 @@ import {
 } from "@/data/skills";
 import { readSkillMeta } from "@/lib/skill-meta.mjs";
 
+import { CommunitySearch } from "./_components/CommunitySearch";
 import { CopyButton } from "./_components/CopyButton";
 import { SkillCard } from "./_components/SkillCard";
 import { SkillsFilter } from "./_components/SkillsFilter";
@@ -47,6 +48,15 @@ const hostFromOrigin = (origin: string) => origin.replace(/^https?:\/\//, "");
 
 const githubSourceUrl = (source: string) =>
   `https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_SOURCE_REF}/${source}`;
+
+// Example ECOSYSTEM_CARDS entry shown in the "Add your skill" block.
+// Mirrors the format documented in site/CLAUDE.md.
+const ADD_SKILL_SNIPPET = `{
+  title: "Project Name",
+  description: "Verb-led summary of what the skill does.",
+  pathLabel: "owner/repo",
+  copyValue: "https://github.com/owner/repo/blob/main/path/to/SKILL.md",
+}`;
 
 export default function LandingPage() {
   const host = hostFromOrigin(SITE_ORIGIN);
@@ -169,7 +179,11 @@ export default function LandingPage() {
             evaluating any community skill before use, including reviewing its
             code, license, and security practices.
           </p>
-          <div className="SkillsLanding__ecosystemGrid">
+          <CommunitySearch
+            searchTexts={ECOSYSTEM_CARDS.map((c) =>
+              `${c.title} ${c.description}`.toLowerCase(),
+            )}
+          >
             {ECOSYSTEM_CARDS.map((c) => (
               <SkillCard
                 key={c.copyValue}
@@ -181,6 +195,33 @@ export default function LandingPage() {
                 headingLevel={3}
               />
             ))}
+          </CommunitySearch>
+
+          <div className="SkillsLanding__addSkill">
+            <h3 className="SkillsLanding__addSkillTitle">Add your skill</h3>
+            <p className="SkillsLanding__addSkillText">
+              Built a skill that helps people develop on Stellar?{" "}
+              <a
+                href={`https://github.com/${GITHUB_REPOSITORY}/edit/main/site/src/data/skills.ts`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open a pull request
+              </a>{" "}
+              that adds an entry to <code>ECOSYSTEM_CARDS</code> in{" "}
+              <a
+                href={`https://github.com/${GITHUB_REPOSITORY}/blob/main/site/src/data/skills.ts`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                site/src/data/skills.ts
+              </a>
+              . Once merged, your skill shows up here and in{" "}
+              <a href={`${SITE_ORIGIN}/llms.txt`}>llms.txt</a>.
+            </p>
+            <pre className="SkillsLanding__addSkillSnippet">
+              <code>{ADD_SKILL_SNIPPET}</code>
+            </pre>
           </div>
         </section>
       </main>

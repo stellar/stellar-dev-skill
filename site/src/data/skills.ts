@@ -17,7 +17,7 @@
 type FilterType =
   | "All"
   | "Agentic Payments"
-  | "Soroban"
+  | "Smart Contracts"
   | "Frontend"
   | "Assets"
   | "APIs"
@@ -30,7 +30,7 @@ type FilterType =
  */
 export const FILTERS: readonly FilterType[] = [
   "All",
-  "Soroban",
+  "Smart Contracts",
   "Agentic Payments",
   "Frontend",
   "Assets",
@@ -46,7 +46,7 @@ export const FILTERS: readonly FilterType[] = [
  * to upstream metadata when they're omitted.
  */
 export type SkillCardSource = {
-  /** Upstream path, e.g. "skills/soroban/SKILL.md". Forms both the
+  /** Upstream path, e.g. "skills/smart-contracts/SKILL.md". Forms both the
    *  fetch source and the site URL ("/" + source). */
   source: string;
   category: FilterType;
@@ -71,7 +71,6 @@ export type EcosystemCardSource = {
   pathLabel: string;
   /** Full URL copied to clipboard when the user clicks the pill. */
   copyValue: string;
-  category: FilterType;
 };
 
 /**
@@ -80,9 +79,9 @@ export type EcosystemCardSource = {
  */
 export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
   {
-    source: "skills/soroban/SKILL.md",
-    category: "Soroban",
-    title: "Soroban Smart Contracts",
+    source: "skills/smart-contracts/SKILL.md",
+    category: "Smart Contracts",
+    title: "Stellar Smart Contracts",
     description:
       "Write, test, secure, and ship Rust smart contracts on Stellar. Covers patterns, pitfalls, and architecture.",
   },
@@ -98,7 +97,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "Assets",
     title: "Stellar Assets & SAC",
     description:
-      "Issue and manage classic Stellar assets and trustlines, with the SAC bridge for Soroban interop.",
+      "Issue and manage classic Stellar assets and trustlines, with the SAC bridge for smart contract interop.",
   },
   {
     source: "skills/data/SKILL.md",
@@ -119,7 +118,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "ZK",
     title: "ZK Proofs",
     description:
-      "Verify Groth16 zero-knowledge proofs on Stellar using BLS12-381, BN254, and Poseidon primitives.",
+      "Verify Groth16 proofs on-chain via BLS12-381, with Circom, Noir, and RISC Zero toolchain walkthroughs.",
   },
   {
     source: "skills/standards/SKILL.md",
@@ -138,11 +137,10 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
   {
     title: "OpenZeppelin Contracts",
     description:
-      "Scaffold a Soroban project with OpenZeppelin's audited Stellar contract libraries. Walks through Rust toolchain setup, Stellar CLI install, workspace dependencies, and applying the pausable and ownable macros to your contract.",
+      "Scaffold a Stellar smart contract project with OpenZeppelin's audited Stellar contract libraries. Walks through Rust toolchain setup, Stellar CLI install, workspace dependencies, and applying the pausable and ownable macros to your contract.",
     pathLabel: "OpenZeppelin/openzeppelin-skills",
     copyValue:
       "https://github.com/OpenZeppelin/openzeppelin-skills/blob/main/skills/setup-stellar-contracts/SKILL.md",
-    category: "Ecosystem",
   },
   {
     title: "DeFindex SDK",
@@ -151,7 +149,6 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "paltalabs/defindex-sdk",
     copyValue:
       "https://github.com/paltalabs/defindex-sdk/blob/main/defindex-sdk-skill.md",
-    category: "Ecosystem",
   },
   {
     title: "Soroswap SDK",
@@ -159,7 +156,6 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Trade on Soroswap DEX from a backend, bot, or swap widget using the @soroswap/sdk TypeScript package. Covers token swaps, liquidity pool operations, price and route queries, API key handling, and signing flows for both server keypairs and browser wallets.",
     pathLabel: "soroswap/sdk",
     copyValue: "https://github.com/soroswap/sdk/blob/main/soroswap-sdk-skill.md",
-    category: "Ecosystem",
   },
   {
     title: "Trustless Work Escrow",
@@ -168,6 +164,5 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "Trustless-Work/trustless-work-dev-skill",
     copyValue:
       "https://github.com/Trustless-Work/trustless-work-dev-skill/blob/main/SKILL.md",
-    category: "Ecosystem",
   },
 ] as const;
