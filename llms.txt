@@ -94,7 +94,7 @@ The skills installed via the methods above, grouped by category.
 
 ## Community Built
 
-Other community-built skills that may be helpful for your build. These aren't installed via the methods above; each project has its own setup, so follow the link on each entry. Not endorsed by the Stellar Foundation; do your own research. To get a skill listed here, open a pull request adding it to ECOSYSTEM_CARDS in site/src/data/skills.ts of https://github.com/stellar/stellar-dev-skill.
+Community-built skills maintained by their respective authors, not by SDF. Each project has its own setup; follow the link on each entry. These skills are not reviewed, endorsed, or warranted by the Stellar Development Foundation. Evaluate each skill independently before use.
 
 - [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-skills/blob/main/skills/setup-stellar-contracts/SKILL.md): Scaffold a Stellar smart contract project with OpenZeppelin's audited Stellar contract libraries. Walks through Rust toolchain setup, Stellar CLI install, workspace dependencies, and applying the pausable and ownable macros to your contract.
 - [DeFindex SDK](https://github.com/paltalabs/defindex-sdk/blob/main/defindex-sdk-skill.md): Integrate DeFindex vaults on Stellar with the @defindex/sdk TypeScript package. Covers vault deposits and withdrawals, balance and APY queries, programmatic vault creation, and the unsigned-XDR signing pattern for backend and bot integrations.
