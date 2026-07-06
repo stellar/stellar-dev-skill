@@ -58,7 +58,7 @@ pub enum DataKey {
 ## Data types
 
 ```rust
-use soroban_sdk::{Address, Bytes, BytesN, Map, String, Symbol, Vec};
+use soroban_sdk::{symbol_short, vec, Address, Bytes, BytesN, Map, String, Symbol, Vec};
 
 let addr: Address = env.current_contract_address();
 let sym: Symbol = symbol_short!("transfer");        // ≤9 chars; Symbol max is 32

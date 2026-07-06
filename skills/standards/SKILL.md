@@ -315,41 +315,13 @@ Audited smart contract library for Stellar (track latest release tags before pin
 
 ### Security Tools
 
-#### Scout Soroban (CoinFabrik)
-Open-source vulnerability detector with 23 detectors for Stellar smart contracts.
-- **GitHub**: https://github.com/CoinFabrik/scout-soroban
-- **Install**: `cargo install cargo-scout-audit`
-- **Features**: CLI tool, VSCode extension, SARIF output for CI/CD
-- **Examples**: https://github.com/CoinFabrik/scout-soroban-examples
+Usage details, detector lists, and workflow guidance live in [the smart contract security guide](../smart-contracts/security.md#tooling). Catalog:
 
-#### OpenZeppelin Security Detectors SDK
-Framework for building custom security detectors for Stellar contracts.
-- **GitHub**: https://github.com/OpenZeppelin/soroban-security-detectors-sdk
-- **Detectors**: `auth_missing`, `unchecked_ft_transfer`, improper TTL, contract panics
-- **Extensible**: Load external detector libraries, CI/CD ready
-
-#### Certora Sunbeam Prover
-Formal verification for Stellar smart contracts — first WASM platform supported by Certora.
-- **Docs**: https://docs.certora.com/en/latest/docs/sunbeam/index.html
-- **Spec Language**: CVLR (Rust macros) — https://github.com/Certora/cvlr
-- **Reports**: [Blend V1 verification](https://www.certora.com/reports/blend-smart-contract-verification-report)
-- **Verifies at**: WASM bytecode level, eliminating compiler trust assumptions
-
-#### Runtime Verification — Komet
-Formal verification and testing tool designed for Stellar smart contracts (SCF-funded).
-- **Docs**: https://docs.runtimeverification.com/komet
-- **Repo**: https://github.com/runtimeverification/komet
-- **Spec Language**: Rust — property-based tests written in the same language as the contracts
-- **Operates at**: WASM bytecode level via [KWasm semantics](https://github.com/runtimeverification/wasm-semantics) (eliminates compiler trust assumptions)
-- **Features**: Fuzzing, testing, formal verification
-- **Reports**: https://github.com/runtimeverification/publications
-- **Example**: [TokenOps audit and verification report](https://github.com/runtimeverification/publications/blob/main/reports/smart-contracts/TokenOps.pdf)
-- **Blog**: [Introducing Komet](https://runtimeverification.com/blog/introducing-komet-smart-contract-testing-and-verification-tool-for-soroban-created-by-runtime-verification)
-
-#### Soroban Security Portal (Inferara)
-Community security knowledge base (SCF-funded).
-- **Website**: https://sorobansecurity.com
-- **Features**: Searchable audit reports, vulnerability database, best practices
+- [Scout Soroban](https://github.com/CoinFabrik/scout-soroban) (CoinFabrik) - static analysis, 23 detectors, VSCode extension, SARIF output ([examples](https://github.com/CoinFabrik/scout-soroban-examples))
+- [Security Detectors SDK](https://github.com/OpenZeppelin/soroban-security-detectors-sdk) (OpenZeppelin) - pre-built detectors plus a framework for custom ones
+- [Certora Sunbeam Prover](https://docs.certora.com/en/latest/docs/sunbeam/index.html) - formal verification at WASM level, CVLR spec language ([Blend V1 report](https://www.certora.com/reports/blend-smart-contract-verification-report))
+- [Komet](https://docs.runtimeverification.com/komet) (Runtime Verification) - property testing and formal verification via KWasm semantics ([reports](https://github.com/runtimeverification/publications))
+- [Soroban Security Portal](https://sorobansecurity.com) (Inferara) - searchable audit reports and vulnerability database
 
 ### CLI & SDKs
 
@@ -622,54 +594,26 @@ Major companies building on Stellar:
 
 ## Example Repositories
 
-### Official Examples
-- [Soroban Examples](https://github.com/stellar/soroban-examples) - Core contract patterns
-- [Soroban Example dApp](https://github.com/stellar/soroban-example-dapp) - Crowdfunding Next.js app
-- [Stellar Repositories](https://github.com/orgs/stellar/repositories)
-
-### Community Examples
-- [Scout Soroban Examples](https://github.com/CoinFabrik/scout-soroban-examples) - Security-audited examples
-- [Soroban Guide (Xycloo)](https://github.com/xycloo/soroban-guide) - Learning resources
-- [Soroban Contracts (icolomina)](https://github.com/icolomina/soroban-contracts) - Governance examples
-- [Oracle Example](https://github.com/FredericRezeau/soroban-oracle-example) - Pub-sub oracle pattern
-- [OZ Stellar NFT](https://github.com/jamesbachini/OZ-Stellar-NFT) - Simple NFT with OpenZeppelin
+Official and community example repos are cataloged in Part 2: Example Repositories above. See also [Stellar Repositories](https://github.com/orgs/stellar/repositories) for everything under the stellar org.
 
 ## Ecosystem Projects
 
-For DeFi protocols, wallets, oracles, gaming/NFTs, cross-chain bridges, and builder teams, see Part 2: Stellar Ecosystem below.
+For DeFi protocols, wallets, oracles, gaming/NFTs, cross-chain bridges, and builder teams, see Part 2: Stellar Ecosystem above.
 
 ## Security
 
-For vulnerability patterns, checklists, and detailed tooling guides, see [the smart contract security guide](../smart-contracts/security.md).
+Vulnerability patterns, checklists, tooling (static analysis, formal verification, monitoring), the Audit Bank, and the Immunefi bounty programs are covered in [the smart contract security guide](../smart-contracts/security.md). The Security Tools catalog in Part 2 above lists the tool links.
 
-### Bug Bounty Programs
-- [Stellar Bug Bounty (Immunefi)](https://immunefi.com/bug-bounty/stellar/) - Up to $250K, covers core + smart contract stack
-- [OpenZeppelin Stellar Bounty (Immunefi)](https://immunefi.com/bug-bounty/openzeppelin-stellar/) - Up to $25K
+Additional resources not covered there:
 - [HackerOne VDP](https://stellar.org/grants-and-funding/bug-bounty) - Web application vulnerabilities
-
-### Audit Bank & Audit Firms
-- [Soroban Audit Bank](https://stellar.org/grants-and-funding/soroban-audit-bank) - $3M+ deployed, 43+ audits
 - [Audited Projects List](https://stellar.org/audit-bank/projects) - Public audit registry
-- Partners: OtterSec, Veridise, Runtime Verification, CoinFabrik, QuarksLab, Coinspect, Certora, Halborn, Zellic, Code4rena
-
-### Static Analysis
-- [Scout Soroban](https://github.com/CoinFabrik/scout-soroban) - 23 vulnerability detectors, VSCode extension
-- [OZ Security Detectors SDK](https://github.com/OpenZeppelin/soroban-security-detectors-sdk) - Custom detector framework
-
-### Formal Verification
-- [Certora Sunbeam Prover](https://docs.certora.com/en/latest/docs/sunbeam/index.html) - WASM-level formal verification
-- [CVLR Spec Language](https://github.com/Certora/cvlr) - Certora Verification Language for Rust
-- [Runtime Verification Komet](https://runtimeverification.com/blog/introducing-komet-smart-contract-testing-and-verification-tool-for-soroban-created-by-runtime-verification) - contract verification tool
-
-### Security Resources
 - [Veridise Security Checklist](https://veridise.com/blog/audit-insights/building-on-stellar-soroban-grab-this-security-checklist-to-avoid-vulnerabilities/) - smart-contract security checklist
-- [Soroban Security Portal](https://sorobansecurity.com) - Community vulnerability database
 - [CoinFabrik Audit Reports](https://www.coinfabrik.com/smart-contract-audit-reports/)
 - [Certora Security Reports](https://github.com/Certora/SecurityReports) - Includes Stellar verifications
 
 ## Zero-Knowledge Proofs (Status-Sensitive)
 
-For comprehensive ZK development guidance, see [zk-proofs.md](../zk-proofs/SKILL.md).
+For comprehensive ZK development guidance, see the [zk-proofs skill](../zk-proofs/SKILL.md).
 
 Always verify CAP status and network support before treating any ZK primitive as production-available.
 
@@ -721,10 +665,8 @@ Always verify CAP status and network support before treating any ZK primitive as
 - [StellarChain](https://stellarchain.io) - Alternative explorer
 
 ### Data Indexers
-- [Mercury](https://mercurydata.app) - Stellar-native indexer with Retroshades + GraphQL ([docs](https://docs.mercurydata.app))
-- [SubQuery](https://subquery.network) - Multi-chain indexer with Stellar support ([quick start](https://subquery.network/doc/indexer/quickstart/quickstart_chains/stellar.html))
-- [Goldsky](https://goldsky.com) - Real-time data replication pipelines + subgraphs ([Stellar docs](https://docs.goldsky.com/chains/stellar))
-- [Zephyr VM](https://github.com/xycloo/zephyr-vm) - Serverless Rust execution at ledger close
+
+Mercury, SubQuery, Goldsky, and Zephyr VM are cataloged with docs links in Part 2: Data Indexing above. Full directory: [Indexer Directory](https://developers.stellar.org/docs/data/indexers).
 
 ### Historical Data & Analytics
 - [Hubble](https://developers.stellar.org/docs/data/analytics/hubble) - BigQuery dataset (updated every 30 min)
@@ -733,15 +675,7 @@ Always verify CAP status and network support before treating any ZK primitive as
 
 ## Infrastructure
 
-### Anchors & On/Off Ramps
-- [Anchor Platform](https://github.com/stellar/java-stellar-anchor-sdk)
-- [Anchor Docs](https://developers.stellar.org/docs/category/anchor-platform)
-- [Anchor Fundamentals](https://developers.stellar.org/docs/learn/fundamentals/anchors)
-- [Stellar Ramps](https://stellar.org/use-cases/ramps)
-
-### Disbursements
-- [Stellar Disbursement Platform](https://github.com/stellar/stellar-disbursement-platform)
-- [SDP Documentation](https://developers.stellar.org/docs/category/use-the-stellar-disbursement-platform)
+Anchors, on/off ramps, and the Stellar Disbursement Platform are cataloged in Part 2: Infrastructure above. See also the [Anchor Platform docs](https://developers.stellar.org/docs/category/anchor-platform).
 
 ### RPC Providers
 - [RPC Provider Directory](https://developers.stellar.org/docs/data/apis/rpc/providers) - Full list of providers
@@ -779,14 +713,7 @@ Always verify CAP status and network support before treating any ZK primitive as
 
 ## Project Directories & Funding
 
-### Ecosystem Discovery
-- [Stellar Ecosystem](https://stellar.org/ecosystem) - Official project directory
-- [Stellar Community Fund Projects](https://communityfund.stellar.org/projects)
-
-### Funding Programs
-- [Stellar Community Fund](https://communityfund.stellar.org) - Grants up to $150K
-- [Soroban Audit Bank](https://stellar.org/grants-and-funding/soroban-audit-bank)
-- [$100M Soroban Adoption Fund](https://stellar.org/soroban)
+Directories (Stellar Ecosystem, SCF Project Tracker) and funding programs (SCF, Audit Bank) are cataloged in Part 2: Project Directories above. See also the [$100M Soroban Adoption Fund](https://stellar.org/soroban).
 
 ## Learning Resources
 

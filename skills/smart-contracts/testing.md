@@ -15,7 +15,7 @@ Layers, fastest first:
 #![cfg(test)]
 use soroban_sdk::{
     testutils::{Address as _, MockAuth, MockAuthInvoke},
-    Address, Env,
+    Address, Env, IntoVal,
 };
 use crate::{Contract, ContractClient};
 
