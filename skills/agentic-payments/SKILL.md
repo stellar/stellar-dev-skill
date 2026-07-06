@@ -347,7 +347,7 @@ Always test on testnet first. To switch a working setup to mainnet, change only 
 
 **OZ Channels 401 on testnet or mainnet**
 - Symptom: facilitator rejects with 401, server logs `Failed to initialize: no supported payment kinds loaded from any facilitator`
-- Fix: an API key is required on **both** networks (this is a recent change). Generate one at [channels.openzeppelin.com/testnet/gen](https://channels.openzeppelin.com/testnet/gen) (testnet) or [channels.openzeppelin.com/gen](https://channels.openzeppelin.com/gen) (mainnet), then set `OZ_API_KEY` and pass it via `createAuthHeaders` (see the Seller example).
+- Fix: an API key is required on **both** networks. Generate one at [channels.openzeppelin.com/testnet/gen](https://channels.openzeppelin.com/testnet/gen) (testnet) or [channels.openzeppelin.com/gen](https://channels.openzeppelin.com/gen) (mainnet), then set `OZ_API_KEY` and pass it via `createAuthHeaders` (see the Seller example).
 
 **Trustline missing on the recipient**
 - Symptom: `op_no_trust` during settlement, even though the client has USDC
