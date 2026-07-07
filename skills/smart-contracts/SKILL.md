@@ -33,7 +33,12 @@ This file covers setup and the core workflow. The deep dives live alongside it �
 
 ## Versions
 
-This skill targets **protocol 27** (`soroban-sdk` v27, `rs-soroban-env` v27, `stellar-cli` v27). Networks upgrade by validator vote — testnet ahead of mainnet — so pin the SDK major that matches the network you deploy to, and check [crates.io/crates/soroban-sdk](https://crates.io/crates/soroban-sdk) for the latest release. Numeric network limits quoted here are the current mainnet settings; they change by vote — [Stellar Lab's Network Limits page](https://lab.stellar.org/network-limits) and `stellar network settings --network mainnet` show the live values.
+This skill was written against **protocol 27** (`soroban-sdk` v27, `rs-soroban-env` v27, `stellar-cli` v27). Version numbers in examples are illustrative — resolve the current ones from these sources rather than trusting any doc:
+
+- **`soroban-sdk` major version tracks the protocol version** (SDK 27 ↔ protocol 27). This rule outlives any specific release.
+- Latest SDK release: [crates.io/crates/soroban-sdk](https://crates.io/crates/soroban-sdk) (or `cargo add soroban-sdk`, which resolves it). Pre-releases (`-rc.x`) exist only during a protocol rollout and must be pinned with the exact version string; [GitHub releases](https://github.com/stellar/rs-soroban-sdk/releases) lists them with changelogs.
+- Networks upgrade by validator vote, testnet before mainnet — pin the SDK major matching the network you deploy to. Live protocol version: RPC `getVersionInfo` or [Stellar Lab](https://lab.stellar.org).
+- Numeric network limits quoted here are mainnet settings at time of writing; they change by vote — [Stellar Lab's Network Limits page](https://lab.stellar.org/network-limits) and `stellar network settings --network mainnet` show the live values.
 
 ## Platform constraints
 
@@ -62,12 +67,12 @@ rustup target add wasm32v1-none     # once per toolchain
 crate-type = ["lib", "cdylib"]   # lib is needed for tests and fuzzing
 
 [dependencies]
-soroban-sdk = "27.0.0-rc.1"  # protocol 27; pre-releases need the exact version string.
-                             # Mainnet is on protocol 26 at the time of writing — use "26" there
-                             # until the network upgrades. Check crates.io for the latest.
+soroban-sdk = "27"  # major = protocol version; see the Versions section above for how
+                    # to resolve the current release (use the exact "27.0.0-rc.x" string
+                    # while the target protocol is still in pre-release)
 
 [dev-dependencies]
-soroban-sdk = { version = "27.0.0-rc.1", features = ["testutils"] }  # match above
+soroban-sdk = { version = "27", features = ["testutils"] }  # match above
 
 [profile.release]
 opt-level = "z"
