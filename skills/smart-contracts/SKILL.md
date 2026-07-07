@@ -134,16 +134,16 @@ Full patterns (three storage types, auth variants, cross-contract calls, events,
 ## Build, deploy, invoke
 
 ```bash
-# Build optimized WASM → target/wasm32-unknown-unknown/release/*.wasm
+# Build optimized WASM → target/wasm32v1-none/release/*.wasm
 stellar contract build
 
 # Create and fund an identity (testnet)
-stellar keys generate --global alice --network testnet --fund
+stellar keys generate alice --network testnet --fund
 
 # Deploy (constructor args go after the `--`)
 stellar contract deploy \
-  --wasm target/wasm32-unknown-unknown/release/my_contract.wasm \
-  --source alice \
+  --wasm target/wasm32v1-none/release/my_contract.wasm \
+  --source-account alice \
   --network testnet \
   -- \
   --admin alice
@@ -151,7 +151,7 @@ stellar contract deploy \
 # Invoke
 stellar contract invoke \
   --id CONTRACT_ID \
-  --source alice \
+  --source-account alice \
   --network testnet \
   -- \
   increment

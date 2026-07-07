@@ -126,7 +126,7 @@ Import another contract's WASM to get a typed client:
 ```rust
 mod token_contract {
     soroban_sdk::contractimport!(
-        file = "../token/target/wasm32-unknown-unknown/release/token.wasm"
+        file = "../token/target/wasm32v1-none/release/token.wasm"
     );
 }
 
@@ -252,9 +252,9 @@ Worked examples: [soroban-examples](https://github.com/stellar/soroban-examples)
 The 64KB limit is real and the release profile in [SKILL.md](SKILL.md#project-setup) is mandatory. If you still exceed it:
 
 ```bash
-ls -la target/wasm32-unknown-unknown/release/*.wasm   # check size
+ls -la target/wasm32v1-none/release/*.wasm   # check size
 cargo install cargo-bloat
-cargo bloat --release --target wasm32-unknown-unknown # find heavy deps
+cargo bloat --release --target wasm32v1-none # find heavy deps
 ```
 
 Then: split the contract, drop heavy dependencies, prefer `symbol_short!`, avoid large static data.
@@ -277,7 +277,7 @@ Fees are multidimensional (CPU instructions, ledger reads/writes, bytes, events,
 | `cannot find macro println` / `std` errors | Missing `#![no_std]` | Add as first line of `lib.rs`; use SDK types |
 | Calls fail after inactivity, data "missing" | Storage TTL expired → archived | Extend TTLs proactively; restore archived entries |
 | Temporary data vanished | Wrong storage type | Use `persistent()` for data that must survive |
-| `Error: identity "alice" not found` | CLI identity missing | `stellar keys generate --global alice --network testnet --fund` |
+| `Error: identity "alice" not found` | CLI identity missing | `stellar keys generate alice --network testnet --fund` |
 | `invalid argument format` on invoke | Wrong CLI arg syntax | Plain strings for addresses; JSON for complex types |
 | `transaction simulation failed` | Soroban tx not simulated/assembled | Simulate, then `assembleTransaction` before signing |
 | `tx_bad_auth` | Wrong network passphrase or signer | Match passphrase to network; check signing identity |
