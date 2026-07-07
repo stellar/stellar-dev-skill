@@ -33,7 +33,7 @@ This file covers setup and the core workflow. The deep dives live alongside it �
 
 ## Versions
 
-This skill targets **protocol 27** (`soroban-sdk` v27, `rs-soroban-env` v27, `stellar-cli` v27). Networks upgrade by validator vote — testnet ahead of mainnet — so pin the SDK major that matches the network you deploy to, and check [crates.io/crates/soroban-sdk](https://crates.io/crates/soroban-sdk) for the latest release. Numeric network limits quoted here are the current mainnet settings; they change by vote — `stellar network settings --network mainnet` returns the live values.
+This skill targets **protocol 27** (`soroban-sdk` v27, `rs-soroban-env` v27, `stellar-cli` v27). Networks upgrade by validator vote — testnet ahead of mainnet — so pin the SDK major that matches the network you deploy to, and check [crates.io/crates/soroban-sdk](https://crates.io/crates/soroban-sdk) for the latest release. Numeric network limits quoted here are the current mainnet settings; they change by vote — [Stellar Lab's Network Limits page](https://lab.stellar.org/network-limits) and `stellar network settings --network mainnet` show the live values.
 
 ## Platform constraints
 

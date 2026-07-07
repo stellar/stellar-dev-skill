@@ -375,7 +375,7 @@ Worked examples: [soroban-examples](https://github.com/stellar/soroban-examples)
 
 Soroban transactions pay an inclusion fee (classic surge-priced mechanic) plus a resource fee based on declared consumption: CPU instructions, ledger reads/writes (entries and bytes), transaction size, events size, and rent. Rent/events are refundable if unused; instructions and I/O are charged as declared — so submitters simulate first to size the declaration, and a transaction that exceeds its declaration fails. If actual state diverges from simulation (concurrent writes), costs can shift — leave headroom.
 
-Current mainnet per-transaction ceilings (network-configured, change by validator vote — `stellar network settings --network mainnet` for live values):
+Current mainnet per-transaction ceilings (network-configured, change by validator vote — check the live values on [Stellar Lab's Network Limits page](https://lab.stellar.org/network-limits) or with `stellar network settings --network mainnet`):
 
 | Resource | Limit |
 |---|---|
