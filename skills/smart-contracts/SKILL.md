@@ -13,7 +13,7 @@ This file covers setup and the core workflow. The deep dives live alongside it â
 
 | Task | File |
 |------|------|
-| Storage/TTL, authorization, cross-contract calls, tokens, events, errors, upgrades, fees/resources, troubleshooting | [development.md](development.md) |
+| Storage/TTL, authorization, constructors, cross-contract calls, tokens, events, errors, upgrades, factories, governance/DeFi patterns, fees/resources, troubleshooting | [development.md](development.md) |
 | Unit, integration, fuzz, property, fork, and mutation testing | [testing.md](testing.md) |
 | Security review, vulnerability classes, checklists, audit prep, tooling | [security.md](security.md) |
 
@@ -160,7 +160,7 @@ Full patterns (three storage types, auth variants, cross-contract calls, tokens,
 stellar contract build
 
 # Create and fund an identity (testnet)
-stellar keys generate --global alice --network testnet --fund
+stellar keys generate alice --network testnet --fund
 
 # Deploy (constructor args go after the `--`)
 stellar contract deploy \

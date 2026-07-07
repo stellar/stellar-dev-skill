@@ -118,7 +118,7 @@ let vault_id = env.register(VaultContract, ());
 
 ```bash
 stellar container start local     # or: docker run --rm -it -p 8000:8000 stellar/quickstart:latest --local
-stellar keys generate --global test-account --network local --fund
+stellar keys generate test-account --network local --fund
 stellar contract deploy --wasm target/wasm32v1-none/release/contract.wasm \
   --source test-account --network local
 ```
@@ -128,7 +128,7 @@ Endpoints: RPC `http://localhost:8000/soroban/rpc`, Horizon `http://localhost:80
 ## Testnet
 
 ```bash
-stellar keys generate --global my-key --network testnet --fund
+stellar keys generate my-key --network testnet --fund
 stellar contract deploy --wasm ... --source my-key --network testnet
 ```
 

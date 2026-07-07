@@ -187,7 +187,7 @@ impl CustomAccountInterface for MyAccount {
 }
 ```
 
-Rules: always verify `signature_payload` (verifying anything else authorizes arbitrary calls); use `auth_contexts` to enforce policies (each `Context::Contract` carries contract, fn_name, args); keep it lean — its cost is added to every transaction the account signs.
+Rules: always verify `signature_payload` (verifying anything else authorizes arbitrary calls); use `auth_contexts` to enforce policies (each `Context::Contract` carries contract, fn_name, args); never `require_auth` the account's own address inside `__check_auth` (it's evaluating auth, not consuming it); keep it lean — its cost is added to every transaction the account signs.
 
 Protocol 27 (CAP-71) adds **auth delegation** for modular accounts: inside `__check_auth`, `env.custom_account().get_delegated_signers()` returns the delegate addresses the transaction supplied (unsanitized — check they are registered delegates of this account), and `env.custom_account().delegate_auth(&addr)` forwards the current authorization check to that G- or C-address. This lets an account delegate authentication to signer contracts without a separate auth entry per delegate; delegation can nest.
 
@@ -310,7 +310,17 @@ What to internalize:
 - Auth pattern: `transfer`/`approve`/`burn` auth `from`; `transfer_from`/`burn_from` auth the `spender` (the allowance pre-authorized the `from` side). Reads need no auth. `mint`/`clawback`/`set_admin`/`set_authorized`/`trust` are SAC/admin surface, not SEP-41.
 - **Allowances expire**: `approve(from, spender, amount, expiration_ledger)`. Convention is temporary storage keyed `(from, spender)` with TTL matching the expiration. Re-approving overwrites — the classic race applies (spender can front-run an allowance reduction and spend old + new); mitigate by approving to 0 first or using exact-amount auth instead of standing allowances.
 - **SAC carries classic-asset semantics into contracts**: account (`G...`) balances live in trustlines (missing or unauthorized trustline → transfer fails; 64-bit balance cap), contract (`C...`) balances live in contract storage (full i128). Issuer flags apply — `AUTH_REQUIRED`, freezes via `AUTH_REVOCABLE`, clawback. Transfers to the issuer burn; from the issuer mint. A protocol that accepts arbitrary token addresses must survive all of this — see [security.md](security.md) for the token-consumer review checklist.
-- Emit the standard token event shapes (`transfer`, `mint`, `burn`, `approve`, …) exactly — wallets and indexers depend on them. Use `#[contractevent]` structs with the participants as topics and `data_format = "single-value"` for the amount.
+- Emit the standard token event shapes exactly — wallets and indexers depend on them (`soroban-token-sdk` ships these as ready-made `#[contractevent]` structs):
+
+| Event | Topics | Data |
+|---|---|---|
+| `transfer` | `("transfer", from, to)` | `amount: i128`, or map `{to_muxed_id, amount}` for muxed destinations |
+| `approve` | `("approve", from, spender)` | vec `[amount: i128, expiration_ledger: u32]` |
+| `mint` | `("mint", to)` | `amount`, or map `{to_muxed_id, amount}` |
+| `burn` | `("burn", from)` | `amount` |
+| `clawback` | `("clawback", from)` | `amount` |
+
+  The SAC emits these same shapes with one addition: the SEP-0011 asset string (`CODE:ISSUER` or `native`) as a trailing topic.
 
 Custom token implementations, asset issuance, and SAC deployment: `../assets/SKILL.md`. Interface spec: [SEP-41](https://stellar.org/protocol/sep-41), [token interface docs](https://developers.stellar.org/docs/tokens/token-interface).
 
@@ -419,7 +429,7 @@ Then: drop heavy dependencies (full `serde`, `regex` — stay in no_std SDK idio
 | `cargo test` fails inside `soroban-env-host` (`ed25519_dalek` trait errors) | A semver-loose transitive dep resolved to an incompatible major (e.g. ed25519-dalek 3.x, mid-2026) | Pin it back: `cargo update ed25519-dalek@3.0.0 --precise 2.2.0` |
 | Calls fail after inactivity, data "missing" | Storage TTL expired → archived | Extend TTLs proactively; simulation auto-restores archived persistent entries |
 | Temporary data vanished | Wrong storage type | Use `persistent()` for data that must survive |
-| `Error: identity "alice" not found` | CLI identity missing | `stellar keys generate --global alice --network testnet --fund` |
+| `Error: identity "alice" not found` | CLI identity missing | `stellar keys generate alice --network testnet --fund` |
 | `invalid argument format` on invoke | Wrong CLI arg syntax | Plain strings for addresses; JSON for complex types |
 | `transaction simulation failed` | Soroban tx not simulated/assembled | Simulate, then `assembleTransaction` before signing |
 | Auth fails only in cross-contract flows | Signed auth tree doesn't match actual call path | Rebuild the tree from simulation; re-auth at each layer (see [Authorization](#authorization)) |
