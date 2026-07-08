@@ -109,6 +109,17 @@ The CLI is designed for progressive disclosure and programmatic recovery:
 
   Read `error.code` / `error.details.error_name`, not the human message. The named-error → next-command table lives in [tokens.md](tokens.md#error-remediation).
 
+## Working with Soroban protocols (DeFi)
+
+This skill covers wallet primitives — moving value, trustlines, and transaction mechanics. It does **not** teach how any specific Soroban protocol works. Reference the DeFi skills when you need to:
+
+1. **Understand how a protocol works** — its architecture, contracts, and on-chain addresses.
+2. **Craft the transaction (or sequence of transactions)** to perform a protocol action — swap or quote, lend / borrow / repay, deposit / withdraw from a vault, provide liquidity.
+
+The DeFi playbooks map each protocol's operations to concrete `contract invoke` / `stellar token` calls and carry the current contract references, so you act on the protocol instead of reverse-engineering it from raw ledger data.
+
+Find them under [`../defi/SKILL.md`](../defi/SKILL.md)
+
 ## Related skills
 
 - Classic assets, trustlines, authorization flags, and the SAC bridge → [`../assets/SKILL.md`](../assets/SKILL.md)
@@ -116,7 +127,8 @@ The CLI is designed for progressive disclosure and programmatic recovery:
 - Querying chain data over RPC / Horizon → [`../data/SKILL.md`](../data/SKILL.md)
 - SEP-41 and other standards → [`../standards/SKILL.md`](../standards/SKILL.md)
 - Paying x402 / MPP services → [`../agentic-payments/SKILL.md`](../agentic-payments/SKILL.md)
-- DeFi playbooks → [`../defi/SKILL.md`](../defi/SKILL.md)
+- Acting on Soroban protocols (swap, lend, vaults) → [Working with Soroban protocols](#working-with-soroban-protocols-defi)
+
 ## Documentation
 
 - [Stellar CLI manual](https://developers.stellar.org/docs/tools/cli/stellar-cli)
