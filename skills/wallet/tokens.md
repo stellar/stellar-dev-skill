@@ -73,7 +73,7 @@ State-changing token calls return a structured error with a `code` you branch on
 |-------|---------|-----------|
 | SAC not deployed | The classic asset's SAC does not exist on-chain yet | `stellar contract asset deploy --asset CODE:ISSUER --source <admin>` |
 | missing / unauthorized trustline | Destination (or source) has no authorized trustline for the asset | `stellar tx new change-trust --source <acct> --line CODE:ISSUER` — see [accounts-and-tx.md](accounts-and-tx.md#trustlines) |
-| insufficient balance | Source balance below the amount | Check `token balance`; reduce the amount or fund the account |
+| insufficient balance | Source balance below the amount (remember XLM must stay above the [reserve](accounts-and-tx.md#reserves)) | Check `token balance`; reduce the amount or fund the account |
 | insufficient allowance | `transfer-from` / `burn-from` exceeds the approved amount | Have the owner call `token approve` with a higher amount and a future `--expires` ledger |
 | not authorized (admin) | Caller is not the SAC admin | Use the admin key, or `set-admin` first |
 
