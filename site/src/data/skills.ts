@@ -165,4 +165,12 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://github.com/Trustless-Work/trustless-work-dev-skill/blob/main/SKILL.md",
   },
+  {
+    title: "Agent Browser WebAuthn",
+    description:
+      "Drive passkey and Stellar smart-account browser tests with agent-browser and Chrome DevTools virtual WebAuthn authenticators.",
+    pathLabel: "kalepail/skills",
+    copyValue:
+      "https://github.com/kalepail/skills/blob/main/skills/agent-browser-webauthn/SKILL.md",
+  },
 ] as const;
