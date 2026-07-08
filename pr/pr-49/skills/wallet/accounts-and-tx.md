@@ -34,7 +34,9 @@ A transaction carries **time bounds** (`setTimeout`); past the upper bound it ca
 
 ## Balances and readiness
 
-<a name="readiness"></a>Before a state-changing command, confirm the account exists and holds what the operation needs.
+<a name="readiness"></a>
+
+Before a state-changing command, confirm the account exists and holds what the operation needs.
 
 ```bash
 # Account entry: XLM balance, subentry count, sequence number, reserves

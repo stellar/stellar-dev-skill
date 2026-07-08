@@ -60,7 +60,7 @@ Verify: `stellar --version`. Full matrix and latest instructions: <https://devel
 
 The CLI uses a [Stellar RPC](https://developers.stellar.org/docs/build/guides/rpc) in order to read ledger entries, simulate transactions, and submit them. The default is the public testnet RPC at `https://soroban-testnet.stellar.org`. You can also configure a named network for mainnet or a private network.
 
-You can find a list of provicers at <https://developers.stellar.org/docs/data/apis/rpc/providers>.
+You can find a list of providers at <https://developers.stellar.org/docs/data/apis/rpc/providers>.
 
 ```bash
 # Save a named network once, then reference it with --network / -n
