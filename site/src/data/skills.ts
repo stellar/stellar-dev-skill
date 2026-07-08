@@ -168,7 +168,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
   {
     title: "Agent Browser WebAuthn",
     description:
-      "Drive passkey and Stellar smart-account browser tests with agent-browser and Chrome DevTools virtual WebAuthn authenticators.",
+      "Drive passkey and Stellar smart account browser tests with agent-browser and Chrome DevTools virtual WebAuthn authenticators.",
     pathLabel: "kalepail/skills",
     copyValue:
       "https://github.com/kalepail/skills/blob/main/skills/agent-browser-webauthn/SKILL.md",
