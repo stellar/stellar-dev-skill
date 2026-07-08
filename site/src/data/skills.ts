@@ -22,6 +22,7 @@ type FilterType =
   | "Assets"
   | "APIs"
   | "ZK"
+  | "Wallets"
   | "Ecosystem";
 
 /**
@@ -36,6 +37,7 @@ export const FILTERS: readonly FilterType[] = [
   "Assets",
   "APIs",
   "ZK",
+  "Wallets",
   "Ecosystem",
 ] as const;
 
@@ -112,6 +114,13 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     title: "Agent Payments (x402 + MPP)",
     description:
       "Charge AI agents for API calls with x402 paywalls or MPP payment channels.",
+  },
+  {
+    source: "skills/wallet/SKILL.md",
+    category: "Wallets",
+    title: "CLI Wallet",
+    description:
+      "Use the Stellar CLI as a wallet: manage keys, fund accounts, check balances, transfer tokens, handle trustlines, and diagnose transactions.",
   },
   {
     source: "skills/zk-proofs/SKILL.md",
