@@ -189,6 +189,7 @@ To upload WASM without instantiating (e.g. for factories or upgrades), use `stel
 ## Minimal test
 
 ```rust
+// src/test.rs — included from lib.rs with `mod test;`
 #![cfg(test)]
 use super::*;
 use soroban_sdk::{testutils::Address as _, Address, Env};

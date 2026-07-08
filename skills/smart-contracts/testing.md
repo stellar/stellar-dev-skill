@@ -12,6 +12,9 @@ Layers, fastest first:
 ## Unit testing
 
 ```rust
+// src/test.rs — a separate file included from lib.rs with `mod test;`
+// (the layout `stellar contract init` scaffolds). The inner `#![cfg(test)]`
+// gates this whole module; don't paste it into lib.rs itself.
 #![cfg(test)]
 extern crate std;  // contracts are no_std; tests can still use std explicitly
 use soroban_sdk::{
