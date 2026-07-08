@@ -120,7 +120,7 @@ let vault_id = env.register(VaultContract, ());
 stellar container start local     # or: docker run --rm -it -p 8000:8000 stellar/quickstart:latest --local
 stellar keys generate test-account --network local --fund
 stellar contract deploy --wasm target/wasm32v1-none/release/contract.wasm \
-  --source test-account --network local
+  --source-account test-account --network local
 ```
 
 Endpoints: RPC `http://localhost:8000/soroban/rpc`, Horizon `http://localhost:8000`, passphrase `"Standalone Network ; February 2017"`.
@@ -129,7 +129,7 @@ Endpoints: RPC `http://localhost:8000/soroban/rpc`, Horizon `http://localhost:80
 
 ```bash
 stellar keys generate my-key --network testnet --fund
-stellar contract deploy --wasm ... --source my-key --network testnet
+stellar contract deploy --wasm ... --source-account my-key --network testnet
 ```
 
 - RPC: `https://soroban-testnet.stellar.org` · Horizon: `https://horizon-testnet.stellar.org`
@@ -222,7 +222,7 @@ Three techniques worth knowing; each is one command plus a doc link:
 ## Resource profiling
 
 ```bash
-stellar contract invoke --id CONTRACT_ID --source alice --network testnet \
+stellar contract invoke --id CONTRACT_ID --source-account alice --network testnet \
   --send=no -- function_name --arg value
 ```
 

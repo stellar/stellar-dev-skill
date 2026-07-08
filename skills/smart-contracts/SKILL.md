@@ -170,7 +170,7 @@ stellar keys generate alice --network testnet --fund
 # Deploy (constructor args go after the `--`)
 stellar contract deploy \
   --wasm target/wasm32v1-none/release/my_contract.wasm \
-  --source alice \
+  --source-account alice \
   --network testnet \
   -- \
   --admin alice
@@ -178,7 +178,7 @@ stellar contract deploy \
 # Invoke
 stellar contract invoke \
   --id CONTRACT_ID \
-  --source alice \
+  --source-account alice \
   --network testnet \
   -- \
   increment
