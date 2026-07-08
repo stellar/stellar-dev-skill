@@ -23,6 +23,7 @@ type FilterType =
   | "APIs"
   | "ZK"
   | "Wallets"
+  | "DeFi"
   | "Ecosystem";
 
 /**
@@ -38,6 +39,7 @@ export const FILTERS: readonly FilterType[] = [
   "APIs",
   "ZK",
   "Wallets",
+  "DeFi",
   "Ecosystem",
 ] as const;
 
@@ -121,6 +123,13 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     title: "CLI Wallet",
     description:
       "Use the Stellar CLI as a wallet: manage keys, fund accounts, check balances, transfer tokens, handle trustlines, and diagnose transactions.",
+  },
+  {
+    source: "skills/defi/SKILL.md",
+    category: "DeFi",
+    title: "DeFi Protocols (Blend)",
+    description:
+      "Act on Soroban DeFi protocols from the CLI. Includes the Blend lending playbook: discover pools, read pool and backstop state over RPC, supply, borrow, repay, and provide backstop capital.",
   },
   {
     source: "skills/zk-proofs/SKILL.md",
