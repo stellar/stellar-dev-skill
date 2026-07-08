@@ -22,7 +22,6 @@ The division of labor is constant:
 |----------|------------|----------|
 | Blend | Permissionless lending pools + a backstop insurance module | [blend/SKILL.md](blend/SKILL.md) |
 
-More protocols will be added here. When acting on a protocol not yet covered, use the [smart-contracts skill](../smart-contracts/SKILL.md) to inspect its interface and the [data skill](../data/SKILL.md) to read its state over RPC.
 
 ## Related skills
 
