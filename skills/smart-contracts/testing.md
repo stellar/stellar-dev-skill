@@ -12,7 +12,11 @@ Layers, fastest first:
 ## Unit testing
 
 ```rust
+// src/test.rs — a separate file included from lib.rs with `mod test;`
+// (the layout `stellar contract init` scaffolds). The inner `#![cfg(test)]`
+// gates this whole module; don't paste it into lib.rs itself.
 #![cfg(test)]
+extern crate std;  // contracts are no_std; tests can still use std explicitly
 use soroban_sdk::{
     testutils::{Address as _, MockAuth, MockAuthInvoke},
     Address, Env,
@@ -26,12 +30,14 @@ fn test_basic() {
     let client = ContractClient::new(&env, &contract_id);
     let user = Address::generate(&env);
 
-    client.initialize(&user);
+    client.set_owner(&user);
     assert_eq!(client.get_value(), 0);
 }
 ```
 
-`env.register` takes constructor args as its second parameter — `env.register(Contract, (admin.clone(),))` for a contract with `__constructor(env, admin)`.
+`env.register` takes constructor args as its second parameter — `env.register(Contract, (admin.clone(),))` for a contract with `__constructor(env, admin)`. Use `env.register_at(&address, Contract, args)` to pin a specific address.
+
+**Resource limits are enforced in tests** (SDK 25+): `Env::default()` applies mainnet CPU/memory limits to invocations, so a contract that would blow the budget in production fails in unit tests — that's a feature. For deliberately heavy tests: `env.cost_estimate().disable_resource_limits()`; to read consumption, `env.cost_estimate().resources()`.
 
 ### Authorization
 
@@ -61,6 +67,8 @@ fn test_auth() {
 }
 ```
 
+`env.auths()` returns `(Address, AuthorizedInvocation)` pairs **for the most recent invocation only** — any later client call (even a read) resets it, so assert immediately after the call under test. Assert the exact tree (function, args, sub-invocations) on security-critical paths so a dropped `require_auth` fails the test. If a contract authorizes calls below the entry point (e.g. via `authorize_as_current_contract`), use `mock_all_auths_allowing_non_root_auth()`.
+
 ### Time and ledger state
 
 ```rust
@@ -72,16 +80,26 @@ env.ledger().set_timestamp(2500);
 
 ### Events
 
+Events defined with `#[contractevent]` compare directly against emitted XDR:
+
 ```rust
-let events = env.events().all();
-assert_eq!(events.len(), 1);
-// each event = (contract_id, topics: Vec<Val>, data: Val)
+use soroban_sdk::{testutils::Events as _, Event as _};
+
+let expected = Transfer { from: from.clone(), to: to.clone(), amount: 100 };
+assert_eq!(
+    env.events().all(),
+    std::vec![expected.to_xdr(&env, &contract_id)],
+);
 ```
+
+`env.events().all()` returns the events of the **most recent invocation** as `ContractEvents` (like `env.auths()`, it resets on every call — assert right after the call under test); `event.to_xdr(&env, &contract_id)` builds the expected `xdr::ContractEvent` from the struct.
 
 ### Storage TTL
 
 ```rust
-let ttl = env.as_contract(&contract_id, || {
+use soroban_sdk::testutils::storage::Persistent as _;  // get_ttl lives on testutils traits
+
+let ttl: u32 = env.as_contract(&contract_id, || {
     env.storage().persistent().get_ttl(&DataKey::MyData)
 });
 assert!(ttl > 0);
@@ -120,6 +138,7 @@ stellar contract deploy --wasm ... --source-account my-key --network testnet
 - RPC: `https://soroban-testnet.stellar.org` · Horizon: `https://horizon-testnet.stellar.org`
 - Passphrase: `"Test SDF Network ; September 2015"` · Friendbot: `https://friendbot.stellar.org`
 - **Testnet resets quarterly** — everything is deleted. Script your deployments; never treat testnet state as durable.
+- Testnet runs the next protocol version before mainnet — it's where you verify against an upcoming upgrade.
 
 ## Integration tests
 
@@ -155,7 +174,7 @@ cargo install --locked cargo-fuzz
 cargo fuzz init
 ```
 
-`Cargo.toml` needs `crate-type = ["lib", "cdylib"]`; add `soroban-sdk = { version = "...", features = ["testutils"] }` to `fuzz/Cargo.toml`.
+The default scaffold's `crate-type = ["lib", "cdylib"]` already exposes the lib target fuzzing needs; add `soroban-sdk = { version = "...", features = ["testutils"] }` to `fuzz/Cargo.toml`.
 
 ```rust
 // fuzz/fuzz_targets/fuzz_deposit.rs
@@ -171,7 +190,6 @@ fuzz_target!(|amount: i128| {
     let client = ContractClient::new(&env, &contract_id);
     let user = Address::generate(&env);
 
-    client.initialize(&user);
     let _ = client.try_deposit(&user, &amount);  // must never panic unexpectedly
 });
 ```
@@ -200,7 +218,7 @@ Workflow: fuzz interactively to find deep bugs → convert findings to proptest 
 
 Three techniques worth knowing; each is one command plus a doc link:
 
-- **Test snapshots**: every test writes a JSON snapshot of events + final ledger state to `test_snapshots/`. Commit them — diffs expose unintended behavioral changes. [Docs](https://developers.stellar.org/docs/build/guides/testing/differential-tests-with-test-snapshots)
+- **Test snapshots**: every test writes a JSON snapshot of events + final ledger state to `test_snapshots/`. Commit them — diffs expose unintended behavioral changes. (Disable per-env with `Env::new_with_config` if they're noise.) [Docs](https://developers.stellar.org/docs/build/guides/testing/differential-tests-with-test-snapshots)
 - **Fork testing**: `stellar snapshot create --address C... --output json --out snapshot.json`, then `Env::from_ledger_snapshot_file("snapshot.json")` to test against real network state. Also useful for upgrade rehearsals: `stellar contract fetch --id C... --out-file deployed.wasm`, register both old and new versions, compare behavior. [Docs](https://developers.stellar.org/docs/build/guides/testing/fork-testing)
 - **Mutation testing**: `cargo install --locked cargo-mutants && cargo mutants` — mutates your source and reports `MISSED` where tests didn't notice. [Docs](https://developers.stellar.org/docs/build/guides/testing/mutation-testing)
 
@@ -211,7 +229,7 @@ stellar contract invoke --id CONTRACT_ID --source-account alice --network testne
   --send=no -- function_name --arg value
 ```
 
-Simulation reports CPU instructions, ledger reads/writes, and fees without submitting.
+Simulation reports CPU instructions, ledger reads/writes, and fees without submitting. In unit tests, `env.cost_estimate().resources()` gives the same numbers programmatically.
 
 ## CI
 
@@ -233,10 +251,10 @@ For integration jobs, run `stellar/quickstart` as a service container and deploy
 
 ## Checklist
 
-- [ ] Unit tests cover all public functions, including error paths
+- [ ] Unit tests cover all public functions, including error paths (`try_` methods)
 - [ ] Edge cases: zero amounts, max values, empty state
 - [ ] Authorization verified with `env.auths()` or specific `mock_auths`
-- [ ] Events asserted
+- [ ] Events asserted (`event.to_xdr` comparison)
 - [ ] Storage TTL behavior validated
 - [ ] Cross-contract interactions tested against real WASM
 - [ ] Fuzz targets for value-moving paths (deposit, withdraw, swap)
