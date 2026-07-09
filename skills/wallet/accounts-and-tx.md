@@ -45,15 +45,15 @@ stellar ledger entry fetch account --account alice --output json
 # A specific trustline: does alice hold this asset, and up to what limit / authorization?
 stellar ledger entry fetch trustline --account alice --asset USDC:GA5Z…ISSUER --output json
 
-# A SEP-41 / SAC token balance (decimal-aware), including the native SAC
-stellar token balance --id native --of alice --output json          # (via #2620)
+# A SEP-41 / SAC token balance (raw base units), including the native SAC
+stellar token balance --id native --of alice --output json
 ```
 
 Readiness checklist to run first:
 
-1. **Account funded?** `ledger entry fetch account` succeeds and XLM balance covers the [minimum balance and reserves](#reserves). If the fetch reports the account as missing, it is unfunded — see [keys.md](keys.md#fund-an-account).
+1. **Account funded?** `ledger entry fetch account` returns an `entries` array. An **unfunded / non-existent account is not an error** — the call succeeds with `"entries":[]`, so test for the empty array, not a failure. When the account is present, confirm its XLM balance covers the [minimum balance and reserves](#reserves). To fund, see [keys.md](keys.md#fund-an-account).
 2. **Trustline present + authorized?** For any issued (non-native) asset, `ledger entry fetch trustline` must return an authorized line before a transfer can settle. If not, provision it (below).
-3. **Enough balance?** Compare the decimal balance against the amount you intend to move.
+3. **Enough balance?** Balances come back as **raw stroops** (e.g. `"balance":"110043500001"`), not decimal XLM — divide by `10_000_000` to compare against a human amount, and remember the amount you pass to move it is also in stroops.
 
 ## Trustlines
 
@@ -78,16 +78,53 @@ Missing or unauthorized trustlines are the most common transfer failure. `token 
 
 `token transfer` is the primary path for all value transfer — native XLM, a classic asset, or a custom SEP-41 token — because every classic asset is reachable through its SAC ([tokens.md](tokens.md)).
 
-`tx new payment` remains available as a pure classic payment operation. Reach for it when you want a classic-only payment that does not depend on the asset's SAC being deployed:
+`tx new payment` remains available as a pure classic payment operation. Reach for it when you want a classic-only payment that does not depend on the asset's SAC being deployed. **`--amount` is in stroops** (1 XLM = `10_000_000` stroops), *not* human units — passing `100` sends 100 stroops (0.00001 XLM), and it succeeds silently, so this is an easy 10⁷ mistake. All classic assets (native XLM and any `CODE:ISSUER`) are 7-decimal, so this stroop scale always applies here; SEP-41 tokens moved via `stellar token` can declare a different `decimals` — look it up ([tokens.md](tokens.md#amounts)):
 
 ```bash
 stellar tx new payment \
   --source alice \
   --destination GBOB…DEST \
   --asset USDC:GA5Z…ISSUER \
-  --amount 100 \
+  --amount 100000000 \                 # 10 units, in stroops (1 unit = 10_000_000)
   --network testnet --output json
 ```
+
+`tx new payment` fails with `NoDestination` if the destination account does not exist on-chain yet (see [named errors](#errors)). To send value to a brand-new address, first create and fund it with `create-account` — `--starting-balance` is also in **stroops** (default `10_000_000` = 1 XLM):
+
+```bash
+stellar tx new create-account \
+  --source alice \
+  --destination GNEW…ADDR \
+  --starting-balance 10000000 \        # 1 XLM, in stroops
+  --network testnet --output json
+```
+
+With `--output json` these return a decoded *receipt* — result, tx hash, charged fee, and decoded events (see [structured output and errors](SKILL.md#structured-output-and-errors)). To diagnose a transaction you already submitted, look its hash up with [`tx fetch`](#diagnose-a-transaction).
+
+## Named errors
+<a name="errors"></a>
+
+A failed on-chain transaction is not printed as a tidy message — it is a Rust debug dump. The name that tells you what went wrong is the innermost one:
+
+```text
+❌ error: transaction submission failed: Some(TransactionResult {
+    fee_charged: 100,                                  // the fee is charged even though the tx failed
+    result: TxFailed(VecM([OpInner(Payment(NoDestination))])),
+    ext: V0,
+})
+```
+
+Read the `<Op>(<ErrorName>)` at the center. The ones you will actually hit:
+
+| Error name | Seen on | Meaning | Fix |
+|------------|---------|---------|-----|
+| `NoDestination` | `payment` | Destination account does not exist on-chain | Create it first with `create-account` ([move value](#move-value)) |
+| `NoTrust` | `payment` | Destination has no authorized trustline for the (non-native) asset | Add the trustline ([trustlines](#trustlines)) before paying |
+| `Underfunded` | `payment` | Source cannot cover the amount **and** stay above its [reserve](#reserves) | Reduce the amount, or fund the source |
+| `InvalidLimit` | `change-trust` | New limit is below the current balance — including `--limit 0` while the balance is non-zero | Move the balance out to 0 first, *then* set `--limit 0` |
+| `HasSubEntries` | `account-merge` | Account still holds subentries (trustlines, offers, …) | Remove every subentry first ([drain](#drain)) |
+
+Failed transactions **still charge the fee** (`fee_charged` above), so a loop that retries a doomed transaction burns XLM each attempt.
 
 ## Diagnose a transaction
 
@@ -109,8 +146,8 @@ stellar tx fetch events --hash <TX_HASH> --output json    # decoded contract eve
 When you have an unsigned transaction envelope (from `--build-only`, an offline flow, or another tool), sign it then send it. Both read the XDR from an argument, a file, or stdin.
 
 ```bash
-# Build without signing
-stellar tx new payment --source alice --destination GBOB… --asset native --amount 10 \
+# Build without signing (--amount in stroops: this is 10 XLM)
+stellar tx new payment --source alice --destination GBOB… --asset native --amount 100000000 \
   --build-only > tx.xdr
 
 # Sign with a key, then submit; piping chains the two

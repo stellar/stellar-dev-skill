@@ -1,8 +1,10 @@
 # Tokens: the `stellar token` client
 
-`stellar token` is a typed client for any SEP-41 token or Stellar Asset Contract (SAC). Each subcommand is a thin wrapper over `contract invoke` with token-aware argument parsing, asset/contract resolution, and decimal-aware amounts. Every state-changing subcommand inherits the full pipeline — simulate, sign auth entries, sign the transaction, fee-bump if needed, submit, poll — and returns a decoded JSON receipt. No sequence number or fee is requested from you.
+`stellar token` is a typed client for any SEP-41 token or Stellar Asset Contract (SAC). Each subcommand is a thin wrapper over `contract invoke` with token-aware argument parsing and asset/contract resolution. Amounts are **raw base units** (`10^decimals`, which you look up per token with `decimals` — not always 7), like the rest of the CLI — see [amounts below](#amounts). Every state-changing subcommand inherits the full pipeline — simulate, sign auth entries, sign the transaction, fee-bump if needed, submit, poll — and returns a decoded JSON receipt. No sequence number or fee is requested from you.
 
 Back to the [wallet overview](SKILL.md).
+
+> **Lower-level access.** `stellar contract invoke` calls a token's contract functions directly — reach for it for anything `stellar token` does not wrap. Discover a token's functions with `stellar contract invoke --id <SAC> --network testnet -- --help`. Amounts are **base units** here too, exactly as with `stellar token` — read the token's `decimals` first (`stellar contract invoke --id <SAC> --network testnet -- decimals`) and scale by `10^decimals`. It is **not always 7** (SAC-wrapped classic assets are 7, but a SEP-41 token can declare 6, 18, …) — see [amounts](#amounts).
 
 ## Target resolution
 
@@ -26,7 +28,7 @@ stellar contract asset deploy --asset USDC:GA5Z…ISSUER --source alice --networ
 |-------|-----------|----------|---------|
 | Transfer | `transfer` | `--id <t> --to <dst> <amount>` | Move tokens. The primary value-transfer command. |
 | Transfer | `transfer-from` | `--id <t> --from <a> --to <dst> <amount>` | Spend an allowance on behalf of another holder. |
-| Read | `balance` | `--id <t> --of <addr>` | Decimal-aware balance. |
+| Read | `balance` | `--id <t> --of <addr>` | Balance, returned in raw base units. |
 | Read | `allowance` | `--id <t> --from <a> --spender <s>` | Read an allowance. |
 | Read | `name` / `symbol` / `decimals` | `--id <t>` | Token metadata. |
 | Allowance | `approve` | `--id <t> --spender <s> <amount> --expires <ledger>` | Set an allowance. |
@@ -47,12 +49,21 @@ stellar token transfer \
   --source alice \
   --network testnet \
   --output json \
-  100
+  1000000000                           # 100 XLM in base units (native SAC has 7 decimals)
 ```
 
 The receipt carries `status`, the decoded `result`, the tx hash, the charged fee, and decoded events. For an issued asset, pass `--id USDC:GA5Z…ISSUER` (or its SAC `C…` id); the destination must hold an authorized trustline.
 
-Amounts are **decimal-aware**: pass human units (`100`), not stroops or base units. `token decimals --id <t>` tells you the scale.
+<a name="amounts"></a>
+The amount is in **raw base units**, not human units — like `tx new payment --amount`, the whole CLI works this way. The scale is `10^decimals`, and **a SEP-41 token declares its own `decimals` — it is not always 7.** Read it before computing any amount, never assume:
+
+```bash
+stellar token decimals --id <t> --output json
+```
+
+Then `1 unit = 10^decimals` base units. The native SAC and any SAC-wrapped classic asset are 7 (so 1 XLM = `10_000_000`), but a native Soroban token can declare anything — a 6-decimal token means `1 unit = 1_000_000`, an 18-decimal token means `1 unit = 1_000_000_000_000_000_000`. Passing `100` without scaling moves 100 base units — a silent off-by-`10^decimals` mistake.
+
+> **Transferring to the issuer burns.** Sending a SAC-wrapped classic asset *to its own issuer* address emits a `Burn` event and the issuer's balance reads back as the `i64::MAX` sentinel (`9223372036854775807`) rather than going up — so verifying the transfer by checking the issuer's destination balance looks like a failure even though it succeeded. Confirm by the `Burn` event or the sender's decreased balance instead.
 
 ## Reads
 
@@ -81,7 +92,7 @@ Read `error.code` / `error.details.error_name` from the JSON, not the human mess
 
 ## Pull a trusted token list
 
-Don't hardcode contract IDs. Resolve assets from a published, trusted list so you target the right issuer. Stellar's convention is [SEP-1 `stellar.toml`](https://developers.stellar.org/docs/tokens/publishing-asset-information) `[[CURRENCIES]]`, and asset directories publish JSON.
+Don't hardcode contract IDs. Resolve assets from a published, trusted list so you target the right issuer. Stellar's convention is [SEP-1 `stellar.toml`](https://developers.stellar.org/docs/tokens/publishing-asset-info) `[[CURRENCIES]]`, and asset directories publish JSON.
 
 ```bash
 # Fetch a home domain's stellar.toml and list its declared assets (code:issuer)
