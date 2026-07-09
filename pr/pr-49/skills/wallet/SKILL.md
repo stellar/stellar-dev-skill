@@ -58,22 +58,26 @@ Verify: `stellar --version`. Full matrix and latest instructions: <https://devel
 
 ### Configure the network (RPC)
 
-The CLI uses a [Stellar RPC](https://developers.stellar.org/docs/build/guides/rpc) in order to read ledger entries, simulate transactions, and submit them. The default is the public testnet RPC at `https://soroban-testnet.stellar.org`. You can also configure a named network for mainnet or a private network.
-
-You can find a list of providers at <https://developers.stellar.org/docs/data/apis/rpc/providers>.
+The CLI uses a [Stellar RPC](https://developers.stellar.org/docs/build/guides/rpc) to read ledger entries, simulate transactions, and submit them. **`testnet`, `pubnet`, `futurenet`, and `local` ship built-in — you do not `network add` them.** The built-in default is `testnet` (RPC `https://soroban-testnet.stellar.org`), so a bare command with no `--network` / `-n` runs against testnet.
 
 ```bash
-# Save a named network once, then reference it with --network / -n
-stellar network add testnet \
-  --rpc-url https://soroban-testnet.stellar.org \
-  --network-passphrase "Test SDF Network ; September 2015"
-stellar network use testnet          # set the default so you can omit --network
-
-stellar network ls                   # list configured networks
+stellar network ls                   # list networks (built-ins are already present)
+stellar network use testnet          # set the default so you can omit --network / -n
 stellar network health               # confirm the RPC is reachable
+
+# …or select a network per command instead of setting a default
+stellar <cmd> --network testnet      # (or -n testnet)
 ```
 
-You can also pass `--rpc-url` / `STELLAR_RPC_URL` and `--network-passphrase` / `STELLAR_NETWORK_PASSPHRASE` per command instead of saving a network.
+`stellar network add` is only for a **custom or private** RPC (or to override a built-in's endpoint):
+
+```bash
+stellar network add my-rpc \
+  --rpc-url https://my-private-rpc.example.com \
+  --network-passphrase "Test SDF Network ; September 2015"
+```
+
+You can also pass `--rpc-url` / `STELLAR_RPC_URL` and `--network-passphrase` / `STELLAR_NETWORK_PASSPHRASE` per command instead of saving a network. A provider list is at <https://developers.stellar.org/docs/data/apis/rpc/providers>.
 
 ### Configure a relayer (optional)
 
@@ -133,4 +137,3 @@ Find them under [`../defi/SKILL.md`](../defi/SKILL.md)
 
 - [Stellar CLI manual](https://developers.stellar.org/docs/tools/cli/stellar-cli)
 - [Anatomy of an asset](https://developers.stellar.org/docs/tokens/anatomy-of-an-asset)
-- [Agentic Wallet CLI epic](https://github.com/stellar/stellar-cli/issues/2628)
