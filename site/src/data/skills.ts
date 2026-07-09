@@ -165,4 +165,11 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://github.com/Trustless-Work/trustless-work-dev-skill/blob/main/SKILL.md",
   },
+  {
+    title: "PRISM Bounded Agent Treasury",
+    description:
+      "Give an AI agent a non-custodial, contract-bounded spending account on Stellar with PRISM. Covers treasury deployment with per-payment and rolling daily limits, payee whitelists, time-bound agent session keys, escrow, x402-gated payments, and Groth16/BN254 ZK compliance proofs verified on-chain.",
+    pathLabel: "Bekirerdem/prism",
+    copyValue: "https://github.com/Bekirerdem/prism/blob/main/SKILL.md",
+  },
 ] as const;
