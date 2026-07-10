@@ -180,6 +180,5 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "RozoAI/rozo-intents-skills",
     copyValue:
       "https://github.com/RozoAI/rozo-intents-skills/blob/main/SKILL.md",
-    category: "Ecosystem",
   },
 ] as const;
