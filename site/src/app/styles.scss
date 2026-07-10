@@ -17,10 +17,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: pxToRem(12px);
   width: 100%;
-  height: pxToRem(60px);
-  padding: 0 pxToRem(24px);
+  min-height: pxToRem(60px);
+  padding: pxToRem(10px) pxToRem(24px);
   margin-top: auto;
   border-top: 1px solid var(--sds-clr-gray-06);
 }
@@ -33,6 +34,9 @@
 }
 
 .SkillsLanding__footerLink {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(14px);
+  font-weight: 500;
   color: var(--sds-clr-lilac-11);
   text-decoration: none;
   transition: color var(--sds-anim-transition-default);
@@ -42,6 +46,13 @@
       color: var(--sds-clr-lilac-09);
     }
   }
+}
+
+.SkillsLanding__footerSep {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(14px);
+  color: var(--sds-clr-gray-06);
+  user-select: none;
 }
 
 .SkillsLanding__footerGithub {
@@ -85,6 +96,7 @@
   display: flex;
   align-items: center;
   gap: pxToRem(8px);
+  text-decoration: none;
 
   svg {
     width: pxToRem(96px);
@@ -302,7 +314,7 @@
 }
 
 @each $filter
-  in (Soroban, "Agentic Payments", Frontend, Assets, APIs, ZK, Ecosystem)
+  in ("Smart Contracts", "Agentic Payments", Frontend, Assets, APIs, ZK, Ecosystem)
 {
   .SkillsLanding__filterPanel[data-active-filter="#{$filter}"]
     .SkillsLanding__filterItem[data-category="#{$filter}"] {
@@ -555,6 +567,107 @@ p.SkillsLanding__sectionDescription {
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
+}
+
+// Community search input (client island; the cards stay server-rendered).
+// Width matches one grid column (50% minus half the 16px column gap) so
+// the input lines up with the card below it.
+.SkillsLanding__communitySearch {
+  width: calc(50% - #{pxToRem(8px)});
+  margin-bottom: pxToRem(16px);
+
+  @media (max-width: 600px) {
+    width: 100%;
+  }
+}
+
+// Each grid cell wraps one server-rendered card. `display: grid` makes
+// the card stretch to the full row height, like a direct grid child.
+.SkillsLanding__communityItem {
+  display: grid;
+}
+
+// Hidden by search/pagination. The card markup stays in the HTML so
+// non-JS clients (AI agents, crawlers) still see every entry.
+.SkillsLanding__communityItem[data-hidden="true"] {
+  display: none;
+}
+
+// These caption paragraphs are scoped under .SkillsLanding__ecosystem so
+// they outweigh the SDS global `.sds-theme-light p / .sds-theme-dark p`
+// rule (specificity 0,1,1), which otherwise forces every <p> to 16px /
+// 1.75rem line-height. A bare `.SkillsLanding__communityCount` (0,1,0)
+// loses to it; the ancestor prefix (0,2,0) wins.
+.SkillsLanding__ecosystem .SkillsLanding__communityEmpty {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(12px);
+  line-height: pxToRem(18px);
+  color: var(--sds-clr-gray-11);
+  margin: pxToRem(8px) 0 0 0;
+}
+
+// "Showing x of y skills" status line under the community grid.
+// Matches the ecosystem card title (h3.SkillsCard__title): 14px Inter
+// semibold in gray-12.
+.SkillsLanding__ecosystem .SkillsLanding__communityCount {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(14px);
+  font-weight: 600;
+  line-height: pxToRem(20px);
+  color: var(--sds-clr-gray-12);
+  margin: pxToRem(12px) 0 0 0;
+}
+
+.SkillsLanding__communityPagination {
+  display: flex;
+  justify-content: center;
+  margin-top: pxToRem(16px);
+}
+
+// "Add your skill" block at the bottom of the community panel.
+.SkillsLanding__addSkill {
+  margin-top: pxToRem(24px);
+  padding-top: pxToRem(16px);
+  border-top: 1px solid var(--sds-clr-gray-06);
+}
+
+h3.SkillsLanding__addSkillTitle {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(14px);
+  font-weight: 600;
+  line-height: pxToRem(20px);
+  margin: 0 0 pxToRem(4px) 0;
+  color: var(--sds-clr-gray-12);
+}
+
+.SkillsLanding__ecosystem p.SkillsLanding__addSkillText {
+  font-family: "Inter", sans-serif;
+  font-size: pxToRem(12px);
+  font-weight: 400;
+  line-height: pxToRem(18px);
+  margin: 0 0 pxToRem(12px) 0;
+  color: var(--sds-clr-gray-11);
+
+  a {
+    color: var(--sds-clr-gray-12);
+  }
+
+  code {
+    font-family: "Roboto Mono", monospace;
+  }
+}
+
+.SkillsLanding__addSkillSnippet {
+  font-family: "Roboto Mono", monospace;
+  font-size: pxToRem(12px);
+  line-height: pxToRem(18px);
+  color: var(--sds-clr-gray-11);
+  background-color: var(--sds-clr-gray-03);
+  border: 1px solid var(--sds-clr-gray-06);
+  border-radius: pxToRem(8px);
+  padding: pxToRem(12px);
+  margin: 0;
+  overflow-x: auto;
 }
 
 // Installer panel: independent tablist; only the active tab's panel

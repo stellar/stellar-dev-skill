@@ -1,23 +1,23 @@
 ---
 name: dapp
-description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, Soroban contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar or Soroban.
+description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts.
 user-invocable: true
 argument-hint: "[dapp task]"
 ---
 
 # Stellar dApp / Frontend
 
-Client-side development with `@stellar/stellar-sdk`, wallet connection, signing, and submitting transactions. Covers both classic Stellar operations and Soroban contract invocation from the browser or Node.js.
+Client-side development with `@stellar/stellar-sdk`, wallet connection, signing, and submitting transactions. Covers both classic Stellar operations and smart contract invocation from the browser or Node.js.
 
 ## When to use this skill
 - Connecting Freighter or other wallets via Stellar Wallets Kit
 - Building, simulating, signing, and submitting transactions
-- Invoking Soroban contracts from a frontend
+- Invoking Stellar smart contracts from a frontend
 - Implementing smart accounts with passkeys
 - Handling network passphrases (Mainnet / Testnet / local)
 
 ## Related skills
-- Writing the contract being invoked → `../soroban/SKILL.md`
+- Writing the contract being invoked → `../smart-contracts/SKILL.md`
 - Issuing assets and managing trustlines → `../assets/SKILL.md`
 - Querying chain state via RPC / Horizon → `../data/SKILL.md`
 - Building paid APIs or agent payment clients → `../agentic-payments/SKILL.md`
@@ -113,9 +113,8 @@ export const rpc = new StellarSdk.rpc.Server(config.rpcUrl);
 import { useState, useEffect, useCallback } from "react";
 import {
   isConnected,
-  isAllowed,
-  setAllowed,
-  getPublicKey,
+  getAddress,
+  requestAccess,
   signTransaction,
   getNetwork,
 } from "@stellar/freighter-api";
@@ -130,34 +129,38 @@ export function useFreighter() {
   }, []);
 
   const checkConnection = async () => {
-    const freighterConnected = await isConnected();
-    if (!freighterConnected) return;
+    const { isConnected: installed, error } = await isConnected();
+    if (error || !installed) return;
 
-    const allowed = await isAllowed();
-    if (allowed) {
-      const pubKey = await getPublicKey();
-      const net = await getNetwork();
-      setConnected(true);
-      setAddress(pubKey);
-      setNetwork(net);
-    }
+    // getAddress returns address: "" until the app has been granted access,
+    // so a non-empty address means we're already authorized.
+    const { address: addr, error: addressError } = await getAddress();
+    if (addressError || !addr) return;
+
+    const { network: net, error: networkError } = await getNetwork();
+    if (networkError) return;
+    setConnected(true);
+    setAddress(addr);
+    setNetwork(net);
   };
 
   const connect = useCallback(async () => {
-    const freighterConnected = await isConnected();
-    if (!freighterConnected) {
+    const { isConnected: installed, error } = await isConnected();
+    if (error || !installed) {
       throw new Error("Freighter extension not installed");
     }
 
-    await setAllowed();
-    const pubKey = await getPublicKey();
-    const net = await getNetwork();
+    // requestAccess prompts the user and returns the granted address.
+    const { address: addr, error: accessError } = await requestAccess();
+    if (accessError) throw new Error(accessError.message);
 
+    const { network: net, error: networkError } = await getNetwork();
+    if (networkError) throw new Error(networkError.message);
     setConnected(true);
-    setAddress(pubKey);
+    setAddress(addr);
     setNetwork(net);
 
-    return pubKey;
+    return addr;
   }, []);
 
   const disconnect = useCallback(() => {
@@ -169,7 +172,11 @@ export function useFreighter() {
   const sign = useCallback(
     async (xdr: string, networkPassphrase: string) => {
       if (!connected) throw new Error("Wallet not connected");
-      return signTransaction(xdr, { networkPassphrase });
+      const { signedTxXdr, error } = await signTransaction(xdr, {
+        networkPassphrase,
+      });
+      if (error) throw new Error(error.message);
+      return signedTxXdr;
     },
     [connected]
   );
@@ -256,7 +263,7 @@ export async function buildPaymentTx(
 }
 ```
 
-### Soroban Contract Invocation
+### Smart Contract Invocation
 ```typescript
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { rpc, config } from "@/lib/stellar";
@@ -335,7 +342,7 @@ export async function submitTransaction(signedXdr: string) {
     config.networkPassphrase
   );
 
-  // For Soroban transactions, use RPC
+  // For smart contract transactions, use RPC
   if (transaction.operations.some(op => op.type === "invokeHostFunction")) {
     return submitSorobanTransaction(signedXdr);
   }
@@ -645,7 +652,7 @@ const client = new RPChannels.ChannelsClient({
   apiKey: "your-api-key",
 });
 
-// Submit a Soroban contract call with fee sponsorship
+// Submit a smart contract call with fee sponsorship
 const response = await client.submitSorobanTransaction({
   func: contractFunc,
   auth: contractAuth,

@@ -1,0 +1,63 @@
+@use "@/styles/utils.scss" as *;
+
+.TermsPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--sds-clr-gray-02);
+  color: var(--sds-clr-gray-12);
+}
+
+.TermsPage__main {
+  max-width: pxToRem(720px);
+  width: 100%;
+  margin: 0 auto;
+  padding: pxToRem(48px) pxToRem(20px) pxToRem(80px);
+
+  h1 {
+    font-family: "Inter", sans-serif;
+    font-size: pxToRem(24px);
+    font-weight: 600;
+    line-height: pxToRem(32px);
+    margin: 0 0 pxToRem(8px);
+    color: var(--sds-clr-gray-12);
+  }
+
+  h2 {
+    font-family: "Inter", sans-serif;
+    font-size: pxToRem(13px);
+    font-weight: 600;
+    line-height: pxToRem(20px);
+    margin: pxToRem(28px) 0 pxToRem(8px);
+    color: var(--sds-clr-gray-12);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  p {
+    font-family: "Inter", sans-serif;
+    font-size: pxToRem(14px);
+    font-weight: 400;
+    line-height: pxToRem(22px);
+    color: var(--sds-clr-gray-11);
+    margin: 0 0 pxToRem(12px);
+  }
+
+  a {
+    color: var(--sds-clr-lilac-11);
+    text-decoration: underline;
+    transition: color var(--sds-anim-transition-default);
+
+    @media (hover: hover) {
+      &:hover {
+        color: var(--sds-clr-lilac-09);
+      }
+    }
+  }
+}
+
+.TermsPage__meta {
+  font-size: pxToRem(12px) !important;
+  color: var(--sds-clr-gray-09) !important;
+  margin-bottom: pxToRem(32px) !important;
+}

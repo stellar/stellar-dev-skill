@@ -16,7 +16,7 @@ Three things bundled because they're all reference material you reach for in the
 - Locating official docs, SDKs, or community resources
 
 ## Related skills
-- Implementing a SEP-41 token interface → `../assets/SKILL.md`, `../soroban/SKILL.md`
+- Implementing a SEP-41 token interface → `../assets/SKILL.md`, `../smart-contracts/SKILL.md`
 - Frontend SEP-7 / SEP-10 flows → `../dapp/SKILL.md`
 - CAPs for cryptography (BLS, BN254, Poseidon) → `../zk-proofs/SKILL.md`
 - x402/MPP protocol context → `../agentic-payments/SKILL.md`
@@ -63,9 +63,9 @@ Treat this file as a routing map, not a source of final governance/status truth.
 - [SEP-0031](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0031.md): Cross-border payment flow
 - [SEP-0012](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0012.md): KYC data exchange
 
-## High-value CAPs for Soroban developers
+## High-value CAPs for smart contract developers
 
-### Soroban foundations
+### Smart contract foundations
 - [CAP-0046](https://github.com/stellar/stellar-protocol/blob/master/core/cap-0046.md): Soroban overview
 - CAP-0046 subdocuments (`cap-0046-*.md`): runtime, lifecycle, host functions, storage, auth, metering
 
@@ -114,10 +114,10 @@ Use the CAP preamble status fields as the source of truth for implementation rea
 - Step 5: Document dependencies on draft standards explicitly.
 
 ## Related docs
-- Contract implementation details: [`../soroban/SKILL.md`](../soroban/SKILL.md)
-- Advanced architecture guidance: [`../soroban/SKILL.md`](../soroban/SKILL.md)
+- Contract implementation details: [`../smart-contracts/SKILL.md`](../smart-contracts/SKILL.md)
+- Advanced architecture guidance: [`../smart-contracts/development.md`](../smart-contracts/development.md)
 - RPC and data access: [`../data/SKILL.md`](../data/SKILL.md)
-- Security considerations: [`../security/SKILL.md`](../security/SKILL.md)
+- Security considerations: [`../smart-contracts/security.md`](../smart-contracts/security.md)
 
 ---
 
@@ -145,7 +145,7 @@ Universal liquidity protocol enabling permissionless lending pools.
 - **Integrations**: Meru, Airtm, Lobstr, DeFindex, Beans
 
 #### Slender
-First non-custodial lending protocol on Soroban with flash loan support.
+First non-custodial lending protocol on Stellar with flash loan support.
 - **Use Case**: Lending, borrowing, flash loans
 - **Features**: Pool-based strategy, sTokens, dTokens, utilization caps
 - **Oracle**: SEP-40 compatible (Reflector)
@@ -153,7 +153,7 @@ First non-custodial lending protocol on Soroban with flash loan support.
 ### DEXs & AMMs
 
 #### Soroswap
-First DEX and aggregator on Stellar/Soroban.
+First DEX and aggregator on Stellar.
 - **Use Case**: Token swaps, liquidity provision, aggregation
 - **Website**: https://soroswap.finance
 - **GitHub (Core)**: https://github.com/soroswap/core
@@ -172,7 +172,7 @@ Governance-driven liquidity layer with AMM functionality.
 - **Docs**: https://docs.aqua.network
 
 #### Phoenix Protocol
-AMM protocol on Soroban.
+AMM protocol on Stellar.
 - **GitHub**: https://github.com/Phoenix-Protocol-Group
 - **Use Case**: Token swaps, liquidity pools
 
@@ -203,7 +203,7 @@ SDF's flagship non-custodial browser wallet.
 - **GitHub**: https://github.com/stellar/freighter
 - **GitHub (Mobile)**: https://github.com/stellar/freighter-mobile
 - **API**: https://github.com/stellar/freighter/tree/master/library/freighter-api
-- **Features**: Soroban support, mobile apps (iOS/Android), Discover browser
+- **Features**: Smart contract support, mobile apps (iOS/Android), Discover browser
 
 #### xBull
 Feature-rich browser wallet with advanced capabilities.
@@ -248,7 +248,7 @@ SDK for integrating multiple Stellar wallets.
 ### Smart Account & Authentication
 
 #### Smart Account Kit (Recommended)
-Comprehensive TypeScript SDK for OpenZeppelin Smart Accounts on Stellar/Soroban.
+Comprehensive TypeScript SDK for OpenZeppelin Smart Accounts on Stellar.
 - **GitHub**: https://github.com/kalepail/smart-account-kit
 - **Use Case**: Production smart wallets with passkeys
 - **Built On**: [OpenZeppelin stellar-contracts](https://github.com/OpenZeppelin/stellar-contracts)
@@ -286,7 +286,7 @@ Stellar-native data indexing platform with Retroshades technology.
 - **Features**: Zephyr VM (serverless Rust execution at ledger close), GraphQL API
 
 #### SubQuery
-Multi-chain indexer supporting Stellar and Soroban.
+Multi-chain indexer supporting Stellar.
 - **Website**: https://subquery.network
 - **Quick Start**: https://subquery.network/doc/indexer/quickstart/quickstart_chains/stellar.html
 - **Features**: Block/transaction/operation/event handlers, multi-threading, 300+ chains
@@ -306,7 +306,7 @@ Cloud execution environment for blockchain data processing.
 ### Contract Libraries
 
 #### OpenZeppelin Stellar Contracts
-Audited smart contract library for Soroban (track latest release tags before pinning versions).
+Audited smart contract library for Stellar (track latest release tags before pinning versions).
 - **GitHub**: https://github.com/OpenZeppelin/stellar-contracts
 - **Docs**: https://developers.stellar.org/docs/tools/openzeppelin-contracts
 - **Contract Wizard**: https://wizard.openzeppelin.com/stellar
@@ -316,30 +316,30 @@ Audited smart contract library for Soroban (track latest release tags before pin
 ### Security Tools
 
 #### Scout Soroban (CoinFabrik)
-Open-source vulnerability detector with 23 detectors for Soroban contracts.
+Open-source vulnerability detector with 23 detectors for Stellar smart contracts.
 - **GitHub**: https://github.com/CoinFabrik/scout-soroban
 - **Install**: `cargo install cargo-scout-audit`
 - **Features**: CLI tool, VSCode extension, SARIF output for CI/CD
 - **Examples**: https://github.com/CoinFabrik/scout-soroban-examples
 
 #### OpenZeppelin Security Detectors SDK
-Framework for building custom security detectors for Soroban.
+Framework for building custom security detectors for Stellar contracts.
 - **GitHub**: https://github.com/OpenZeppelin/soroban-security-detectors-sdk
 - **Detectors**: `auth_missing`, `unchecked_ft_transfer`, improper TTL, contract panics
 - **Extensible**: Load external detector libraries, CI/CD ready
 
 #### Certora Sunbeam Prover
-Formal verification for Soroban — first WASM platform supported by Certora.
+Formal verification for Stellar smart contracts — first WASM platform supported by Certora.
 - **Docs**: https://docs.certora.com/en/latest/docs/sunbeam/index.html
 - **Spec Language**: CVLR (Rust macros) — https://github.com/Certora/cvlr
 - **Reports**: [Blend V1 verification](https://www.certora.com/reports/blend-smart-contract-verification-report)
 - **Verifies at**: WASM bytecode level, eliminating compiler trust assumptions
 
 #### Runtime Verification — Komet
-Formal verification and testing tool designed for Soroban (SCF-funded).
+Formal verification and testing tool designed for Stellar smart contracts (SCF-funded).
 - **Docs**: https://docs.runtimeverification.com/komet
 - **Repo**: https://github.com/runtimeverification/komet
-- **Spec Language**: Rust — property-based tests written in the same language as Soroban contracts
+- **Spec Language**: Rust — property-based tests written in the same language as the contracts
 - **Operates at**: WASM bytecode level via [KWasm semantics](https://github.com/runtimeverification/wasm-semantics) (eliminates compiler trust assumptions)
 - **Features**: Fuzzing, testing, formal verification
 - **Reports**: https://github.com/runtimeverification/publications
@@ -354,7 +354,7 @@ Community security knowledge base (SCF-funded).
 ### CLI & SDKs
 
 #### Stellar CLI
-Official command-line interface for Stellar/Soroban.
+Official command-line interface for Stellar.
 - **Docs**: https://developers.stellar.org/docs/tools/stellar-cli
 - **Features**: Contract build, deploy, invoke, bindings generation
 
@@ -364,7 +364,7 @@ Official JavaScript/TypeScript SDK.
 - **npm**: `@stellar/stellar-sdk`
 
 #### Soroban Rust SDK
-Rust SDK for Soroban contract development.
+Rust SDK for smart contract development.
 - **GitHub**: https://github.com/stellar/rs-soroban-sdk
 - **Crate**: `soroban-sdk`
 
@@ -445,7 +445,7 @@ Official educational smart contract examples.
 #### Soroban Example dApp
 Crowdfunding dApp with Next.js frontend.
 - **GitHub**: https://github.com/stellar/soroban-example-dapp
-- **Learning**: Full-stack Soroban development, Freighter integration
+- **Learning**: Full-stack contract development, Freighter integration
 
 ### Community Examples
 
@@ -471,7 +471,7 @@ Simple NFT using OpenZeppelin.
 ## Cross-Chain
 
 #### Axelar
-Cross-chain gateway and Interchain Token Service for Soroban.
+Cross-chain gateway and Interchain Token Service for Stellar.
 - **GitHub**: https://github.com/axelarnetwork/axelar-amplifier-stellar
 - **Use Case**: Cross-chain messaging, token bridging, interoperability
 - **Status**: Active development (verify latest activity before integrating)
@@ -488,7 +488,7 @@ Omnichain interoperability protocol with Stellar support.
 
 ## Builder Teams & Companies
 
-Notable teams shipping production-level code on Stellar/Soroban. For a broader directory, see [Stellar Ecosystem](https://stellar.org/ecosystem).
+Notable teams shipping production-level code on Stellar. For a broader directory, see [Stellar Ecosystem](https://stellar.org/ecosystem).
 
 | Team | Website | GitHub | X/Twitter | Notable Projects |
 |------|---------|--------|-----------|-----------------|
@@ -562,7 +562,7 @@ Major companies building on Stellar:
 
 ### Stellar Developer Docs
 - [Stellar Documentation](https://developers.stellar.org/docs) - Primary documentation
-- [Build Smart Contracts](https://developers.stellar.org/docs/build/smart-contracts) - Soroban guides
+- [Build Smart Contracts](https://developers.stellar.org/docs/build/smart-contracts) - smart contract guides
 - [Build Apps](https://developers.stellar.org/docs/build/apps) - Client application guides
 - [Tools & SDKs](https://developers.stellar.org/docs/tools) - Available tooling
 - [Networks](https://developers.stellar.org/docs/networks) - Network configuration
@@ -584,7 +584,7 @@ Major companies building on Stellar:
 - [Rust SDK (RPC Client)](https://github.com/stellar/rs-stellar-rpc-client)
 - [SDK Documentation](https://developers.stellar.org/docs/tools/sdks/client-sdks)
 
-### Contract SDK (Soroban Development)
+### Contract SDK (Rust)
 - [Soroban Rust SDK](https://github.com/stellar/rs-soroban-sdk) - `soroban-sdk`
 - [Soroban SDK Docs](https://docs.rs/soroban-sdk/latest/soroban_sdk/) - Rust docs
 
@@ -640,10 +640,10 @@ For DeFi protocols, wallets, oracles, gaming/NFTs, cross-chain bridges, and buil
 
 ## Security
 
-For vulnerability patterns, checklists, and detailed tooling guides, see [Soroban security section](../soroban/SKILL.md).
+For vulnerability patterns, checklists, and detailed tooling guides, see [the smart contract security guide](../smart-contracts/security.md).
 
 ### Bug Bounty Programs
-- [Stellar Bug Bounty (Immunefi)](https://immunefi.com/bug-bounty/stellar/) - Up to $250K, covers core + Soroban
+- [Stellar Bug Bounty (Immunefi)](https://immunefi.com/bug-bounty/stellar/) - Up to $250K, covers core + smart contract stack
 - [OpenZeppelin Stellar Bounty (Immunefi)](https://immunefi.com/bug-bounty/openzeppelin-stellar/) - Up to $25K
 - [HackerOne VDP](https://stellar.org/grants-and-funding/bug-bounty) - Web application vulnerabilities
 
@@ -659,10 +659,10 @@ For vulnerability patterns, checklists, and detailed tooling guides, see [Soroba
 ### Formal Verification
 - [Certora Sunbeam Prover](https://docs.certora.com/en/latest/docs/sunbeam/index.html) - WASM-level formal verification
 - [CVLR Spec Language](https://github.com/Certora/cvlr) - Certora Verification Language for Rust
-- [Runtime Verification Komet](https://runtimeverification.com/blog/introducing-komet-smart-contract-testing-and-verification-tool-for-soroban-created-by-runtime-verification) - Soroban verification tool
+- [Runtime Verification Komet](https://runtimeverification.com/blog/introducing-komet-smart-contract-testing-and-verification-tool-for-soroban-created-by-runtime-verification) - contract verification tool
 
 ### Security Resources
-- [Veridise Security Checklist](https://veridise.com/blog/audit-insights/building-on-stellar-soroban-grab-this-security-checklist-to-avoid-vulnerabilities/) - Soroban-specific
+- [Veridise Security Checklist](https://veridise.com/blog/audit-insights/building-on-stellar-soroban-grab-this-security-checklist-to-avoid-vulnerabilities/) - smart-contract security checklist
 - [Soroban Security Portal](https://sorobansecurity.com) - Community vulnerability database
 - [CoinFabrik Audit Reports](https://www.coinfabrik.com/smart-contract-audit-reports/)
 - [Certora Security Reports](https://github.com/Certora/SecurityReports) - Includes Stellar verifications
@@ -722,7 +722,7 @@ Always verify CAP status and network support before treating any ZK primitive as
 
 ### Data Indexers
 - [Mercury](https://mercurydata.app) - Stellar-native indexer with Retroshades + GraphQL ([docs](https://docs.mercurydata.app))
-- [SubQuery](https://subquery.network) - Multi-chain indexer with Stellar/Soroban support ([quick start](https://subquery.network/doc/indexer/quickstart/quickstart_chains/stellar.html))
+- [SubQuery](https://subquery.network) - Multi-chain indexer with Stellar support ([quick start](https://subquery.network/doc/indexer/quickstart/quickstart_chains/stellar.html))
 - [Goldsky](https://goldsky.com) - Real-time data replication pipelines + subgraphs ([Stellar docs](https://docs.goldsky.com/chains/stellar))
 - [Zephyr VM](https://github.com/xycloo/zephyr-vm) - Serverless Rust execution at ledger close
 
@@ -805,7 +805,7 @@ Always verify CAP status and network support before treating any ZK primitive as
 
 ### Developer Tools
 - [Stella AI Bot](https://developers.stellar.org/docs/tools/developer-tools) - AI assistant for Stellar developer questions
-- [Soroban Playground](https://soropg.com) - Browser-based Soroban IDE ([GitHub](https://github.com/jamesbachini/Soroban-Playground))
+- [Soroban Playground](https://soropg.com) - Browser-based smart contract IDE ([GitHub](https://github.com/jamesbachini/Soroban-Playground))
 
 ### Blog Posts & Guides
 - [Composability on Stellar](https://stellar.org/blog/developers/composability-on-stellar-from-concept-to-reality)
@@ -835,7 +835,7 @@ Always verify CAP status and network support before treating any ZK primitive as
 
 ### Key People to Follow
 
-Builders and contributors actively shaping the Stellar/Soroban ecosystem:
+Builders and contributors actively shaping the Stellar ecosystem:
 
 | Name | GitHub | X/Twitter | Focus |
 |------|--------|-----------|-------|
@@ -856,7 +856,7 @@ Builders and contributors actively shaping the Stellar/Soroban ecosystem:
 | Willem Wyndham | [willemneal](https://github.com/willemneal) | [@willemneal](https://x.com/willemneal) | Aha Labs co-founder, Scaffold Stellar, JS contract client |
 
 ### Builder Teams & Companies
-See Part 2: Stellar Ecosystem above for a table of teams shipping production code on Stellar/Soroban, with GitHub orgs, websites, and Twitter handles.
+See Part 2: Stellar Ecosystem above for a table of teams shipping production code on Stellar, with GitHub orgs, websites, and Twitter handles.
 
 ### Foundation
 - [Stellar Development Foundation](https://stellar.org/foundation)

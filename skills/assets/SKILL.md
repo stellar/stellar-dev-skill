@@ -1,23 +1,23 @@
 ---
 name: assets
-description: Stellar Assets (classic) + trustlines + Stellar Asset Contract (SAC) bridge to Soroban. Covers asset issuance, distribution, authorization flags, clawback, regulated assets, trustline management, and the SAC interop layer that exposes classic assets as Soroban tokens. Use when tokenizing real-world assets, issuing stablecoins, managing trustlines, or bridging classic assets to Soroban contracts.
+description: Stellar Assets (classic) + trustlines + Stellar Asset Contract (SAC) bridge to smart contracts. Covers asset issuance, distribution, authorization flags, clawback, regulated assets, trustline management, and the SAC interop layer that exposes classic assets as SEP-41 contract tokens. Use when tokenizing real-world assets, issuing stablecoins, managing trustlines, or bridging classic assets to smart contracts.
 user-invocable: true
 argument-hint: "[asset task]"
 ---
 
 # Stellar Assets, Trustlines, and SAC
 
-Stellar's native token mechanism: classic asset issuance, trustlines, and the Stellar Asset Contract (SAC) bridge that makes classic assets usable from Soroban. Default to classic assets over custom Soroban tokens unless you need custom logic.
+Stellar's native token mechanism: classic asset issuance, trustlines, and the Stellar Asset Contract (SAC) bridge that makes classic assets usable from smart contracts. Default to classic assets over custom contract tokens unless you need custom logic.
 
 ## When to use this skill
 - Issuing a new asset (stablecoin, security token, utility token)
 - Setting up trustlines from a client or contract
 - Managing issuer flags (auth required, auth revocable, clawback)
-- Bridging a classic asset into a Soroban contract via SAC
+- Bridging a classic asset into a smart contract via SAC
 - Building regulated-asset flows (compliance, KYC, freeze)
 
 ## Related skills
-- Custom token contracts (when classic isn't enough) → `../soroban/SKILL.md`
+- Custom token contracts (when classic isn't enough) → `../smart-contracts/SKILL.md`
 - UI flows for trustline creation and asset display → `../dapp/SKILL.md`
 - Looking up balances and trustline state → `../data/SKILL.md`
 - Token-related SEPs (SEP-41, SEP-7, etc.) → `../standards/SKILL.md`
@@ -30,7 +30,7 @@ Stellar's native token mechanism: classic asset issuance, trustlines, and the St
 Stellar has two token mechanisms:
 
 1. **Stellar Assets (Classic)**: Built-in, highly efficient, full ecosystem support
-2. **Soroban Tokens**: Custom contracts with flexible logic
+2. **Contract tokens (SEP-41)**: Custom contracts with flexible logic
 
 **Recommendation**: Prefer Stellar Assets unless you need custom token logic.
 
@@ -258,7 +258,7 @@ if (trustline) {
 
 ## Stellar Asset Contract (SAC)
 
-SAC provides Soroban interface for Stellar Assets, enabling smart contract interactions.
+SAC provides a smart-contract interface for Stellar Assets, enabling smart contract interactions.
 
 ### Deploy SAC for Existing Asset
 
@@ -266,7 +266,7 @@ SAC provides Soroban interface for Stellar Assets, enabling smart contract inter
 # Get the SAC address for an asset
 stellar contract asset deploy \
   --asset USDC:GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN \
-  --source alice \
+  --source-account alice \
   --network testnet
 ```
 
@@ -280,7 +280,7 @@ const contractId = asset.contractId(StellarSdk.Networks.TESTNET);
 // Returns the deterministic SAC contract address
 ```
 
-### Using SAC in Soroban Contracts
+### Using SAC in Smart Contracts
 
 ```rust
 use soroban_sdk::{token::Client as TokenClient, Address, Env};
@@ -302,7 +302,7 @@ pub fn transfer_asset(
 
 ### SAC vs Custom Token Interface
 
-SAC implements the standard Soroban token interface:
+SAC implements the standard SEP-41 token interface:
 - `balance(id: Address) -> i128`
 - `transfer(from: Address, to: Address, amount: i128)`
 - `approve(from: Address, spender: Address, amount: i128, expiration_ledger: u32)`
@@ -320,15 +320,23 @@ SAC implements the standard Soroban token interface:
 - Performance critical (classic operations are cheaper)
 - DEX integration via order book
 
-### Use Soroban Custom Tokens When:
+### Use Custom Contract Tokens When:
 - Complex transfer logic (royalties, fees, restrictions)
 - Custom authorization schemes
 - Non-standard token behaviors
 - Integration with custom DeFi contracts
 - NFTs or semi-fungible tokens
 
+> Reach for a fully custom token as a last resort. Many of the cases above
+> (royalties, fees, transfer restrictions) can be built with a regular
+> issued Stellar asset plus a thin "SAC admin" contract that drives the
+> SAC's `mint`, `burn`, and `clawback` functions. That keeps the ecosystem
+> compatibility of a normal asset (DEX, anchors, wallets, trustlines) while
+> still layering on custom logic. Prefer a custom contract token only when
+> you need token behavior the SAC genuinely cannot express.
+
 ### Use SAC When:
-- Need Stellar Asset in Soroban contract
+- Need a Stellar asset inside a smart contract
 - Building DeFi protocols with existing assets
 - Bridge between classic and smart contract operations
 
@@ -417,11 +425,11 @@ For fiat on/off ramps:
 
 ### SEP-0045 (Web Auth for Contract Accounts)
 
-Extends SEP-10 to support Soroban contract accounts (`C...` addresses) for web authentication. Required for smart wallet / passkey-based anchor integrations. See [SEP-0045](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0045.md).
+Extends SEP-10 to support contract accounts (`C...` addresses) for web authentication. Required for smart wallet / passkey-based anchor integrations. See [SEP-0045](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0045.md).
 
 ### SEP-0050 (Non-Fungible Tokens)
 
-Standard contract interface for NFTs on Soroban. Reference implementations available in [OpenZeppelin Stellar Contracts](https://github.com/OpenZeppelin/stellar-contracts) with Base, Consecutive, and Enumerable variants. See [SEP-0050](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0050.md).
+Standard contract interface for NFTs on Stellar. Reference implementations available in [OpenZeppelin Stellar Contracts](https://github.com/OpenZeppelin/stellar-contracts) with Base, Consecutive, and Enumerable variants. See [SEP-0050](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0050.md).
 
 ## Best Practices
 

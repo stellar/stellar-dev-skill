@@ -1,0 +1,72 @@
+name: Release skill archives
+
+# On a version tag (e.g. v1.2.0), bundle every multi-file skill as a
+# `<slug>.tar.gz` and attach it to the GitHub Release as an asset. The
+# tarballs are NOT committed to the repo — they exist only as release
+# assets, so the source tree stays clean. Their stable download URLs and
+# SHA-256 digests feed the Agent Skills discovery index (RFC v0.2.0),
+# published from stellar-docs (PR #2440).
+#
+# A skill is bundled iff its directory holds files beyond SKILL.md: the
+# RFC requires multi-file skills be distributed as `type: archive`, while
+# single-file skills are referenced directly as `type: skill-md`.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)build archives for, e.g. v1.2.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  archives:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref_name }}
+
+      - name: Bundle multi-file skills and compute digests
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          : > dist/skills-digests.txt
+          for d in skills/*/; do
+            slug=$(basename "$d")
+            [ -f "${d}SKILL.md" ] || continue
+            companions=$(find "$d" -type f ! -name SKILL.md | wc -l | tr -d ' ')
+            if [ "$companions" -gt 0 ]; then
+              # SKILL.md at the archive root, no wrapper directory (RFC requirement).
+              # Reproducible bytes (fixed mtime/ownership, sorted entries, gzip -n)
+              # so re-runs are idempotent and the digest is verifiable from the tag.
+              tar --sort=name --format=gnu --mtime='@0' \
+                  --owner=0 --group=0 --numeric-owner \
+                  -C "$d" -cf - . | gzip -n -9 > "dist/$slug.tar.gz"
+              digest=$(sha256sum "dist/$slug.tar.gz" | awk '{print $1}')
+              printf '%s\tarchive\tsha256:%s\n' "$slug" "$digest" >> dist/skills-digests.txt
+            else
+              digest=$(sha256sum "${d}SKILL.md" | awk '{print $1}')
+              printf '%s\tskill-md\tsha256:%s\n' "$slug" "$digest" >> dist/skills-digests.txt
+            fi
+          done
+          echo "Per-skill artifact digests:"
+          cat dist/skills-digests.txt
+
+      - name: Attach archives + digest manifest to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          gh release view "$TAG" >/dev/null 2>&1 || \
+            gh release create "$TAG" --title "$TAG" \
+              --notes "Skill archives for Agent Skills discovery (RFC v0.2.0). Multi-file skills are bundled as <slug>.tar.gz; skills-digests.txt lists the sha256 of each skill artifact (tarball for archives, SKILL.md for single-file skills)."
+          # --clobber so re-runs replace assets in place.
+          archives=$(ls dist/*.tar.gz 2>/dev/null || true)
+          gh release upload "$TAG" $archives dist/skills-digests.txt --clobber

@@ -21,7 +21,7 @@ export const INSTALLERS = [
     description: "Install using the plugin marketplace:",
     commands: [
       "/plugin marketplace add stellar/stellar-dev-skill",
-      "/plugin install stellar-dev@stellar-dev-skill",
+      "/plugin install stellar-dev@stellar-dev",
     ],
   },
   {
@@ -29,6 +29,13 @@ export const INSTALLERS = [
     description:
       "Install from the Cursor Marketplace, or add manually via Settings → Rules → Add Rule → Remote Rule (GitHub) with this slug:",
     commands: ["stellar/stellar-dev-skill"],
+  },
+  {
+    name: "OpenAI Codex",
+    description: "Clone the repo into your Codex skills directory:",
+    commands: [
+      "git clone https://github.com/stellar/stellar-dev-skill ~/.codex/skills/stellar-dev-skill",
+    ],
   },
   {
     name: "npx skills",

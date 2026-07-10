@@ -45,7 +45,7 @@ const firstH1 = (body) => {
 };
 
 /**
- * @param {string} source - upstream path like "skills/soroban/SKILL.md"
+ * @param {string} source - upstream path like "skills/smart-contracts/SKILL.md"
  * @returns {SkillMeta}
  */
 export const readSkillMeta = (source) => {
