@@ -753,6 +753,24 @@ Always verify CAP status and network support before treating any ZK primitive as
 - [NOWNodes](https://nownodes.io) - All networks incl. Futurenet
 - [GetBlock](https://getblock.io) - Testnet & Mainnet
 
+#### Public mainnet RPC endpoints
+
+SDF provides no public **mainnet** RPC, and the Stellar CLI's built-in `mainnet` network has **no RPC URL** — nothing works against mainnet until you register an endpoint. No-signup public endpoints (each verified with a `getHealth` probe; most keep ~1–7 days of history — check `ledgerRetentionWindow` in the `getHealth` response):
+
+| Endpoint | Operator |
+|----------|----------|
+| `https://mainnet.sorobanrpc.com` | Community-run public endpoint |
+| `https://rpc.ankr.com/stellar_soroban` | Ankr (public tier) |
+| `https://soroban-rpc.creit.tech` | Creit Tech (xBull) |
+
+```bash
+stellar network add mainnet \
+  --rpc-url https://mainnet.sorobanrpc.com \
+  --network-passphrase "Public Global Stellar Network ; September 2015"
+```
+
+Public endpoints are rate-limited, best-effort, and may drop low-fee Soroban transactions under load (retry with a higher `--inclusion-fee`) — use a provider above for production.
+
 ## Protocol & Governance
 
 ### Stellar Protocol
