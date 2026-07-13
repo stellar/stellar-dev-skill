@@ -82,7 +82,9 @@ The pool pulls the asset from `spender` via authorization; the CLI collects and 
 
 ## Borrow
 
-You can only borrow up to your collateral's borrowing power (collateral value × collateral factor); exceeding it fails simulation with contract error `#1205`. Borrow sends the asset to `to` — if the asset is a classic-asset SAC (e.g. USDC), `to` needs a **trustline** first (`stellar tx new change-trust --line <CODE:ISSUER>`; get the `CODE:ISSUER` string from the token's `name()`):
+You can only borrow up to your collateral's borrowing power (collateral value × collateral factor); exceeding it fails simulation with contract error `#1205` (`InvalidHf`). Borrow sends the asset to `to` — if the asset is a classic-asset SAC (e.g. USDC), `to` needs a **trustline** first (`stellar tx new change-trust --line <CODE:ISSUER>`; get the `CODE:ISSUER` string from the token's `name()`).
+
+There is also a **minimum position size**: `PoolConfig.min_collateral` (read it with [`get_config`](#reading-pool-state)) is the smallest **c_factor-adjusted** collateral value — *not* your raw collateral value — that may back a borrow position, denominated in the oracle's base asset at the oracle's `decimals()`. Falling below it fails with `#1224` (`MinCollateralNotMet`). The active mainnet reward-zone pools currently set a $5 floor; with XLM's `c_factor` at 0.75 that means roughly $6.70 worth of raw XLM collateral (a few tens of XLM) before you can borrow anything at all:
 
 ```bash
 stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=yes \
@@ -93,7 +95,7 @@ stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=
 
 ## Repay
 
-Repay pulls the asset from `spender`. To fully repay, pass an `amount` larger than the debt — the pool pulls the full amount and refunds the excess to `spender` in the same transaction, so `spender` needs a balance covering the full amount you pass:
+Repay pulls the asset from `spender`:
 
 ```bash
 stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=yes \
@@ -101,6 +103,20 @@ stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=
   --from "$ME" --spender "$ME" --to "$ME" \
   --requests '[{"request_type":5,"address":"'"$ASSET"'","amount":"500000000"}]'
 ```
+
+### Fully closing a loan
+
+Your debt is always **slightly more than what you borrowed** — dTokens round up at borrow, so debt exceeds the proceeds from the very same ledger (measured: 8 stroops over within minutes). That makes the two "obvious" full-repay moves both wrong when all you hold is the loan proceeds:
+
+- Pass more than your balance → the pool pulls the **full amount before refunding**, and the transfer fails with `#10` (`BalanceError`).
+- Pass exactly your balance → dust debt survives, and later blocks withdraw-all with `#1205` (any withdraw that leaves debt must stay healthy).
+
+The working recipe:
+
+1. **Get a small buffer (~5–10%) of the exact borrowed asset** — same `CODE:ISSUER`, check with `name()`. From XLM, use a DEX path payment: `stellar tx new path-payment-strict-receive` (see the [wallet skill](../../wallet/SKILL.md)).
+2. **Repay with any `amount` between your debt and your balance** — over the debt so nothing survives, within your balance so the pull succeeds. The pool pulls only what's owed and refunds the excess to `spender` exactly, in the same transaction.
+
+After the repay, `get_positions` should show no liability for the reserve — then withdraw-all works.
 
 ## Withdraw collateral
 
@@ -111,7 +127,7 @@ stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=
   --requests '[{"request_type":3,"address":"'"$ASSET"'","amount":"1000000000"}]'
 ```
 
-Withdrawal is blocked if it would drop your position below the required collateralization while you hold debt. Passing an amount larger than your balance withdraws the full balance — so to fully exit a reserve, pass an oversized amount.
+Withdrawal is blocked (`#1205`) if it would drop your position below the required collateralization while you hold debt — including **dust debt** left by an inexact repay (see [fully closing a loan](#fully-closing-a-loan)). Passing an amount larger than your balance withdraws the full balance — so to fully exit a reserve, pass an oversized amount.
 
 ## Batching requests atomically
 
@@ -132,44 +148,66 @@ stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=
 
 ## Discovering pools
 
-Pools are created by the Pool Factory; enumerate them over RPC. The factory records deployed pools — inspect its interface for the exact getter, then read the list:
+**Enumerate pools with `reward_zone()` on the Backstop.** It returns the list of active, emission-eligible pool addresses — which is what you want for supplying, borrowing, or yield analysis (`BACKSTOP` and `NETWORK` come from [network setup](SKILL.md#network-setup)):
 
 ```bash
-POOL_FACTORY=CDSYOAVXFY7SM5S64IZPPPYB4GVGGLMQVFREPSQQEZVIWXX5R23G4QSU   # mainnet (v2)
-stellar contract info interface --id "$POOL_FACTORY" --network "$NETWORK"
-
-# The v2 factory exposes only deploy(...) and is_pool(pool_address) -> bool — no list getter.
-stellar contract invoke --id "$POOL_FACTORY" --source "$ME" --network "$NETWORK" -- is_pool --pool_address <POOL>
+stellar contract invoke --id "$BACKSTOP" --source "$ME" --network "$NETWORK" --send=no -- reward_zone
 ```
 
-Since there is no list getter, enumerate pool-creation events from RPC (`getEvents` on the factory contract) — still RPC-only, no indexer. See the [data skill](../../data/SKILL.md) for the `getEvents` pattern. The [backstop reward zone](backstop.md#reading-backstop-state) is also a practical source of active pool addresses.
+On testnet this currently includes the blend-utils reference pool, ready to paste:
+
+```bash
+POOL=CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF   # testnet (v2) "TestnetV2" pool
+```
+
+To check whether an arbitrary address is a genuine v2 pool (the factory exposes only `deploy(...)` and `is_pool` — no list getter):
+
+```bash
+stellar contract invoke --id "$POOL_FACTORY" --source "$ME" --network "$NETWORK" --send=no -- is_pool --pool_address <POOL>
+```
+
+Don't try to enumerate pools from the factory's deploy events: RPC keeps only ~7 days of events, and the deploys are long past — `getEvents` returns nothing. Pools outside the reward zone can only be found by address (from the user, [Blend's UI](https://mainnet.blend.capital), or an indexer).
 
 ## Reading pool state
 
-All reads simulate; nothing is signed or submitted, but the CLI still requires `--source-account` (any funded key) to build the simulation.
+All reads simulate — pass `--send=no` so they stay reads even against archived state (see [reading Blend state](SKILL.md#reading-blend-state-over-rpc)). The CLI still requires `--source-account` (any funded key) to build the simulation.
 
 ```bash
-# Pool config: oracle, backstop take rate, status, max positions
-stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" -- get_config
+# Pool config: oracle, backstop take rate, status, max positions, min collateral
+stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=no -- get_config
 
 # Reserve list: the asset addresses this pool supports
-stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" -- get_reserve_list
+stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=no -- get_reserve_list
 
 # One reserve: Reserve { asset, config: ReserveConfig, data: ReserveData, scalar }
-stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" -- get_reserve --asset "$ASSET"
+stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=no -- get_reserve --asset "$ASSET"
 
 # A user's positions: collateral / liabilities / supply, keyed by reserve index
-stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" -- get_positions --address "$(stellar keys address "$ME")"
+stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=no -- get_positions --address "$(stellar keys address "$ME")"
 ```
 
 Key fields you will read:
 
-- **`PoolConfig`** — `oracle` (price source), `bstop_rate` (fraction of interest routed to the backstop), `status`, `max_positions`, `min_collateral`.
-- **`ReserveConfig`** — `decimals`, `c_factor` (collateral factor), `l_factor` (liability factor), the kinked interest-rate curve (`r_base`, `r_one`, `r_two`, `r_three`, `util`, `max_util`, `reactivity`), `supply_cap`, `enabled`, `index`.
-- **`ReserveData`** — `b_rate` / `d_rate` (supply/borrow indexes), `b_supply` / `d_supply` (total b/d tokens), `ir_mod`, `backstop_credit`, `last_time`.
+- **`PoolConfig`** — `oracle` (price source), `bstop_rate` (fraction of interest routed to the backstop, 7-decimal fixed point), `status`, `max_positions`, `min_collateral` (minimum c_factor-adjusted collateral value to hold a borrow position, in the oracle's base asset at the oracle's `decimals()` — see [Borrow](#borrow)).
+- **`PoolConfig.status`** — `0` Admin-Active, `1` Active, `2` Admin-On-Ice, `3` On-Ice, `4` Admin-Frozen, `5` Frozen, `6` Setup. Status > 1 disables borrowing; status > 3 also disables supplying (violations fail with `#1206`).
+- **`ReserveConfig`** — `decimals`, `c_factor` (collateral factor), `l_factor` (liability factor), the kinked interest-rate curve (`r_base`, `r_one`, `r_two`, `r_three`, `util`, `max_util`, `reactivity` — all 7-decimal), `supply_cap`, `enabled`, `index`.
+- **`ReserveData`** — `b_rate` / `d_rate` (supply/borrow indexes), `b_supply` / `d_supply` (total b/d tokens), `ir_mod` (rate modifier, **7-decimal** fixed point, clamped to [0.1, 10] — i.e. `1000000`–`100000000`), `backstop_credit`, `last_time`.
 - **`Positions`** — `collateral`, `liabilities`, `supply` maps keyed by reserve index.
 
 Convert shares to underlying with the rate index: underlying supply = `bToken_balance × b_rate / 1e12`; underlying debt = `dToken_balance × d_rate / 1e12`. `b_rate` / `d_rate` are 12-decimal fixed-point (`SCALAR_12`); the result is in the asset's native decimals.
+
+### The borrow rate
+
+The current borrow APR is computable from `ReserveConfig` + `ReserveData` alone (all inputs and the result are 7-decimal fixed point; `util` here is current utilization, `target` is `ReserveConfig.util`):
+
+```
+util ≤ target:          rate = (r_base + r_one × util/target) × ir_mod
+target < util ≤ 0.95:   rate = (r_base + r_one + r_two × (util − target)/(0.95 − target)) × ir_mod
+util > 0.95:            rate = (r_base + r_one + r_two) × ir_mod
+                               + r_three × (util − 0.95)/0.05        # r_three leg is NOT scaled by ir_mod
+```
+
+with `utilization = (d_supply × d_rate) / (b_supply × b_rate)`. This is `calc_accrual` in `pool/src/pool/interest.rs` of [`blend-contracts-v2`](https://github.com/blend-capital/blend-contracts-v2), transcribed; check the source if in doubt.
 
 ## Emissions: check, project, claim
 
@@ -184,15 +222,17 @@ Suppliers and borrowers accrue BLND emissions per reserve **side**. Each reserve
 
 ```bash
 # The stream itself: eps (BLND/sec — 14 total decimals: BLND's 7 + a 7-decimal scalar), index, expiration
-stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" \
+stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=no \
   -- get_reserve_emissions --reserve_token_index 1
 
 # Your accrued-but-unclaimed BLND on that stream: UserEmissionData { accrued, index }
-stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" \
+stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=no \
   -- get_user_emissions --user "$(stellar keys address "$ME")" --reserve_token_index 1
 ```
 
-`accrued` only updates when your position is touched, so BLND earned since your last interaction isn't in it. For the exact claimable total, **simulate the claim**: run it with `--send=no` and read the returned amount without submitting anything:
+`accrued` only updates when your position is touched, so BLND earned since your last interaction isn't in it. For the exact claimable total, **simulate the claim**: run it with `--send=no` and read the returned amount without submitting anything.
+
+> **Prerequisite:** `to` needs a **BLND trustline** before any claim — even this simulated preview reverts with `#13` (`TrustlineMissingError`) without one. See [prerequisites](SKILL.md#prerequisites) for deriving BLND and adding the trustline.
 
 ```bash
 stellar contract invoke --id "$POOL" --source "$ME" --network "$NETWORK" --send=no \
@@ -224,7 +264,7 @@ utilization  = (d_supply × d_rate) / (b_supply × b_rate)      # underlying bor
 supply_rate  ≈ borrow_rate × utilization × (1 − bstop_rate)   # bstop_rate is 7-decimal fixed point
 ```
 
-`borrow_rate` comes from the reserve's kinked curve — `r_base` plus the `r_one`/`r_two`/`r_three` slopes around target `util`, scaled by the live `ir_mod` modifier (see `pool/src/pool/interest.rs` in [`blend-contracts-v2`](https://github.com/blend-capital/blend-contracts-v2)). Projected yearly interest ≈ `your_supplied_underlying × supply_rate` (or `your_debt × borrow_rate` on the cost side).
+`borrow_rate` is computed from `ReserveConfig` + `ReserveData` with the formula in [the borrow rate](#the-borrow-rate). Projected yearly interest ≈ `your_supplied_underlying × supply_rate` (or `your_debt × borrow_rate` on the cost side).
 
 **2. BLND emissions.** Your share of a stream is proportional to your b/dTokens over the side's total:
 
@@ -240,14 +280,14 @@ To express BLND earnings in USD, read the BLND price from the Comet LP (pool ora
 
 ```bash
 # BLND price in USDC — 7-decimal fixed point, e.g. "3008070" = 0.30 USDC per BLND
-stellar contract invoke --id "$LP_TOKEN" --source "$ME" --network "$NETWORK" \
+stellar contract invoke --id "$LP_TOKEN" --source "$ME" --network "$NETWORK" --send=no \
   -- get_spot_price --token_in "$USDC" --token_out "$BLND"
 ```
 
 To price a reserve asset in USD (the interest side), use the pool's oracle (`PoolConfig.oracle` from `get_config`, SEP-40). The `Asset` argument is an enum — pass it as JSON:
 
 ```bash
-# Returns PriceData { price, timestamp }; scale price by the oracle's decimals() (typically 7)
-stellar contract invoke --id "$ORACLE" --source "$ME" --network "$NETWORK" \
+# Returns PriceData { price, timestamp }; scale price by the oracle's decimals() (typically 7 or 14)
+stellar contract invoke --id "$ORACLE" --source "$ME" --network "$NETWORK" --send=no \
   -- lastprice --asset '{"Stellar":"'"$ASSET"'"}'
 ```

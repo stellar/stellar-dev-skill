@@ -1,6 +1,6 @@
 ---
 name: defi
-description: Interact with Stellar/Soroban DeFi protocols from the CLI: discover pools and markets, read live protocol state over RPC, and compose the transactions that act on them (lend, borrow, provide backstop/liquidity). Per-protocol playbooks map each protocol's operations to concrete `contract invoke` / `stellar token` calls. Use when acting on a Soroban DeFi protocol rather than moving value between accounts.
+description: Interact with Stellar/Soroban DeFi protocols from the CLI: discover pools and markets, read live protocol state over RPC, and compose the transactions that act on them (lend, borrow, provide backstop/liquidity). Per-protocol playbooks map each protocol's operations to concrete `contract invoke` calls. Use when acting on a Soroban DeFi protocol rather than moving value between accounts.
 user-invocable: true
 argument-hint: "[defi task]"
 ---
@@ -9,7 +9,7 @@ argument-hint: "[defi task]"
 
 The [wallet skill](../wallet/SKILL.md) covers wallet **primitives** — moving value, trustlines, transaction mechanics. It deliberately does *not* teach how any specific Soroban protocol works.
 
-These DeFi playbooks pick up where the wallet skill stops. Each one maps a protocol's operations to concrete `contract invoke` / `stellar token` calls, carries the current contract references, and shows how to read the protocol's live state over RPC — so you act on the protocol instead of reverse-engineering it from raw ledger data.
+These DeFi playbooks pick up where the wallet skill stops. Each one maps a protocol's operations to concrete `contract invoke` calls, carries the current contract references, and shows how to read the protocol's live state over RPC — so you act on the protocol instead of reverse-engineering it from raw ledger data.
 
 The division of labor is constant:
 
