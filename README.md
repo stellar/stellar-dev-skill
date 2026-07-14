@@ -20,6 +20,18 @@ This skill provides AI assistants with deep knowledge of the current Stellar dev
 - **Security**: Smart contract security patterns, audit checklists
 - **Ecosystem**: DeFi protocols, developer tools, community projects
 
+## Raven — live MCP server
+
+These skills give your agent durable Stellar context, baked in. [Raven](https://raven.stellar.buzz) is a complementary **remote MCP server (Model Context Protocol)** for on-demand lookups: connect an agent and it searches Stellar docs and live ecosystem data, cross-referenced into single answers. Its catalog also includes these skills, so Raven is a live delivery gateway for them. Use both — skills for durable best practices, Raven for current lookups.
+
+Raven is open source at [kalepail/stellar-raven](https://github.com/kalepail/stellar-raven). Connect it in Claude Code:
+
+```bash
+claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"
+```
+
+You can also try Raven in the browser at the [playground](https://raven.stellar.buzz/playground), a hosted chat UI for asking Raven questions (sign-in required).
+
 ## Installing
 
 These skills work with any agent that supports the [Agent Skills](https://agentskills.io) standard.

@@ -125,7 +125,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "Ecosystem",
     title: "SEPs, CAPs & Ecosystem",
     description:
-      "Pick the right SEP or CAP for your feature, with ecosystem projects and curated reference links.",
+      "Pick the right SEP or CAP for your feature, with ecosystem projects, curated reference links, and MCPs.",
   },
 ] as const;
 
