@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleTagManager, GoogleAnalytics } from "@next/third-parties/google";
 
 import "@stellar/design-system/build/styles.min.css";
 import "@/styles/globals.scss";
@@ -74,7 +74,12 @@ export default function RootLayout({
     <html lang="en">
       <body className="sds-theme-light" data-sds-theme="sds-theme-light">
         <div id="root">{children}</div>
-        {GA_TRACKING_ENABLED && <GoogleTagManager gtmId="GTM-KCNDDL3" />}
+        {GA_TRACKING_ENABLED && (
+          <>
+            <GoogleTagManager gtmId="GTM-KPV99TKH" />
+            <GoogleAnalytics gaId="G-6PQ8C6FJSR" />
+          </>
+        )}
       </body>
     </html>
   );
