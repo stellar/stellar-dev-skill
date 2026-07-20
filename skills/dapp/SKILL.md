@@ -46,8 +46,8 @@ Client-side development with `@stellar/stellar-sdk`, wallet connection, signing,
 
 ```bash
 npm install @stellar/stellar-sdk @stellar/freighter-api
-# Or for multi-wallet support:
-npm install @stellar/stellar-sdk @creit.tech/stellar-wallets-kit
+# Or for multi-wallet support — Wallets Kit v2 is distributed on JSR, not npm:
+npx jsr add @creit-tech/stellar-wallets-kit
 ```
 
 > **Sourcing:** SDK mechanics below (init, transaction building, contract invocation, submission, data fetching, error handling) track the official [JS SDK docs](https://stellar.github.io/js-stellar-sdk/) (which also publish [`llms.txt`](https://stellar.github.io/js-stellar-sdk/llms.txt) / [`llms-full.txt`](https://stellar.github.io/js-stellar-sdk/llms-full.txt) bundles for agents). Wallet integrations (Freighter, Stellar Wallets Kit), passkey smart accounts, and the OpenZeppelin relayer are separate packages, not part of the JS SDK — verify those against their own upstream docs.
@@ -197,49 +197,47 @@ export function useFreighter() {
 ```
 
 ### Stellar Wallets Kit (Multi-Wallet)
+
 ```typescript
 // hooks/useStellarWallet.ts
 import { useState, useCallback } from "react";
-import {
-  StellarWalletsKit,
-  WalletNetwork,
-  allowAllModules,
-  FREIGHTER_ID,
-  LOBSTR_ID,
-  XBULL_ID,
-} from "@creit.tech/stellar-wallets-kit";
+import { StellarWalletsKit, Networks } from "@creit-tech/stellar-wallets-kit";
+import { defaultModules } from "@creit-tech/stellar-wallets-kit/modules/utils";
 
-const kit = new StellarWalletsKit({
-  network: WalletNetwork.TESTNET,
-  selectedWalletId: FREIGHTER_ID,
-  modules: allowAllModules(),
+// v2 is a static singleton: init once at module load, then call static methods —
+// there is no instance to construct or pass around.
+// defaultModules() loads every wallet that needs no extra setup; modules with
+// prerequisites (WalletConnect, Ledger, Trezor) must be imported and added explicitly.
+StellarWalletsKit.init({
+  modules: defaultModules(),
+  network: Networks.TESTNET,
 });
 
 export function useStellarWallet() {
   const [address, setAddress] = useState<string | null>(null);
 
   const connect = useCallback(async () => {
-    await kit.openModal({
-      onWalletSelected: async (option) => {
-        kit.setWallet(option.id);
-        const { address } = await kit.getAddress();
-        setAddress(address);
-      },
-    });
+    // authModal() opens the wallet picker, sets the chosen module active,
+    // and returns the address — one call replaces v1's openModal callback dance.
+    const { address } = await StellarWalletsKit.authModal();
+    setAddress(address);
   }, []);
 
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback(async () => {
+    await StellarWalletsKit.disconnect();
     setAddress(null);
   }, []);
 
   const sign = useCallback(async (xdr: string) => {
-    const { signedTxXdr } = await kit.signTransaction(xdr);
+    const { signedTxXdr } = await StellarWalletsKit.signTransaction(xdr);
     return signedTxXdr;
   }, []);
 
-  return { address, connect, disconnect, sign, kit };
+  return { address, connect, disconnect, sign };
 }
 ```
+
+> **Migrating from v1?** (noted July 2026) v1 lived on npm under the dotted scope `@creit.tech/stellar-wallets-kit`, with `new StellarWalletsKit({...})`, `allowAllModules()`, and `openModal({ onWalletSelected })`. v2 moved to JSR under `@creit-tech/stellar-wallets-kit`, made the kit fully static, replaced `allowAllModules()` with `defaultModules()`, and folded wallet selection + address fetch into `authModal()`. npm parity is maintained for now, but the maintainers say npm updates will eventually stop — install from JSR. Pre-selecting a wallet (`setWallet(FREIGHTER_ID)`) still works; the ID constants now live in per-wallet module subpaths like `@creit-tech/stellar-wallets-kit/modules/freighter`.
 
 ## Transaction Building
 
