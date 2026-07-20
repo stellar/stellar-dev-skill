@@ -173,4 +173,12 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://github.com/kalepail/skills/blob/main/skills/agent-browser-webauthn/SKILL.md",
   },
+  {
+    title: "Anchors",
+    description:
+      "Integrate with or build Stellar anchors (fiat on/off-ramps, deposits/withdrawals, KYC). Covers core SEP flows (1/6/10/12/24/31/38) and common integration pitfalls.",
+    pathLabel: "CheesecakeLabs/stellar-anchor-skill",
+    copyValue:
+      "https://github.com/CheesecakeLabs/stellar-anchor-skill/blob/main/SKILL.md",
+  },
 ] as const;
