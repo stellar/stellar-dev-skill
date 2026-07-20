@@ -118,7 +118,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "ZK",
     title: "ZK Proofs",
     description:
-      "Verify Groth16 proofs on-chain via BLS12-381, with Circom, Noir, and RISC Zero toolchain walkthroughs.",
+      "Verify Groth16 and UltraHonk proofs on-chain via BLS12-381 and BN254, with Circom, Noir, and RISC Zero toolchain walkthroughs.",
   },
   {
     source: "skills/standards/SKILL.md",
