@@ -1,6 +1,6 @@
 ---
 name: agentic-payments
-description: Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs via OZ Channels facilitator, fee-sponsored clients) and MPP (Machine Payments Protocol) in both Charge mode (per-request SAC) and Channel mode (off-chain commits, high-frequency). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
+description: Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs via OZ Channels facilitator, fee-sponsored clients) and MPP (Machine Payments Protocol) in both Charge mode (per-request SAC) and Session mode (channel-backed off-chain commits, high-frequency; formerly called Channel mode). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
 user-invocable: true
 argument-hint: "[payment task]"
 ---
@@ -11,7 +11,7 @@ Two complementary protocols for AI-agent and machine-to-machine payments on Stel
 
 ## Quick decision
 
-| | x402 | MPP Charge | MPP Channel |
+| | x402 | MPP Charge | MPP Session |
 |--|------|------------|-------------|
 | Per-request on-chain tx? | Yes (via facilitator) | Yes (SAC) | No (off-chain commits) |
 | Needs facilitator? | Yes (OZ Channels) | No | No |
@@ -22,7 +22,7 @@ Two complementary protocols for AI-agent and machine-to-machine payments on Stel
 - Selling an API, want zero-XLM clients → see **x402 Seller** below
 - Calling an x402 API from an agent → see **x402 Buyer** below
 - Selling an API, no facilitator dependency → see **MPP Charge** below
-- Agent making many requests per session → see **MPP Channel** below
+- Agent making many requests per session → see **MPP Session** below
 - Unsure → x402 (lowest friction to get started)
 
 All protocols use USDC (SEP-41 SAC) by default; `stellar:testnet` / `stellar:pubnet` CAIP-2 network IDs.
@@ -369,13 +369,13 @@ Always test on testnet first. To switch a working setup to mainnet, change only 
 
 ---
 
-# Part 2: MPP — Machine Payments Protocol (Charge + Channel)
+# Part 2: MPP — Machine Payments Protocol (Charge + Session)
 
 
 ## When to use MPP
 MPP is the right choice when:
 - You want **no facilitator dependency** — payments settle directly on Stellar via SAC transfers
-- Your AI agent makes **many requests per session** — use channel mode to pay off-chain and settle once
+- Your AI agent makes **many requests per session** — use Session mode (a payment channel under the hood) to pay off-chain and settle once
 - You're building a Stellar-native payment stack without relying on third-party infrastructure
 
 Two modes:
@@ -383,7 +383,7 @@ Two modes:
 | Mode | On-chain txs | Best for |
 |------|-------------|----------|
 | **Charge** | One per request | Per-request payments, no pre-funding required |
-| **Channel** | One deposit + one close | High-frequency agents (100s of requests/session) |
+| **Session** | One deposit + one close | High-frequency agents (100s of requests/session) |
 
 If you need zero-XLM clients or the simplest possible setup, use x402 (Part 1 above) instead.
 
@@ -392,16 +392,19 @@ If you need zero-XLM clients or the simplest possible setup, use x402 (Part 1 ab
 Each request triggers a SAC token transfer settled on-chain. No facilitator. Server can optionally sponsor fees so clients don't need XLM.
 
 ```bash
-npm install express @stellar/mpp mppx @stellar/stellar-sdk dotenv
+npm install express@^5 @stellar/mpp mppx @stellar/stellar-sdk@^15 dotenv
 npm pkg set type=module
 ```
+
+> **Version alignment matters:** `@stellar/mpp@0.7.x` pins `@stellar/stellar-sdk@^15.1.0` (installing alongside SDK 13/14 fails with `ERESOLVE`), and `mppx` expects `express@>=5`.
 
 **Server:**
 
 ```js
 // charge-server.js
 import express from "express";
-import { Mppx } from "mppx";
+import { Mppx } from "mppx/express";
+import { Store } from "mppx/server";
 import * as stellar from "@stellar/mpp/charge/server";
 import * as StellarSdk from "@stellar/stellar-sdk";
 
@@ -415,6 +418,7 @@ const mppx = Mppx.create({
       recipient: RECIPIENT,
       currency: USDC_SAC_TESTNET,
       network: "stellar:testnet",
+      store: Store.memory(), // required in charge mode; dev only — use a persistent store in production
       // optional: server pays network fees so clients don't need XLM
       feePayer: process.env.FEE_PAYER_SECRET
         ? { envelopeSigner: StellarSdk.Keypair.fromSecret(process.env.FEE_PAYER_SECRET) }
@@ -426,12 +430,15 @@ const mppx = Mppx.create({
 const app = express();
 app.use(express.json());
 
-// mppx middleware: returns 402 with challenge, then validates payment on retry
-app.use(mppx.middleware());
-
-app.get("/data", (req, res) => {
-  res.json({ result: "paid content", price: "$0.001 USDC" });
-});
+// Mppx.create returns per-intent Express handlers — mount one per paid route.
+// The price is set here, per route, not in the method config.
+app.get(
+  "/data",
+  mppx.charge({ amount: "0.001", description: "paid API call" }),
+  (req, res) => {
+    res.json({ result: "paid content", price: "$0.001 USDC" });
+  },
+);
 
 app.listen(3002, () => console.log("MPP charge server on http://localhost:3002"));
 ```
@@ -440,7 +447,7 @@ app.listen(3002, () => console.log("MPP charge server on http://localhost:3002")
 
 ```js
 // charge-client.js
-import { Mppx } from "mppx";
+import { Mppx } from "@stellar/mpp/charge/client"; // re-exports the client Mppx from mppx/client
 import * as stellar from "@stellar/mpp/charge/client";
 import * as StellarSdk from "@stellar/stellar-sdk";
 
@@ -452,8 +459,8 @@ const mppx = Mppx.create({
       keypair,
       mode: "pull", // server assembles and broadcasts the transaction
       onProgress(event) {
-        // event.type: "challenge" | "signed" | "settled"
-        if (event.type === "settled") console.log("Settled:", event.txHash);
+        // event.type: "challenge" | "signing" | "signed" | "paying" | "confirming" | "paid"
+        if (event.type === "paid") console.log("Paid:", event.hash);
       },
     }),
   ],
@@ -471,11 +478,13 @@ console.log(await res.json());
 - `"pull"` — client signs auth entries, server assembles + broadcasts (default; use with `feePayer`)
 - `"push"` — client builds and broadcasts the transaction directly (client must have XLM for fees)
 
-## Channel mode: high-frequency off-chain payments
+## Session mode: high-frequency off-chain payments
+
+> **Naming:** current MPP material calls the payment intent a **Session**; it settles over a **one-way payment channel**. Older docs (including earlier versions of this skill) said "Channel mode" — treat that as a synonym. "Channel" below always refers to the settlement mechanism, not the mode.
 
 The client deploys a one-way payment channel contract, deposits USDC once, then signs **cumulative commitments** off-chain for each request. No transaction per request — only two on-chain txs total (deposit + close). Ideal for AI agents making hundreds of calls in a session.
 
-### Channel lifecycle
+### Session lifecycle
 
 ```
 1. Deploy channel contract (one-time)   → C... contract address
@@ -496,7 +505,8 @@ The client deploys a one-way payment channel contract, deposits USDC once, then 
 ```js
 // channel-server.js
 import express from "express";
-import { Mppx, Store } from "mppx";
+import { Mppx } from "mppx/express";
+import { Store } from "mppx/server";
 import * as stellar from "@stellar/mpp/channel/server";
 
 const mppx = Mppx.create({
@@ -513,11 +523,15 @@ const mppx = Mppx.create({
 
 const app = express();
 app.use(express.json());
-app.use(mppx.middleware());
 
-app.get("/data", (req, res) => {
-  res.json({ result: "paid content" });
-});
+// Per-route handler, same adapter model as charge mode; price per route.
+app.get(
+  "/data",
+  mppx.channel({ amount: "0.001", description: "paid API call" }),
+  (req, res) => {
+    res.json({ result: "paid content" });
+  },
+);
 
 app.listen(3003);
 ```
@@ -526,7 +540,7 @@ app.listen(3003);
 
 ```js
 // channel-client.js
-import { Mppx } from "mppx";
+import { Mppx } from "mppx/client";
 import * as stellar from "@stellar/mpp/channel/client";
 import * as StellarSdk from "@stellar/stellar-sdk";
 
@@ -586,7 +600,11 @@ npm install @stellar/mpp mppx @stellar/stellar-sdk
 | `@stellar/mpp/channel/server` | `import * as stellar from "@stellar/mpp/channel/server"` — use `stellar.channel(...)`, `stellar.close(...)`, `stellar.getChannelState(...)`, `stellar.watchChannel(...)` |
 | `@stellar/mpp/channel/client` | `import * as stellar from "@stellar/mpp/channel/client"` — use `stellar.channel(...)` |
 | `@stellar/mpp/channel` | Zod schema definitions for channel types |
-| `mppx` | `import { Mppx, Store } from "mppx"` |
+| `mppx/express` | `import { Mppx } from "mppx/express"` — Express adapter; `Mppx.create(...)` returns per-route handlers |
+| `mppx/server` | `import { Mppx, Store } from "mppx/server"` — framework-agnostic server + `Store` |
+| `mppx/client` | `import { Mppx } from "mppx/client"` — client; also re-exported by `@stellar/mpp/charge/client` |
+
+> The bare `mppx` root does **not** export a usable `Mppx` or `Store` — always import from the subpaths above.
 
 ## Testnet runbook
 
@@ -595,7 +613,7 @@ npm install @stellar/mpp mppx @stellar/stellar-sdk
 2. Add USDC trustline
 3. Get testnet USDC from [Circle faucet](https://faucet.circle.com/)
 
-**Channel mode only:**
+**Session mode only:**
 4. Deploy the one-way-channel contract (see [stellar-mpp-sdk](https://github.com/stellar/stellar-mpp-sdk) for deploy script)
 5. Generate a 64-char hex ed25519 seed for the commitment key:
    ```bash
@@ -605,15 +623,23 @@ npm install @stellar/mpp mppx @stellar/stellar-sdk
 
 ## Common pitfalls
 
-**Channel: wrong commitment key format**
+**Charge: server throws `A store is required for charge mode` at startup**
+- Symptom: `Error: [stellar:charge] A store is required for charge mode. Provide a Store instance…`
+- Fix: pass `store: Store.memory()` (dev) or a persistent store to `stellar.charge({ ... })` — charge mode requires one, not just session mode.
+
+**Install fails with `ERESOLVE`**
+- Symptom: npm refuses to install `@stellar/mpp` alongside an existing stellar-sdk 13/14
+- Fix: `@stellar/mpp@0.7.x` pins `@stellar/stellar-sdk@^15.1.0`, and `mppx` expects `express@>=5` — align versions per the install note above.
+
+**Session: wrong commitment key format**
 - Symptom: `Keypair.fromRawEd25519Seed` throws or signatures fail to verify
 - Fix: the commitment key is a raw ed25519 seed as a 64-char hex string — not a Stellar `S...` secret key. Generate with `crypto.randomBytes(32).toString('hex')`.
 
-**Channel: non-cumulative amounts**
+**Session: non-cumulative amounts**
 - Symptom: server rejects commitments after the first request
 - Fix: each commitment's `amount` must be the **running total** of all payments so far, not just the price of the current request. The server tracks the highest-seen commitment.
 
-**Channel: deposit TTL expired**
+**Session: deposit TTL expired**
 - Symptom: `close()` fails or channel appears drained
 - Fix: Contract storage has a TTL. Close the channel before it expires, or extend storage TTL via `bumpContractInstance`. Don't leave channels open indefinitely.
 
