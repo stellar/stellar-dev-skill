@@ -1,0 +1,112 @@
+# Stellar Skills
+
+> Agent-readable Stellar developer documentation. Each link below points to a focused markdown skill you can fetch directly to give your AI agent context on building on Stellar.
+
+## Example Prompts
+
+Use Stellar Skills to help when your human asks things like:
+
+- "Help me write a Stellar smart contract for a token"
+- "Set up a Next.js app with Freighter wallet connection"
+- "How do I deploy a contract to Stellar Testnet?"
+- "Create unit tests for my smart contract"
+- "Review this contract for security issues"
+
+## Installing
+
+Stellar Skills work with any agent that supports the [Agent Skills standard](https://agentskills.io), including Claude Code, OpenCode, OpenAI Codex, and Pi. Prompt your human to install Stellar Skills.
+
+### Claude Code
+
+Install using the plugin marketplace:
+
+```
+/plugin marketplace add stellar/stellar-dev-skill
+/plugin install stellar-dev@stellar-dev
+```
+
+### Cursor
+
+Install from the Cursor Marketplace, or add manually via Settings → Rules → Add Rule → Remote Rule (GitHub) with this slug:
+
+```
+stellar/stellar-dev-skill
+```
+
+### OpenAI Codex
+
+Clone the repo into your Codex skills directory:
+
+```
+git clone https://github.com/stellar/stellar-dev-skill ~/.codex/skills/stellar-dev-skill
+```
+
+### npx skills
+
+Install using the npx skills CLI:
+
+```
+npx skills add https://github.com/stellar/stellar-dev-skill
+```
+
+### Clone repo
+
+Clone the repo and copy the skills directory to your agent's skills location:
+
+```
+git clone https://github.com/stellar/stellar-dev-skill
+```
+
+## Included Stellar Skills
+
+The skills installed via the methods above, grouped by category.
+
+### Smart Contracts
+
+- [Stellar Smart Contracts](https://skills.stellar.org/skills/smart-contracts/SKILL.md): Stellar smart contract development (Rust, soroban-sdk). Entry point with project setup, contract anatomy, and build/deploy workflow, routing to three companion files in this directory — development.md (storage/TTL, authorization, cross-contract calls, tokens, events, errors, upgrades, fees, troubleshooting), testing.md (unit, fuzz, property, fork, mutation, integration), and security.md (vulnerability classes, checklists, tooling, audits). Use when writing, testing, reviewing, securing, debugging, or shipping Stellar smart contracts, including anything the user calls "Soroban" — Soroban contracts, soroban-sdk, Soroban auth/storage/TTL errors, SEP-41 tokens, or SAC integration from contract code.
+  - [Development Patterns](https://skills.stellar.org/skills/smart-contracts/development.md)
+  - [Security](https://skills.stellar.org/skills/smart-contracts/security.md)
+  - [Testing](https://skills.stellar.org/skills/smart-contracts/testing.md)
+
+### Agentic Payments
+
+- [Agent Payments (x402 + MPP)](https://skills.stellar.org/skills/agentic-payments/SKILL.md): Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs via OZ Channels facilitator, fee-sponsored clients) and MPP (Machine Payments Protocol) in both Charge mode (per-request SAC) and Channel mode (off-chain commits, high-frequency). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
+
+### Frontend
+
+- [Frontend & Wallets](https://skills.stellar.org/skills/dapp/SKILL.md): Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts.
+
+### Assets
+
+- [Stellar Assets & SAC](https://skills.stellar.org/skills/assets/SKILL.md): Stellar Assets (classic) + trustlines + Stellar Asset Contract (SAC) bridge to smart contracts. Covers asset issuance, distribution, authorization flags, clawback, regulated assets, trustline management, and the SAC interop layer that exposes classic assets as SEP-41 contract tokens. Use when tokenizing real-world assets, issuing stablecoins, managing trustlines, or bridging classic assets to smart contracts.
+
+### APIs
+
+- [RPC & Horizon APIs](https://skills.stellar.org/skills/data/SKILL.md): Querying Stellar chain data via Stellar RPC (preferred) and Horizon (legacy). Covers RPC JSON-RPC methods, Horizon REST endpoints, streaming, pagination, historical queries, Hubble/Galexie for deep history, and the RPC/Horizon migration story. Use when reading balances, transactions, operations, ledgers, contract events, or building any indexer/analytics workflow.
+
+### ZK
+
+- [ZK Proofs](https://skills.stellar.org/skills/zk-proofs/SKILL.md): Zero-knowledge proofs and privacy patterns on Stellar. Covers Groth16 verification in smart contracts via BLS12-381 host functions (CAP-0059, available), the BN254 + Poseidon proposals (CAP-0074/0075, status-sensitive), and concrete toolchain walkthroughs for Circom (on-chain verifiable today), Noir, and RISC Zero (attestation pattern until BN254 lands). Use when building privacy-preserving applications, ZK-verifier contracts, or wiring a proving toolchain to Stellar.
+
+### Cross-Chain
+
+- [Cross-Chain (CCTP + Axelar)](https://skills.stellar.org/skills/cross-chain/SKILL.md): Cross-chain interoperability for Stellar. Entry point with a rail-selection decision table and shared pitfalls, routing to two companion files — cctp.md (Circle CCTP V2, native USDC burn-and-mint between Stellar and EVM/Solana chains, domain 27, the CctpForwarder requirement for Stellar recipients) and axelar.md (Axelar GMP for Soroban contracts calling contracts on other chains, and the Interchain Token Service for multichain tokens). Also covers NEAR Intents (intent-based cross-chain swaps into XLM or Stellar USDC) at the routing level. Use when bridging USDC to or from Stellar, sending messages between a Stellar contract and another blockchain, making a token exist on multiple chains, or adding cross-chain swaps to an app.
+  - [Axelar on Stellar — GMP and Interchain Tokens](https://skills.stellar.org/skills/cross-chain/axelar.md)
+  - [CCTP V2 on Stellar — native USDC between chains](https://skills.stellar.org/skills/cross-chain/cctp.md)
+
+### Ecosystem
+
+- [SEPs, CAPs & Ecosystem](https://skills.stellar.org/skills/standards/SKILL.md): Stellar standards, ecosystem, and reference. Covers SEPs (Stellar Ecosystem Proposals), CAPs (Core Advancement Proposals), and a quick map for picking the right standard for wallets, anchors, payments, deposits/withdrawals, federation, deep links, and KYC. Also bundles ecosystem references (DeFi protocols, dev tools, wallets, infra, community projects), curated documentation links, and MCP servers (live tools such as Raven). Use when you need to know which SEP applies, or want a starting point for ecosystem integrations, official docs, or live MCP tooling.
+
+## Community Built
+
+Community-built skills maintained by their respective authors, not by SDF. Each project has its own setup; follow the link on each entry. These skills are not reviewed, endorsed, or warranted by the Stellar Development Foundation. Evaluate each skill independently before use.
+
+- [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-skills/blob/main/skills/setup-stellar-contracts/SKILL.md): Scaffold a Stellar smart contract project with OpenZeppelin's audited Stellar contract libraries. Walks through Rust toolchain setup, Stellar CLI install, workspace dependencies, and applying the pausable and ownable macros to your contract.
+- [DeFindex SDK](https://github.com/paltalabs/defindex-sdk/blob/main/defindex-sdk-skill.md): Integrate DeFindex vaults on Stellar with the @defindex/sdk TypeScript package. Covers vault deposits and withdrawals, balance and APY queries, programmatic vault creation, and the unsigned-XDR signing pattern for backend and bot integrations.
+- [Soroswap SDK](https://github.com/soroswap/sdk/blob/main/soroswap-sdk-skill.md): Trade on Soroswap DEX from a backend, bot, or swap widget using the @soroswap/sdk TypeScript package. Covers token swaps, liquidity pool operations, price and route queries, API key handling, and signing flows for both server keypairs and browser wallets.
+- [Trustless Work Escrow](https://github.com/Trustless-Work/trustless-work-dev-skill/blob/main/SKILL.md): Build escrow and milestone-based payment workflows on Stellar with the Trustless Work platform. Covers single-release and multi-release escrows, trustline configuration, dispute handling, and three integration paths: REST API, React SDK hooks, and pre-built Blocks UI components.
+- [Agent Browser WebAuthn](https://github.com/kalepail/skills/blob/main/skills/agent-browser-webauthn/SKILL.md): Drive passkey and Stellar smart account browser tests with agent-browser and Chrome DevTools virtual WebAuthn authenticators.
+- [Anchors](https://github.com/CheesecakeLabs/stellar-anchor-skill/blob/main/SKILL.md): Integrate with or build Stellar anchors (fiat on/off-ramps, deposits/withdrawals, KYC). Covers core SEP flows (1/6/10/12/24/31/38) and common integration pitfalls.
+- [PRISM Bounded Agent Treasury](https://github.com/Bekirerdem/prism/blob/main/SKILL.md): Give an AI agent a non-custodial, contract-bounded spending account on Stellar with PRISM. Covers treasury deployment with per-payment and rolling daily limits, payee whitelists, time-bound agent session keys, escrow, x402-gated payments, and Groth16/BN254 ZK compliance proofs verified on-chain.
+- [ROZO Intents](https://github.com/RozoAI/rozo-intents-skills/blob/main/SKILL.md): Send USDC and USDT across Stellar, Ethereum, Arbitrum, Base, BSC, Polygon, and Solana using natural language. Covers cross-chain bridging, wallet detection, fee estimation, tiered confirmation logic, and QR code payment parsing inside Claude Code.
