@@ -260,4 +260,11 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-project-dossier/SKILL.md",
   },
+  {
+    title: "Stellar Scout",
+    description:
+      "Scout the Stellar ecosystem before you build: validate ideas against shipped projects, match open SCF-funded RFPs, draft SCF pitches, find audit firms, and pull cited prior art from 2,000+ indexed repos.",
+    pathLabel: "stellarlight.xyz/scout",
+    copyValue: "https://stellarlight.xyz/skills/stellar-scout.md",
+  },
 ] as const;
