@@ -5,7 +5,7 @@
 - **GMP (General Message Passing)** — a Soroban contract sends arbitrary payloads to a contract on another chain, or receives and executes payloads from one.
 - **ITS (Interchain Token Service)** — tokens that exist on multiple chains: mint new ones, or connect an existing Stellar token.
 
-Both are live on Stellar testnet and mainnet. The Stellar contracts are Rust/Soroban and live in [axelar-amplifier-stellar](https://github.com/axelarnetwork/axelar-amplifier-stellar) — `stellar-axelar-gateway`, `stellar-axelar-gas-service`, and the ITS contracts.
+Both are live on Stellar testnet and mainnet. The Stellar contracts are Rust/Soroban and live in [axelar-amplifier-stellar](https://github.com/axelarnetwork/axelar-amplifier-stellar) — `stellar-axelar-gateway`, `stellar-axelar-gas-service`, and the ITS contracts. Every signature in this file is checked against those sources, which occasionally run ahead of the docs site; when they disagree, the source wins.
 
 > **Addresses:** resolve the current Gateway, Gas Service, and ITS addresses from Axelar's [contract addresses directory](https://docs.axelar.dev/resources/contract-addresses/mainnet/) (and its testnet counterpart) or the amplifier repo's releases at integration time — they are deployment-versioned, so don't hardcode from any tutorial, including this one.
 
@@ -49,24 +49,42 @@ Notes that save debugging time:
 
 ## GMP: receiving a message on Stellar
 
-The receiving contract implements Axelar's `Executable` interface. The relayer invokes `execute`, and the contract **must validate before acting**:
+Do **not** hand-implement the executable interface — the source marks it "DO NOT IMPLEMENT THIS MANUALLY!". The supported pattern is the `AxelarExecutable` derive macro plus a `CustomAxelarExecutable` impl with two functions: `__gateway` (which gateway to trust) and `__execute` (your logic). The macro generates the public `execute` entrypoint and **guarantees the gateway's `validate_message` has already succeeded** before `__execute` runs. Verbatim from Axelar's own [example contract](https://github.com/axelarnetwork/axelar-amplifier-stellar/tree/main/contracts/stellar-axelar-example):
 
 ```rust
-fn execute(
-    env: Env,
-    source_chain: String,
-    message_id: String,
-    source_address: String,
-    payload: Bytes,
-);
+use stellar_axelar_gateway::executable::CustomAxelarExecutable;
+use stellar_axelar_std::AxelarExecutable;
+
+#[contract]
+#[derive(AxelarExecutable)]
+pub struct AxelarExample;
+
+impl CustomAxelarExecutable for AxelarExample {
+    type Error = AxelarExampleError;
+
+    fn __gateway(env: &Env) -> Address {
+        storage::gateway(env)
+    }
+
+    fn __execute(
+        env: &Env,
+        source_chain: String,
+        message_id: String,
+        source_address: String,
+        payload: Bytes,
+    ) -> Result<(), Self::Error> {
+        // your logic — the message is already gateway-validated here
+        Ok(())
+    }
+}
 ```
 
-Inside `execute`, first call the Gateway's `validate_message` — it authenticates that this exact message (chain, id, sender, payload hash) was verified by Axelar and marks it executed:
+Under the hood the generated `execute` calls the Gateway's `validate_message`, which authenticates the exact message (chain, id, sender, payload hash) and flips it to executed so it cannot replay:
 
 ```rust
-pub fn validate_message(
+fn validate_message(
     env: Env,
-    caller: Address,
+    caller: Address,          // must be the message's intended destination contract
     source_chain: String,
     message_id: String,
     source_address: String,
@@ -74,9 +92,9 @@ pub fn validate_message(
 ) -> bool;
 ```
 
-Treat `validate_message` returning `false` as a hard stop. And validate `source_chain`/`source_address` against an allowlist of counterpart contracts you trust — Axelar authenticates *that* the message came from that sender, not *whether* you should listen to them.
+One thing the macro does **not** do for you: check `source_chain`/`source_address` against an allowlist of counterpart contracts you trust. Axelar authenticates *that* the message came from that sender, not *whether* you should listen to them — do that check first thing in `__execute`.
 
-Axelar's [Stellar GMP guide](https://docs.axelar.dev/dev/general-message-passing/stellar-gmp/intro/) and the worked [GMP example](https://docs.axelar.dev/dev/general-message-passing/stellar-gmp/gmp-example/) walk a full send-and-receive pair; start from those when scaffolding.
+Axelar's [Stellar GMP guide](https://docs.axelar.dev/dev/general-message-passing/stellar-gmp/intro/), the worked [GMP example docs](https://docs.axelar.dev/dev/general-message-passing/stellar-gmp/gmp-example/), and the `stellar-axelar-example` contract are the scaffolding starting points. The same example also shows `#[derive(InterchainTokenExecutable)]` + `CustomInterchainTokenExecutable` — the receiving-side hook for ITS transfers that carry a data payload.
 
 ## ITS: tokens on multiple chains
 
@@ -86,17 +104,17 @@ ITS on Stellar operates in **hub mode**: token messages route through Axelar's I
 
 ```rust
 fn deploy_interchain_token(
-    env: &Env, caller: Address, salt: BytesN<32>,
+    env: &Env, deployer: Address, salt: BytesN<32>,
     token_metadata: TokenMetadata, initial_supply: i128, minter: Option<Address>,
 ) -> Result<BytesN<32>, ContractError>;   // returns the token_id
 
-fn deploy_remote_token(
+fn deploy_remote_interchain_token(
     env: &Env, caller: Address, salt: BytesN<32>,
     destination_chain: String, gas_token: Option<Token>,
 ) -> Result<BytesN<32>, ContractError>;
 ```
 
-**Connect an existing Stellar token** (canonical registration) — works for any Stellar token, SACs of classic assets included:
+**Connect an existing Stellar token** (canonical registration) — works for any Stellar token, SACs of classic assets included. Anyone can deploy the trustless canonical representation to a trusted chain. Naming quirk from the source: if the token name exceeds 32 characters the symbol is used as the name, and natively issued Stellar assets always deploy with the symbol as the name:
 
 ```rust
 fn register_canonical_token(
@@ -115,17 +133,18 @@ fn deploy_remote_canonical_token(
 fn interchain_transfer(
     env: &Env, caller: Address, token_id: BytesN<32>,
     destination_chain: String, destination_address: Bytes, amount: i128,
-    data: Option<Bytes>, gas_token: Option<Token>,
+    metadata: Option<Bytes>, gas_token: Option<Token>,
 ) -> Result<(), ContractError>;
 ```
 
-`destination_address` is `Bytes` in the destination chain's format; `data` optionally triggers contract execution on arrival (GMP piggybacked on a token transfer); `gas_token` prepays the cross-chain leg.
+`destination_address` is `Bytes` in the destination chain's format; `metadata` optionally triggers contract execution on arrival (GMP piggybacked on a token transfer — the receiver implements `InterchainTokenExecutable`); `gas_token` prepays the cross-chain leg.
 
-**Operational controls** — per-token rate limits, worth setting for anything with real value:
+**Operational controls** — per-token rate limits, worth setting for anything with real value. Callable by the contract operator and by per-token approved flow limiters:
 
 ```rust
-#[only_operator]
-fn set_flow_limit(env: &Env, token_id: BytesN<32>, flow_limit: Option<i128>) -> Result<(), ContractError>;
+fn set_flow_limit(
+    env: &Env, caller: Address, token_id: BytesN<32>, flow_limit: Option<i128>,
+) -> Result<(), ContractError>;
 fn flow_limit(token_id: BytesN<32>) -> Option<i128>;
 fn flow_out_amount(token_id: BytesN<32>) -> i128;   // current-window outflow
 fn flow_in_amount(token_id: BytesN<32>) -> i128;
