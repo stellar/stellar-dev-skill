@@ -279,7 +279,8 @@ export async function buildPaymentTx(
 The canonical way to call a Soroban contract from JS is the `contract.Client`, not hand-built `Contract.call` + `assembleTransaction`. The client reads the contract's interface from the network, so each method is callable by name and returns an `AssembledTransaction`. You get a native JS result and don't build ScVals by hand.
 
 ```typescript
-import { contract, rpc, Networks } from "@stellar/stellar-sdk";
+import { contract } from "@stellar/stellar-sdk";
+import { config } from "@/lib/stellar";
 
 // Describe just the methods you call. `Client.from<T>()` uses this to type
 // the returned client, so calls are checked and autocompleted — no codegen.
@@ -301,8 +302,8 @@ export async function getCounterClient(
 ) {
   return contract.Client.from<CounterContract>({
     contractId,
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: Networks.TESTNET,
+    rpcUrl: config.rpcUrl,
+    networkPassphrase: config.networkPassphrase,
     publicKey,
     signTransaction,
   });
