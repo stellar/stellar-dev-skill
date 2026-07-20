@@ -132,9 +132,9 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
   {
     source: "skills/cross-chain/SKILL.md",
     category: "Cross-Chain",
-    title: "Cross-Chain (CCTP + Axelar)",
+    title: "Cross-Chain (CCTP, Axelar, LayerZero)",
     description:
-      "Bridge native USDC with Circle CCTP, pass messages and interchain tokens with Axelar GMP and ITS, and route intent-based swaps with NEAR Intents.",
+      "Bridge native USDC with Circle CCTP, pass messages and tokens with Axelar GMP/ITS and LayerZero OApp/OFT, and route intent-based swaps with NEAR Intents.",
   },
 ] as const;
 
