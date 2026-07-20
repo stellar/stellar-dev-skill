@@ -1,6 +1,6 @@
 ---
 name: standards
-description: Stellar standards, ecosystem, and reference. Covers SEPs (Stellar Ecosystem Proposals), CAPs (Core Advancement Proposals), and a quick map for picking the right standard for wallets, anchors, payments, deposits/withdrawals, federation, deep links, and KYC. Also bundles ecosystem references (DeFi protocols, dev tools, wallets, infra, community projects) and curated documentation links. Use when you need to know which SEP applies, or want a starting point for ecosystem integrations and official docs.
+description: Stellar standards, ecosystem, and reference. Covers SEPs (Stellar Ecosystem Proposals), CAPs (Core Advancement Proposals), and a quick map for picking the right standard for wallets, anchors, payments, deposits/withdrawals, federation, deep links, and KYC. Also bundles ecosystem references (DeFi protocols, dev tools, wallets, infra, community projects), curated documentation links, and MCP servers (live tools such as Raven). Use when you need to know which SEP applies, or want a starting point for ecosystem integrations, official docs, or live MCP tooling.
 user-invocable: true
 argument-hint: "[standards or ecosystem lookup]"
 ---
@@ -339,6 +339,16 @@ Official JavaScript/TypeScript SDK.
 Rust SDK for smart contract development.
 - **GitHub**: https://github.com/stellar/rs-soroban-sdk
 - **Crate**: `soroban-sdk`
+
+### AI & MCP Tools
+
+#### Raven
+Remote Model Context Protocol (MCP) server for AI agents. Searches Stellar docs and live ecosystem data, cross-referenced into single answers. Its catalog also serves these skills.
+- **Server**: https://raven.stellar.buzz (MCP endpoint: https://raven.stellar.buzz/mcp)
+- **Playground**: https://raven.stellar.buzz/playground (hosted chat UI for humans; sign-in required)
+- **GitHub**: https://github.com/kalepail/stellar-raven
+- **Connect (Claude Code)**: `claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"`
+- **Tools**: `search`, `execute`
 
 ## Oracles
 
