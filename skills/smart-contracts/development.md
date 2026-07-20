@@ -83,7 +83,7 @@ Keep keys fine-grained (`Balance(Address)` per user, not one giant `Map`). Every
 ## Data types
 
 ```rust
-use soroban_sdk::{Address, Bytes, BytesN, Map, String, Symbol, Vec, U256, I256};
+use soroban_sdk::{symbol_short, vec, Address, Bytes, BytesN, Map, String, Symbol, Vec, U256, I256};
 
 let addr: Address = env.current_contract_address();
 let sym: Symbol = symbol_short!("transfer");        // ≤9 chars; Symbol max is 32
