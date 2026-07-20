@@ -125,7 +125,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "Ecosystem",
     title: "SEPs, CAPs & Ecosystem",
     description:
-      "Pick the right SEP or CAP for your feature, with ecosystem projects and curated reference links.",
+      "Pick the right SEP or CAP for your feature, with ecosystem projects, curated reference links, and MCPs.",
   },
 ] as const;
 
@@ -172,6 +172,21 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "kalepail/skills",
     copyValue:
       "https://github.com/kalepail/skills/blob/main/skills/agent-browser-webauthn/SKILL.md",
+  },
+  {
+    title: "Anchors",
+    description:
+      "Integrate with or build Stellar anchors (fiat on/off-ramps, deposits/withdrawals, KYC). Covers core SEP flows (1/6/10/12/24/31/38) and common integration pitfalls.",
+    pathLabel: "CheesecakeLabs/stellar-anchor-skill",
+    copyValue:
+      "https://github.com/CheesecakeLabs/stellar-anchor-skill/blob/main/SKILL.md",
+  },
+  {
+    title: "PRISM Bounded Agent Treasury",
+    description:
+      "Give an AI agent a non-custodial, contract-bounded spending account on Stellar with PRISM. Covers treasury deployment with per-payment and rolling daily limits, payee whitelists, time-bound agent session keys, escrow, x402-gated payments, and Groth16/BN254 ZK compliance proofs verified on-chain.",
+    pathLabel: "Bekirerdem/prism",
+    copyValue: "https://github.com/Bekirerdem/prism/blob/main/SKILL.md",
   },
   {
     title: "ROZO Intents",

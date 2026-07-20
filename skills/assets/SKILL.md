@@ -406,30 +406,19 @@ image = "https://example.com/token-logo.png"
 
 ### SEP-0010 (Web Authentication)
 
-Authenticate users with their Stellar accounts:
-
-```typescript
-// Server generates challenge
-// Client signs with wallet
-// Server verifies signature
-```
+Authenticate users with their Stellar accounts. Flow: the server generates a challenge transaction, the client signs it with their wallet, and the server verifies the signature. See [SEP-0010](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
 
 ### SEP-0024 (Hosted Deposit/Withdrawal)
 
-For fiat on/off ramps:
-
-```typescript
-// Interactive flow for deposits/withdrawals
-// Anchor handles KYC and fiat transfer
-```
+For fiat on/off ramps: an interactive webview flow where the anchor handles KYC and the fiat transfer. See [SEP-0024](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0024.md).
 
 ### SEP-0045 (Web Auth for Contract Accounts)
 
-Extends SEP-10 to support contract accounts (`C...` addresses) for web authentication. Required for smart wallet / passkey-based anchor integrations. See [SEP-0045](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0045.md).
+Extends SEP-10 to support contract accounts (`C...` addresses) for web authentication. Required for smart wallet / passkey-based anchor integrations. Draft status; verify current status in [SEP-0045](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0045.md).
 
 ### SEP-0050 (Non-Fungible Tokens)
 
-Standard contract interface for NFTs on Stellar. Reference implementations available in [OpenZeppelin Stellar Contracts](https://github.com/OpenZeppelin/stellar-contracts) with Base, Consecutive, and Enumerable variants. See [SEP-0050](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0050.md).
+Standard contract interface for NFTs on Stellar. Reference implementations available in [OpenZeppelin Stellar Contracts](https://github.com/OpenZeppelin/stellar-contracts) with Base, Consecutive, and Enumerable variants. Draft status; verify current status in [SEP-0050](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0050.md).
 
 ## Best Practices
 
