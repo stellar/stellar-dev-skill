@@ -1,22 +1,22 @@
 ---
 name: cross-chain
-description: Cross-chain interoperability for Stellar. Entry point with a rail-selection decision table and shared pitfalls, routing to two companion files — cctp.md (Circle CCTP V2, native USDC burn-and-mint between Stellar and EVM/Solana chains, domain 27, the CctpForwarder requirement for Stellar recipients) and axelar.md (Axelar GMP for Soroban contracts calling contracts on other chains, and the Interchain Token Service for multichain tokens). Also covers NEAR Intents (intent-based cross-chain swaps into XLM or Stellar USDC) at the routing level. Use when bridging USDC to or from Stellar, sending messages between a Stellar contract and another blockchain, making a token exist on multiple chains, or adding cross-chain swaps to an app.
+description: Cross-chain interoperability for Stellar. Entry point with a rail-selection decision table and shared pitfalls, routing to three companion files — cctp.md (Circle CCTP V2, native USDC burn-and-mint between Stellar and EVM/Solana chains, domain 27, the CctpForwarder requirement for Stellar recipients), axelar.md (Axelar GMP for Soroban contracts calling contracts on other chains, and the Interchain Token Service for multichain tokens), and layerzero.md (LayerZero V2 OApp messaging with configurable DVN security, and OFT omnichain tokens). Also covers NEAR Intents (intent-based cross-chain swaps into XLM or Stellar USDC) at the routing level. Use when bridging USDC to or from Stellar, sending messages between a Stellar contract and another blockchain, making a token exist on multiple chains, or adding cross-chain swaps to an app.
 user-invocable: true
 argument-hint: "[cross-chain task]"
 ---
 
 # Cross-Chain on Stellar
 
-Stellar connects to other blockchains over three production rails, each built for a different job. Picking the wrong rail wastes engineering effort; picking the right one is a routing decision, not a research project. This file routes; the deep dives live alongside it — **read the file that matches the task**:
+Stellar connects to other blockchains over several production rails, each built for a different job. Picking the wrong rail wastes engineering effort; picking the right one is a routing decision, not a research project. This file routes; the deep dives live alongside it — **read the file that matches the task**:
 
 | You want to | Use | Where |
 |---|---|---|
 | Move **native USDC** between Stellar and an EVM chain or Solana (no wrapped assets, no liquidity pools) | Circle CCTP V2 | [cctp.md](cctp.md) |
-| Have a Stellar contract **call a contract on another chain**, or receive calls from one (arbitrary payloads) | Axelar GMP | [axelar.md](axelar.md) |
-| Make a token — new or an existing Stellar asset — **exist on multiple chains** | Axelar ITS | [axelar.md](axelar.md) |
+| Have a Stellar contract **call a contract on another chain**, or receive calls from one (arbitrary payloads) | Axelar GMP or LayerZero OApp | [axelar.md](axelar.md), [layerzero.md](layerzero.md) |
+| Make a token — new or an existing Stellar asset — **exist on multiple chains** | Axelar ITS or LayerZero OFT | [axelar.md](axelar.md), [layerzero.md](layerzero.md) |
 | **Swap any asset cross-chain** (BTC, ETH, SOL, … → XLM or Stellar USDC) without integrating a bridge yourself | NEAR Intents | [below](#near-intents-intent-based-swaps) |
 
-Rules of thumb: if the asset is USDC and both ends are CCTP chains, CCTP is the cheapest and most direct (it burns and mints Circle-native USDC — nothing wrapped, nothing pooled). If you need logic, not just value, on the far chain, that is message passing — Axelar GMP. If you control a token and want it multichain, that is ITS. If the user just wants "turn my X on chain A into Y on Stellar" and you don't want bridge plumbing at all, quote it through NEAR Intents.
+Rules of thumb: if the asset is USDC and both ends are CCTP chains, CCTP is the cheapest and most direct (it burns and mints Circle-native USDC — nothing wrapped, nothing pooled). If you need logic, not just value, on the far chain, that is message passing — two rails do it, and the [comparison at the end of layerzero.md](layerzero.md#choosing-between-axelar-gmp-and-layerzero-oapp) helps you pick between Axelar's shared validator security and LayerZero's app-configured DVN sets. If you control a token and want it multichain, that is ITS or OFT on the same split. If the user just wants "turn my X on chain A into Y on Stellar" and you don't want bridge plumbing at all, quote it through NEAR Intents.
 
 ## When to use this skill
 

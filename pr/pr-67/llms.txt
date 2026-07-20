@@ -90,9 +90,10 @@ The skills installed via the methods above, grouped by category.
 
 ### Cross-Chain
 
-- [Cross-Chain (CCTP + Axelar)](https://skills.stellar.org/skills/cross-chain/SKILL.md): Cross-chain interoperability for Stellar. Entry point with a rail-selection decision table and shared pitfalls, routing to two companion files — cctp.md (Circle CCTP V2, native USDC burn-and-mint between Stellar and EVM/Solana chains, domain 27, the CctpForwarder requirement for Stellar recipients) and axelar.md (Axelar GMP for Soroban contracts calling contracts on other chains, and the Interchain Token Service for multichain tokens). Also covers NEAR Intents (intent-based cross-chain swaps into XLM or Stellar USDC) at the routing level. Use when bridging USDC to or from Stellar, sending messages between a Stellar contract and another blockchain, making a token exist on multiple chains, or adding cross-chain swaps to an app.
+- [Cross-Chain (CCTP, Axelar, LayerZero)](https://skills.stellar.org/skills/cross-chain/SKILL.md): Cross-chain interoperability for Stellar. Entry point with a rail-selection decision table and shared pitfalls, routing to three companion files — cctp.md (Circle CCTP V2, native USDC burn-and-mint between Stellar and EVM/Solana chains, domain 27, the CctpForwarder requirement for Stellar recipients), axelar.md (Axelar GMP for Soroban contracts calling contracts on other chains, and the Interchain Token Service for multichain tokens), and layerzero.md (LayerZero V2 OApp messaging with configurable DVN security, and OFT omnichain tokens). Also covers NEAR Intents (intent-based cross-chain swaps into XLM or Stellar USDC) at the routing level. Use when bridging USDC to or from Stellar, sending messages between a Stellar contract and another blockchain, making a token exist on multiple chains, or adding cross-chain swaps to an app.
   - [Axelar on Stellar — GMP and Interchain Tokens](https://skills.stellar.org/skills/cross-chain/axelar.md)
   - [CCTP V2 on Stellar — native USDC between chains](https://skills.stellar.org/skills/cross-chain/cctp.md)
+  - [LayerZero V2 on Stellar — omnichain messaging and OFT](https://skills.stellar.org/skills/cross-chain/layerzero.md)
 
 ### Ecosystem
 
