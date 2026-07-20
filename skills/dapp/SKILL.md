@@ -52,7 +52,7 @@ npm install @stellar/stellar-sdk @creit.tech/stellar-wallets-kit
 
 ## SDK Initialization
 
-> For the full API reference (RPC methods, Horizon endpoints, migration guide), see [api-rpc-horizon.md](../data/SKILL.md).
+> For the full API reference (RPC methods, Horizon endpoints, migration guide), see the [data skill](../data/SKILL.md).
 
 ### Basic Setup
 ```typescript
@@ -86,20 +86,29 @@ const requireEnv = (name: string): string => {
   return value;
 };
 
-export const config = {
-  testnet: {
-    horizonUrl: "https://horizon-testnet.stellar.org",
-    rpcUrl: "https://soroban-testnet.stellar.org",
-    networkPassphrase: StellarSdk.Networks.TESTNET,
-    friendbotUrl: "https://friendbot.stellar.org",
-  },
-  mainnet: {
-    horizonUrl: "https://horizon.stellar.org",
-    rpcUrl: requireEnv("NEXT_PUBLIC_STELLAR_MAINNET_RPC_URL"),
-    networkPassphrase: StellarSdk.Networks.PUBLIC,
-    friendbotUrl: null,
-  },
-}[NETWORK]!;
+function getConfig(network: string) {
+  switch (network) {
+    case "testnet":
+      return {
+        horizonUrl: "https://horizon-testnet.stellar.org",
+        rpcUrl: "https://soroban-testnet.stellar.org",
+        networkPassphrase: StellarSdk.Networks.TESTNET,
+        friendbotUrl: "https://friendbot.stellar.org" as string | null,
+      };
+    case "mainnet":
+      return {
+        horizonUrl: "https://horizon.stellar.org",
+        // Resolved lazily so testnet runs don't require the mainnet env var
+        rpcUrl: requireEnv("NEXT_PUBLIC_STELLAR_MAINNET_RPC_URL"),
+        networkPassphrase: StellarSdk.Networks.PUBLIC,
+        friendbotUrl: null,
+      };
+    default:
+      throw new Error(`Unknown network: ${network}`);
+  }
+}
+
+export const config = getConfig(NETWORK);
 
 export const horizon = new StellarSdk.Horizon.Server(config.horizonUrl);
 export const rpc = new StellarSdk.rpc.Server(config.rpcUrl);
@@ -441,6 +450,7 @@ export function ConnectButton() {
 import { useState } from "react";
 import { useFreighter } from "@/hooks/useFreighter";
 import { buildPaymentTx, submitTransaction } from "@/lib/transactions";
+import { config } from "@/lib/stellar";
 
 export function SendPayment() {
   const { address, sign } = useFreighter();
