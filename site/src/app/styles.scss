@@ -314,7 +314,16 @@
 }
 
 @each $filter
-  in ("Smart Contracts", "Agentic Payments", Frontend, Assets, APIs, ZK, Ecosystem)
+  in (
+    "Smart Contracts",
+    "Agentic Payments",
+    Frontend,
+    Assets,
+    APIs,
+    ZK,
+    "Cross-Chain",
+    Ecosystem
+  )
 {
   .SkillsLanding__filterPanel[data-active-filter="#{$filter}"]
     .SkillsLanding__filterItem[data-category="#{$filter}"] {

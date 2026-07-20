@@ -22,6 +22,7 @@ type FilterType =
   | "Assets"
   | "APIs"
   | "ZK"
+  | "Cross-Chain"
   | "Ecosystem";
 
 /**
@@ -36,6 +37,7 @@ export const FILTERS: readonly FilterType[] = [
   "Assets",
   "APIs",
   "ZK",
+  "Cross-Chain",
   "Ecosystem",
 ] as const;
 
@@ -126,6 +128,13 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     title: "SEPs, CAPs & Ecosystem",
     description:
       "Pick the right SEP or CAP for your feature, with ecosystem projects, curated reference links, and MCPs.",
+  },
+  {
+    source: "skills/cross-chain/SKILL.md",
+    category: "Cross-Chain",
+    title: "Cross-Chain (CCTP + Axelar)",
+    description:
+      "Bridge native USDC with Circle CCTP, pass messages and interchain tokens with Axelar GMP and ITS, and route intent-based swaps with NEAR Intents.",
   },
 ] as const;
 
