@@ -125,7 +125,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "Ecosystem",
     title: "SEPs, CAPs & Ecosystem",
     description:
-      "Pick the right SEP or CAP for your feature, with ecosystem projects and curated reference links.",
+      "Pick the right SEP or CAP for your feature, with ecosystem projects, curated reference links, and MCPs.",
   },
 ] as const;
 
@@ -164,6 +164,22 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "Trustless-Work/trustless-work-dev-skill",
     copyValue:
       "https://github.com/Trustless-Work/trustless-work-dev-skill/blob/main/SKILL.md",
+  },
+  {
+    title: "Agent Browser WebAuthn",
+    description:
+      "Drive passkey and Stellar smart account browser tests with agent-browser and Chrome DevTools virtual WebAuthn authenticators.",
+    pathLabel: "kalepail/skills",
+    copyValue:
+      "https://github.com/kalepail/skills/blob/main/skills/agent-browser-webauthn/SKILL.md",
+  },
+  {
+    title: "Anchors",
+    description:
+      "Integrate with or build Stellar anchors (fiat on/off-ramps, deposits/withdrawals, KYC). Covers core SEP flows (1/6/10/12/24/31/38) and common integration pitfalls.",
+    pathLabel: "CheesecakeLabs/stellar-anchor-skill",
+    copyValue:
+      "https://github.com/CheesecakeLabs/stellar-anchor-skill/blob/main/SKILL.md",
   },
   {
     title: "PRISM Bounded Agent Treasury",

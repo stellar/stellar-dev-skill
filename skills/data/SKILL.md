@@ -427,7 +427,7 @@ See the full indexer directory: https://developers.stellar.org/docs/data/indexer
 
 ## Network Configuration
 
-> For a React/Next.js-specific setup, see [frontend-stellar-sdk.md](../dapp/SKILL.md).
+> For a React/Next.js-specific setup, see the [dapp skill](../dapp/SKILL.md).
 > For mainnet RPC, set `STELLAR_MAINNET_RPC_URL` from a provider in the [RPC providers directory](https://developers.stellar.org/docs/data/apis/rpc/providers).
 
 ### Environment-Based Setup
@@ -449,29 +449,33 @@ const requireEnv = (name: string): string => {
   return value;
 };
 
-const configs: Record<string, NetworkConfig> = {
-  mainnet: {
+// Lazy per-network factories: requireEnv only runs for the selected network,
+// so testnet/local work without the mainnet env var set.
+const configs: Record<string, () => NetworkConfig> = {
+  mainnet: () => ({
     rpcUrl: requireEnv("STELLAR_MAINNET_RPC_URL"),
     horizonUrl: "https://horizon.stellar.org",
     networkPassphrase: StellarSdk.Networks.PUBLIC,
     friendbotUrl: null,
-  },
-  testnet: {
+  }),
+  testnet: () => ({
     rpcUrl: "https://soroban-testnet.stellar.org",
     horizonUrl: "https://horizon-testnet.stellar.org",
     networkPassphrase: StellarSdk.Networks.TESTNET,
     friendbotUrl: "https://friendbot.stellar.org",
-  },
-  local: {
+  }),
+  local: () => ({
     rpcUrl: "http://localhost:8000/soroban/rpc",
     horizonUrl: "http://localhost:8000",
     networkPassphrase: "Standalone Network ; February 2017",
     friendbotUrl: "http://localhost:8000/friendbot",
-  },
+  }),
 };
 
 const network = process.env.STELLAR_NETWORK || "testnet";
-export const config = configs[network];
+const makeConfig = configs[network];
+if (!makeConfig) throw new Error(`Unknown network: ${network}`);
+export const config = makeConfig();
 
 export const rpc = new StellarSdk.rpc.Server(config.rpcUrl);
 export const horizon = new StellarSdk.Horizon.Server(config.horizonUrl);

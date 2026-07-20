@@ -19,7 +19,7 @@ Layers, fastest first:
 extern crate std;  // contracts are no_std; tests can still use std explicitly
 use soroban_sdk::{
     testutils::{Address as _, MockAuth, MockAuthInvoke},
-    Address, Env,
+    Address, Env, IntoVal,
 };
 use crate::{Contract, ContractClient};
 
