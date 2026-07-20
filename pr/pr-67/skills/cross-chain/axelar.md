@@ -145,15 +145,15 @@ fn interchain_transfer(
 fn set_flow_limit(
     env: &Env, caller: Address, token_id: BytesN<32>, flow_limit: Option<i128>,
 ) -> Result<(), ContractError>;
-fn flow_limit(token_id: BytesN<32>) -> Option<i128>;
-fn flow_out_amount(token_id: BytesN<32>) -> i128;   // current-window outflow
-fn flow_in_amount(token_id: BytesN<32>) -> i128;
+fn flow_limit(env: &Env, token_id: BytesN<32>) -> Option<i128>;
+fn flow_out_amount(env: &Env, token_id: BytesN<32>) -> i128;   // current-epoch outflow
+fn flow_in_amount(env: &Env, token_id: BytesN<32>) -> i128;
 ```
 
 ## ITS pitfalls
 
 - **`token_id` is the identity, not the address.** The same token has different contract addresses per chain but one `BytesN<32>` token id — persist the id, derive addresses from it.
-- **Decimals don't auto-reconcile across ecosystems.** A canonical Stellar token is 7-decimal; think through amount scaling before wiring UIs to EVM counterparts (and test a dust-sized transfer first).
+- **Decimals don't auto-reconcile across ecosystems.** Classic-asset SACs are 7-decimal, but a canonical registration accepts any Soroban token, and ITS tokens carry whatever `TokenMetadata` declared — read `decimals()` from the token instead of assuming 7, and think through amount scaling before wiring UIs to EVM counterparts (test a dust-sized transfer first).
 - **Remote deployments and transfers both prepay gas** via `gas_token` — budget one gas payment per destination chain, not one total.
 - **Flow limits fail closed.** A transfer that would exceed the window's limit is rejected, not queued — surface that error distinctly from "bridge is broken".
 

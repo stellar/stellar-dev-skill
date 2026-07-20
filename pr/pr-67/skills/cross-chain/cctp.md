@@ -154,7 +154,7 @@ pub fn approve_and_deposit(
 }
 ```
 
-One wallet prompt, one network fee, and the allowance expires within ~50 ledgers so nothing lingers.
+One wallet prompt, one network fee, and the allowance expires after 50–99 ledgers (the expression rounds up to the next multiple of 50) so nothing lingers.
 
 ## EVM/Solana → Stellar (inbound)
 
