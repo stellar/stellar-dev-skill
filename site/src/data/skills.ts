@@ -196,4 +196,68 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://github.com/RozoAI/rozo-intents-skills/blob/main/SKILL.md",
   },
+  {
+    title: "LumenLoop MCP Connect",
+    description:
+      "Connect any MCP client (Claude, ChatGPT, Gemini, Cursor) to LumenLoop's free read-only Stellar ecosystem MCP and learn its query tools for directory, content, and SCF data.",
+    pathLabel: "lumenloop/lumenloop-skills",
+    copyValue:
+      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/lumenloop-mcp-connect/SKILL.md",
+  },
+  {
+    title: "SCF Submission Radar",
+    description:
+      "Position a Stellar Community Fund idea against prior submissions before applying: find similar past proposals, check what's been funded in an area, and sharpen positioning.",
+    pathLabel: "lumenloop/lumenloop-skills",
+    copyValue:
+      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/scf-submission-radar/SKILL.md",
+  },
+  {
+    title: "Stellar Builder Quickstart",
+    description:
+      "Go from a Stellar product idea to a build path: pick the right primitives, check ecosystem prior art via LumenLoop, and route to the relevant build skill.",
+    pathLabel: "lumenloop/lumenloop-skills",
+    copyValue:
+      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-builder-quickstart/SKILL.md",
+  },
+  {
+    title: "Stellar Content Auditor",
+    description:
+      "Audit draft posts and announcements against Stellar ecosystem data: resolve project names and X handles, pull supporting citations, and flag unsupported claims.",
+    pathLabel: "lumenloop/lumenloop-skills",
+    copyValue:
+      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-content-auditor/SKILL.md",
+  },
+  {
+    title: "Stellar Ecosystem Digest",
+    description:
+      "Produce a dated, cited digest of recent Stellar ecosystem activity on a theme or entity from indexed news, talks, events, and research.",
+    pathLabel: "lumenloop/lumenloop-skills",
+    copyValue:
+      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-ecosystem-digest/SKILL.md",
+  },
+  {
+    title: "Stellar Ecosystem Scout",
+    description:
+      "Map a sector of the Stellar ecosystem into a landscape of projects, categories, and regions using the LumenLoop directory and semantic search.",
+    pathLabel: "lumenloop/lumenloop-skills",
+    copyValue:
+      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-ecosystem-scout/SKILL.md",
+  },
+  {
+    title: "Stellar Integration Finder",
+    description:
+      "Find the right existing Stellar project or tool to integrate (wallet, oracle, anchor, DEX, indexer) via the LumenLoop directory, then route to the matching build skill.",
+    pathLabel: "lumenloop/lumenloop-skills",
+    copyValue:
+      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-integration-finder/SKILL.md",
+  },
+  {
+    title: "Stellar Project Dossier",
+    description:
+      "Build a due-diligence profile of a single Stellar project: details, related content, talks, SCF history, and similar projects from the LumenLoop directory.",
+    pathLabel: "lumenloop/lumenloop-skills",
+    copyValue:
+      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-project-dossier/SKILL.md",
+  },
 ] as const;
