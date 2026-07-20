@@ -52,7 +52,7 @@ Notes that save debugging time:
 Do **not** hand-implement the executable interface — the source marks it "DO NOT IMPLEMENT THIS MANUALLY!". The supported pattern is the `AxelarExecutable` derive macro plus a `CustomAxelarExecutable` impl with two functions: `__gateway` (which gateway to trust) and `__execute` (your logic). The macro generates the public `execute` entrypoint and **guarantees the gateway's `validate_message` has already succeeded** before `__execute` runs. Verbatim from Axelar's own [example contract](https://github.com/axelarnetwork/axelar-amplifier-stellar/tree/main/contracts/stellar-axelar-example):
 
 ```rust
-use stellar_axelar_gateway::executable::CustomAxelarExecutable;
+use stellar_axelar_gateway::executable::{AxelarExecutableInterface, CustomAxelarExecutable};
 use stellar_axelar_std::AxelarExecutable;
 
 #[contract]
@@ -78,6 +78,8 @@ impl CustomAxelarExecutable for AxelarExample {
     }
 }
 ```
+
+Two compile-verified requirements the example doesn't spell out: `AxelarExecutableInterface` must be in scope (the derive-generated code references it — omitting the import fails with E0405), and your error enum must define a `NotApproved` variant, because the generated `execute` maps the gateway's validation failure onto it.
 
 Under the hood the generated `execute` calls the Gateway's `validate_message`, which authenticates the exact message (chain, id, sender, payload hash) and flips it to executed so it cannot replay:
 
