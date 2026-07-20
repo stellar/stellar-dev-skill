@@ -17,20 +17,21 @@ The full component set (ULN 302 message libraries, executor, price feed, treasur
 
 ## OApp: the Soroban contract pattern
 
-Source of truth: [LayerZero-Labs/monorepo-external](https://github.com/LayerZero-Labs/monorepo-external) — the protocol contracts (`contracts/protocol/stellar/`), the OApp packages (`apps/oapp-app/contracts/stellar/`), and the worked reference at `apps/project-types/omni-counter-app/contracts/stellar/`. The skeleton below is condensed from that counter example; every name is verified against it.
+Source of truth: [LayerZero-Labs/monorepo-external](https://github.com/LayerZero-Labs/monorepo-external) — the protocol contracts (`contracts/protocol/stellar/`), the OApp packages (`apps/oapp-app/contracts/stellar/`), and the worked reference at `apps/project-types/omni-counter-app/contracts/stellar/`. The skeleton below is compile-verified: a minimal OApp of exactly this shape builds to `wasm32v1-none` against the monorepo crates with the full receive surface exported.
 
 ```rust
-use common_macros::{contract_impl, lz_contract, only_auth};
-use endpoint_v2::{LayerZeroEndpointV2Client, MessagingFee, Origin};
+use common_macros::{contract_impl, lz_contract};
+use endpoint_v2::{MessagingFee, Origin};
 use oapp::{
     oapp_core::{init_ownable_oapp, OAppCore},
     oapp_receiver::{LzReceiveInternal, OAppReceiver},
     oapp_sender::{FeePayer, OAppSenderInternal},
 };
 use oapp_macros::oapp;
+use soroban_sdk::{Address, Bytes, BytesN, Env};
 
 #[lz_contract]
-#[oapp(custom = [receiver])]
+#[oapp]
 pub struct MyOApp;
 
 #[contract_impl]
@@ -71,6 +72,7 @@ impl LzReceiveInternal for MyOApp {
 The shape rhymes with Axelar's derive pattern, and the same division of labor applies:
 
 - The `#[oapp]` macro generates the public surface (`OAppCore`, sender internals, the `lz_receive` entrypoint, options handling). The generated `lz_receive` does peer validation and `endpoint.clear()` **before** dispatching to your `__lz_receive` — don't reimplement either.
+- **`custom = [receiver]` is a footgun.** Passing `#[oapp(custom = [receiver])]` tells the macro to *skip* generating the receiver surface; unless you then supply your own `#[contract_impl(contracttrait)] impl OAppReceiver` (as the counter example does, to customize `next_nonce`), the contract **compiles cleanly but exports no `lz_receive` at all** — an OApp that silently cannot receive. Use plain `#[oapp]` unless you're deliberately taking that surface over. (Compile-verified both ways by inspecting the wasm exports.)
 - **Peers must be set on both sides.** `set_peer(&dst_eid, &Some(remote_oapp_bytes32), &caller)` on Stellar, and the mirror call on the destination OApp. A message from an unset peer never reaches `__lz_receive`.
 - **Fees are quoted, then paid in the chain's native token** (XLM on Stellar — the endpoint exposes `native_token()`). Quote with `__quote` into a `MessagingFee` and pass it to `__lz_send`; underquoting fails the send.
 - **Auth is Soroban-native.** `require_auth()` replaces EVM's `msg.sender` checks throughout, and `FeePayer::{Verified, Unverified}` exists specifically to avoid double-auth in the auth tree.
