@@ -177,6 +177,5 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "CheesecakeLabs/stellar-anchor-skill",
     copyValue:
       "https://github.com/CheesecakeLabs/stellar-anchor-skill/blob/main/SKILL.md",
-    category: "Ecosystem",
   },
 ] as const;
