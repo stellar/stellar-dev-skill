@@ -111,7 +111,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "Agentic Payments",
     title: "Agent Payments (x402 + MPP)",
     description:
-      "Charge AI agents for API calls with x402 paywalls or MPP payment channels.",
+      "Charge AI agents for API calls with x402 paywalls or MPP sessions settled over payment channels.",
   },
   {
     source: "skills/zk-proofs/SKILL.md",
