@@ -174,7 +174,7 @@ for (const event of events.events) {
 ### RPC Limitations
 
 - **7-day history for most methods**: `getTransaction`, `getEvents`, etc. only cover recent data
-- **`getLedgers` exception**: "Infinite Scroll" feature queries any ledger back to genesis via the data lake
+- **`getLedgers` exception**: on a data-lake-backed provider, "Infinite Scroll" pages back past the retention window — as far as that provider's data lake reaches (potentially genesis). On a plain RPC instance it is bounded by `getHealth().oldestLedger`; requests older than that fail with `-32600`. Check before assuming depth.
 - **No streaming**: Poll for updates (no WebSocket)
 - **Contract-focused**: Limited classic Stellar data
 
@@ -361,9 +361,12 @@ const allTxs = await horizonServer
   .forAccount(publicKey)
   .call();
 
-// RPC - most methods limited to 7 days
-// Exception: getLedgers can query back to genesis (Infinite Scroll)
-// For full historical data, use:
+// RPC - most methods limited to the retention window (~7 days)
+// Exception: getLedgers can page further back (Infinite Scroll), but only as far
+// as the chosen provider's retention or data-lake integration reaches.
+// Always check the floor of the instance you're talking to first:
+const { oldestLedger } = await rpc.getHealth();
+// For guaranteed full history, use:
 // 1. Hubble (SDF's BigQuery dataset)
 // 2. Galexie (data pipeline)
 // 3. Your own indexer
@@ -386,7 +389,7 @@ setInterval(pollForUpdates, 5000);
 
 ## Historical Data Access
 
-For data older than 7 days (not available via most RPC methods; `getLedgers` can reach genesis via Infinite Scroll):
+For data older than the RPC retention window (~7 days — not available via most RPC methods; `getLedgers` reaches further only on data-lake-backed providers, see [Data Lake](#data-lake) below):
 
 ### Hubble (BigQuery)
 
@@ -406,7 +409,7 @@ Self-hosted data pipeline for processing Stellar ledger data:
 
 ### Data Lake
 
-RPC "Infinite Scroll" is powered by the Stellar data lake — a cloud-based object store (SEP-0054 format):
+RPC "Infinite Scroll" is powered by the Stellar data lake — a cloud-based object store (SEP-0054 format). Deep `getLedgers` history is a property of the **provider**, not the method: an instance only serves history past its retention window if its operator wired a data lake in. Instances without one (the public SDF testnet RPC included) reject older start ledgers with JSON-RPC `-32600` — compare your target against `getHealth().oldestLedger` before paging back.
 - **Public access**: `s3://aws-public-blockchain/v1.1/stellar/ledgers/pubnet` (AWS Open Data)
 - **Self-host**: Use Galexie to export to AWS S3 or Google Cloud Storage
 - **Hosted**: [Quasar (Lightsail Network)](https://quasar.lightsail.network) provides hosted Galexie Data Lake + Archive RPC endpoints
