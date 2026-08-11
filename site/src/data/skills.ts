@@ -198,6 +198,14 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue: "https://github.com/eunomia-finance/eunomia/blob/main/SKILL.md",
   },
   {
+    title: "ROZO Checkout",
+    description:
+      "Pay for AI services with Stellar USDC. Settles an OpenRouter Coinbase Payment Link — which cannot take Stellar directly — through a one-time deposit order and automatic invoice settlement, with CLI progress, expiry countdown, and balance checks. More AI services coming.",
+    pathLabel: "RozoAI/rozo-checkout-skill",
+    copyValue:
+      "https://github.com/RozoAI/rozo-checkout-skill/blob/main/SKILL.md",
+  },
+  {
     title: "ROZO Intents",
     description:
       "Send USDC and USDT across Stellar, Ethereum, Arbitrum, Base, BSC, Polygon, and Solana using natural language. Covers cross-chain bridging, wallet detection, fee estimation, tiered confirmation logic, and QR code payment parsing inside Claude Code.",
