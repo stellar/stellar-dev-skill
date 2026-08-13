@@ -1,18 +1,25 @@
 name: triage-bot-ack
-# Instant acknowledgment for new issues and PRs, in the spirit of high-frequency
-# repo bots like openclaw/clawsweeper. The Automated Triage Bot
-# (github.com/kaankacar/Automated-Triage-Bot) does the heavy lifting on a poll;
-# this tiny workflow gives contributors an immediate signal (~seconds) that their
-# item was picked up, using only this repo's own token — no secrets required.
+# Instant acknowledgment + trigger bridge for the Automated Triage Bot
+# (github.com/kaankacar/Automated-Triage-Bot), in the spirit of high-frequency
+# repo bots like openclaw/clawsweeper.
+#
+# Two jobs:
+#   ack     — reacts with 👀 and posts a one-line acknowledgment the moment an
+#             issue or PR is opened, using only this repo's own token.
+#   forward — pings the trigger worker so the bot wakes within seconds instead
+#             of waiting for its poll. The ping carries no secrets and is
+#             zero-trust: the bot re-reads everything from the GitHub API.
 #
 # Security note: pull_request_target here never checks out or executes PR code —
-# the job only posts a reaction and a comment.
+# these jobs only post a reaction/comment and an outbound ping.
 
 on:
   issues:
     types: [opened, reopened]
+  issue_comment:
+    types: [created]
   pull_request_target:
-    types: [opened, ready_for_review]
+    types: [opened, ready_for_review, synchronize]
 
 permissions:
   issues: write
@@ -20,8 +27,10 @@ permissions:
 
 jobs:
   ack:
-    # The bot's own PRs (opened via kaankacar's token) don't need an ack.
-    if: github.actor != 'kaankacar'
+    if: >-
+      github.actor != 'kaankacar' &&
+      (github.event_name == 'issues' ||
+       (github.event_name == 'pull_request_target' && github.event.action != 'synchronize'))
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -41,3 +50,30 @@ jobs:
           fi
           printf '🤖 _Automated message from Kaan'"'"'s Automated Triage Bot._\n\n👀 Picked this up — a review will follow shortly.\n\n<!-- automated-triage-bot dispatch-ack item=%s -->\n' "$NUMBER" > /tmp/ack.md
           gh issue comment "$NUMBER" -R "${{ github.repository }}" --body-file /tmp/ack.md
+
+  forward:
+    if: >-
+      github.actor != 'kaankacar' &&
+      github.actor != 'github-actions[bot]' &&
+      github.actor != 'copilot-pull-request-reviewer[bot]' &&
+      github.actor != 'Copilot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Wake the triage bot
+        env:
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          IS_PR_EVENT: ${{ github.event_name == 'pull_request_target' }}
+          COMMENT_ON_PR: ${{ github.event.issue.pull_request != null }}
+          PR_ITEM_AUTHOR: ${{ github.event.issue.user.login || github.event.pull_request.user.login }}
+        run: |
+          # Comments on the bot's own PRs belong to the issue lane; everything
+          # PR-shaped from contributors belongs to the PR triage lane.
+          KIND="issue"
+          if [ "$IS_PR_EVENT" = "true" ] || { [ "$COMMENT_ON_PR" = "true" ] && [ "$PR_ITEM_AUTHOR" != "kaankacar" ]; }; then
+            KIND="pr"
+          fi
+          curl -fsS -X POST "https://triage-bot-trigger.sdf-ecosystem.workers.dev" \
+            -H "Content-Type: application/json" \
+            -d "{\"kind\":\"$KIND\",\"number\":$NUMBER,\"repo\":\"${{ github.repository }}\"}" \
+            || echo "trigger ping failed (non-fatal — the poll will catch it)"
