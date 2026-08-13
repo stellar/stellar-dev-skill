@@ -1,0 +1,43 @@
+name: triage-bot-ack
+# Instant acknowledgment for new issues and PRs, in the spirit of high-frequency
+# repo bots like openclaw/clawsweeper. The Automated Triage Bot
+# (github.com/kaankacar/Automated-Triage-Bot) does the heavy lifting on a poll;
+# this tiny workflow gives contributors an immediate signal (~seconds) that their
+# item was picked up, using only this repo's own token — no secrets required.
+#
+# Security note: pull_request_target here never checks out or executes PR code —
+# the job only posts a reaction and a comment.
+
+on:
+  issues:
+    types: [opened, reopened]
+  pull_request_target:
+    types: [opened, ready_for_review]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  ack:
+    # The bot's own PRs (opened via kaankacar's token) don't need an ack.
+    if: github.actor != 'kaankacar'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: React and acknowledge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+        run: |
+          gh api -X POST "repos/${{ github.repository }}/issues/$NUMBER/reactions" \
+            -f content=eyes >/dev/null || true
+          # Dedup: opened and ready_for_review can fire close together.
+          EXISTING=$(gh api "repos/${{ github.repository }}/issues/$NUMBER/comments" \
+            --jq '[.[] | select(.body | contains("automated-triage-bot dispatch-ack"))] | length')
+          if [ "${EXISTING:-0}" -gt 0 ]; then
+            echo "Already acknowledged."
+            exit 0
+          fi
+          printf '🤖 _Automated message from Kaan'"'"'s Automated Triage Bot._\n\n👀 Picked this up — a review will follow shortly.\n\n<!-- automated-triage-bot dispatch-ack item=%s -->\n' "$NUMBER" > /tmp/ack.md
+          gh issue comment "$NUMBER" -R "${{ github.repository }}" --body-file /tmp/ack.md
