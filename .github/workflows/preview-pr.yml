@@ -99,6 +99,9 @@ jobs:
         run: pnpm lint:ts
 
       - if: github.event.action != 'closed'
+        run: pnpm check:ecosystem-links
+
+      - if: github.event.action != 'closed'
         run: pnpm build
 
       - name: Verify hero text matches production SITE_ORIGIN (no PR path leak)
