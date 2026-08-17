@@ -186,6 +186,54 @@ stellar contract invoke \
 
 To upload WASM without instantiating (e.g. for factories or upgrades), use `stellar contract upload` (the older `stellar contract install` is a deprecated alias).
 
+## Verify your build
+
+Nothing on-chain ties a deployed WASM to its source. [SEP-0055](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0055.md) (Draft) closes that gap: build in GitHub Actions, stamp the source repository into the WASM's `contractmetav0` section, and publish a [GitHub build attestation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds) over the binary — anyone can then walk from the on-chain WASM hash back to the commit and the workflow run that produced it. Verifiers read the attestation from `api.github.com/repos/<owner>/<repo>/attestations/sha256:<wasm-hash>` unauthenticated, so the source repository has to be public for that "anyone" to hold; on a private repo the provenance exists but no user can check it. Make it a standard step before **any** mainnet deploy; it costs one workflow file, so there's no reason to reserve it for user-facing contracts.
+
+Two metadata entries carry it (`stellar contract build --meta key=value`, read back with `stellar contract info meta --wasm <file>`):
+
+- `source_repo=github:<owner>/<repo>` — where the source lives
+- `home_domain=<domain>` — domain serving your SEP-1 `stellar.toml`, for org/token lookup (optional; bare domain, no scheme or path)
+
+[soroban-build-workflow](https://github.com/stellar-expert/soroban-build-workflow) does the whole job — build with the metadata, optimize, attest, publish a release with the WASM attached, and register the build with stellar.expert's contract validation.
+
+Resolve its version yourself instead of copying a pin out of any documentation, this file included. Pins go stale, and the newest tag in that repo is not always a published release:
+
+```bash
+gh release view --repo stellar-expert/soroban-build-workflow --json tagName  # latest release
+gh api repos/stellar-expert/soroban-build-workflow/commits/<tag> --jq .sha   # its commit
+```
+
+Read that release's `release.yml` before wiring it in — it should check out the tagged commit, build from source, and attest the same file it uploads. If it doesn't, stop and tell the user rather than pinning it anyway. Then pin the full commit SHA, not the tag: tags are mutable, and this workflow runs with your repository token, OIDC, and attestation permissions.
+
+```yaml
+# .github/workflows/release.yml — verified build on every version tag
+name: Build and Release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:            # inherited by the called workflow, which cannot elevate them
+  contents: write       # create the release, attach the WASM
+  id-token: write       # sign the attestation
+  attestations: write   # publish it
+
+jobs:
+  release:
+    # full SHA of the release you just reviewed; keep the version in the comment
+    uses: stellar-expert/soroban-build-workflow/.github/workflows/release.yml@<commit-sha>  # vX.Y.Z
+    with:
+      release_name: ${{ github.ref_name }}
+      home_domain: example.com   # optional
+      package: my-contract       # optional — omit to build the working directory
+    secrets:
+      release_token: ${{ secrets.GITHUB_TOKEN }}   # created by GitHub, nothing to configure
+```
+
+Then deploy **the WASM attached to that release**, not a local rebuild — compilation environments vary, and a hash that differs by one byte matches no attestation.
+
+The result shows up in [Stellar Lab's contract explorer](https://developers.stellar.org/docs/tools/lab/smart-contracts/contract-explorer#build-info) and on stellar.expert. Be precise with users about what it proves: a specific workflow run built this binary from this commit. It says nothing about whether that code is safe or was ever reviewed.
+
 ## Minimal test
 
 ```rust
@@ -211,7 +259,7 @@ Auth mocking, event assertions, fuzzing, fork tests, and CI setup: [testing.md](
 
 ## Before mainnet
 
-Work through the checklists in [security.md](security.md) — authorization, reinitialization, arithmetic, storage TTLs, and cross-contract validation are the recurring failure modes.
+Work through the checklists in [security.md](security.md) — authorization, reinitialization, arithmetic, storage TTLs, and cross-contract validation are the recurring failure modes. Ship the deploy through a [verified build](#verify-your-build) so the on-chain WASM hash traces back to a reviewable commit.
 
 ## Documentation
 
