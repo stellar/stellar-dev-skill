@@ -219,7 +219,7 @@ console.log("Channel closed:", txHash);
 
 ## Discovery: let agents find your paid API
 
-Charge and Session mode answer "how do I charge". Discovery answers "how does a paying agent find me". Without it you ship a working paid API that no agent can locate.
+Charge and Session modes answer one question: how do I charge? Discovery answers a second: how does a paying agent find me? Without discovery you ship a working paid API that no agent can locate.
 
 A paid MPP server publishes an [OpenAPI 3.1](https://spec.openapis.org/oas/v3.1.0) document at `GET /openapi.json`. Each paid operation carries an `x-payment-info` extension holding an `offers[]` array. Registries aggregate those documents so agents can search for paid APIs.
 
@@ -229,17 +229,23 @@ A paid MPP server publishes an [OpenAPI 3.1](https://spec.openapis.org/oas/v3.1.
 
 `mppx/express` exports `discovery()`. It mounts `GET /openapi.json` and derives each offer from the method config and the per-route handler, so the document stays in step with the Challenges the route returns.
 
+Edit the Charge mode server above — don't append this to it. A second `mppx/express` import redeclares `Mppx`, and a second `/data` route never runs.
+
 ```js
-// charge-server.js (additions to the Charge mode server above)
+// charge-server.js
+
+// 1. Replace the existing `mppx/express` import with this one.
 import { Mppx, discovery } from "mppx/express";
 
-// keep a reference to the route handler — discovery() reads the price from it
+// 2. Replace the inline app.get("/data", ...) block with these two.
+//    discovery() reads the price off the handler object, so name it.
 const pay = mppx.charge({ amount: "0.001", description: "paid API call" });
 
 app.get("/data", pay, (req, res) => {
   res.json({ result: "paid content", price: "$0.001 USDC" });
 });
 
+// 3. Add this after the route, before app.listen().
 discovery(app, mppx, {
   info: { title: "Paid Data API", version: "1.0.0" },
   routes: [{ handler: pay, method: "get", path: "/data" }],
