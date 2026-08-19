@@ -23,6 +23,7 @@ Two complementary protocols for AI-agent and machine-to-machine payments on Stel
 - Calling an x402 API from an agent → **x402 Buyer** in [x402.md](x402.md)
 - Selling an API, no facilitator dependency → **Charge mode** in [mpp.md](mpp.md)
 - Agent making many requests per session → **Session mode** in [mpp.md](mpp.md)
+- Sold an API, now want agents to find it → **Discovery** in [mpp.md](mpp.md#discovery-let-agents-find-your-paid-api)
 - Unsure → x402 (lowest friction to get started)
 
 All protocols use USDC (SEP-41 SAC) by default; `stellar:testnet` / `stellar:pubnet` CAIP-2 network IDs.
@@ -35,6 +36,7 @@ This file carries the decision table, the shared testnet account setup, and the 
 |------|------|
 | Sell a paid API via a facilitator (zero-XLM clients), build an x402 buyer agent | [x402.md](x402.md) |
 | Facilitator-free per-request payments (Charge) or channel-backed sessions (Session) | [mpp.md](mpp.md) |
+| Publish an OpenAPI discovery document so agents find your paid API | [Discovery](mpp.md#discovery-let-agents-find-your-paid-api) |
 | Create/fund testnet accounts, add USDC trustlines, get testnet USDC | [Testnet setup](#testnet-setup-shared) (below) |
 | Which USDC address goes where (classic issuer vs SAC) | [Two USDC addresses](#two-usdc-addresses-dont-confuse-them) (below) |
 
