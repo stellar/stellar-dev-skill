@@ -143,8 +143,8 @@ const mppx = Mppx.create({
   secretKey: process.env.MPP_SECRET_KEY,
   methods: [
     stellar.channel({
-      channel: process.env.CHANNEL_CONTRACT,       // C... contract address
-      commitmentKey: process.env.COMMITMENT_PUBKEY, // 64-char hex ed25519 public key
+      channel: process.env.MPP_CHANNEL_CONTRACT,       // C... contract address
+      commitmentKey: process.env.MPP_COMMITMENT_KEY,   // 64-char hex ed25519 public key
       store: Store.memory(), // dev only — use persistent store in production
       network: "stellar:testnet",
     }),
@@ -204,7 +204,7 @@ import { close } from "@stellar/mpp/channel/server";
 import * as StellarSdk from "@stellar/stellar-sdk";
 
 const txHash = await close({
-  channel: process.env.CHANNEL_CONTRACT,
+  channel: process.env.MPP_CHANNEL_CONTRACT,
   amount: lastCumulativeAmount, // bigint, total USDC owed in base units
   signature: lastCommitmentSignature, // hex string from final commitment
   feePayer: { envelopeSigner: StellarSdk.Keypair.fromSecret(process.env.FEE_PAYER_SECRET) },
@@ -214,8 +214,144 @@ const txHash = await close({
 console.log("Channel closed:", txHash);
 ```
 
-**Env vars (server):** `CHANNEL_CONTRACT`, `COMMITMENT_PUBKEY`, `MPP_SECRET_KEY`, `FEE_PAYER_SECRET`
+**Env vars (server):** `MPP_CHANNEL_CONTRACT`, `MPP_COMMITMENT_KEY`, `MPP_SECRET_KEY`, `FEE_PAYER_SECRET`
 **Env vars (client):** `COMMITMENT_SECRET`
+
+## Production patterns
+
+Three patterns for running Charge and Session behind the same server,
+verified against a service that's been billing real USDC over MPP Charge
+in production since before this skill existed.
+
+### Recipient resolution (fail open, not crash)
+
+Two failure modes hit real deployments: `STELLAR_RECIPIENT` isn't set
+yet (CI, a fresh environment before secrets are provisioned), or it's
+set to the wrong value — a secret key (`S...`) pasted where the public
+key belongs, which happens more than you'd expect when a platform's env
+var UI doesn't visually distinguish the two. Neither should crash the
+server at import time.
+
+```js
+import { Keypair } from "@stellar/stellar-sdk";
+
+function resolveRecipient() {
+  let raw = (process.env.STELLAR_RECIPIENT || "").trim().replace(/['"]/g, "");
+  if (!raw) return "";
+
+  if (raw.startsWith("S")) {
+    // A secret key was set where the public key belongs — recover instead
+    // of failing. Warn loudly; this should get fixed, not silently relied on.
+    try {
+      const pub = Keypair.fromSecret(raw).publicKey();
+      console.warn(`STELLAR_RECIPIENT is a secret key — derived public key: ${pub.slice(0, 8)}...`);
+      return pub;
+    } catch {
+      console.error("STELLAR_RECIPIENT looks like a secret key but failed to parse — disabling MPP");
+      return "";
+    }
+  }
+  return raw;
+}
+
+const RECIPIENT = resolveRecipient();
+
+let chargeMppx = null;
+if (RECIPIENT && process.env.MPP_SECRET_KEY) {
+  chargeMppx = Mppx.create({ /* ... */ });
+} else {
+  console.warn("MPP_SECRET_KEY or STELLAR_RECIPIENT not set — MPP charge middleware disabled");
+}
+
+// Every route's middleware checks the instance, not the env var directly:
+export function mppChargeMiddleware(amount, description) {
+  return async (req, res, next) => {
+    if (!chargeMppx) {
+      res.setHeader("X-MPP-Warning", "MPP not configured on this server");
+      return next(); // route still responds — unpriced, not broken
+    }
+    // ... normal charge flow
+  };
+}
+```
+
+The `S...`-key recovery is the case worth stealing even if you don't
+need the rest: it turns a silent misconfiguration into a loud warning
+plus a working server, instead of a `Keypair.fromPublicKey` throw three
+layers down in the SDK with no context about which env var caused it.
+
+### Optional dual-intent server
+
+Charge and Session don't have to be an either/or choice at the code
+level. Give each mode its own `Mppx` instance, initialize it only when
+its full config is present, and let route middleware no-op — not
+throw — when the instance for that intent is `null`. Charge's and
+Session's server adapters both export their namespace as `stellar` (see
+the Charge and Channel server imports above), so combining them in one
+file means aliasing one — here Channel's becomes `stellarChannel`:
+
+```js
+import { Mppx } from "mppx/express";
+import * as stellar from "@stellar/mpp/charge/server";
+import * as stellarChannel from "@stellar/mpp/channel/server";
+
+// RECIPIENT is the resolveRecipient() result from the pattern above.
+
+const chargeMppx = (RECIPIENT && process.env.MPP_SECRET_KEY)
+  ? Mppx.create({ methods: [stellar.charge({ recipient: RECIPIENT, /* ... */ })] })
+  : null;
+
+const sessionMppx = (
+  process.env.MPP_CHANNEL_CONTRACT &&
+  process.env.MPP_COMMITMENT_KEY &&
+  RECIPIENT &&
+  process.env.MPP_SECRET_KEY
+)
+  ? Mppx.create({ methods: [stellarChannel.channel({ channel: process.env.MPP_CHANNEL_CONTRACT, /* ... */ })] })
+  : null;
+
+export const isSessionEnabled = () => !!sessionMppx;
+```
+
+This is the pattern actually running in production: Charge mode is
+initialized and billing; Session mode's instance is `null` there today,
+by choice — it requires deploying and funding a channel contract per
+deployment, a step that carries custody implications worth a compliance
+pass before turning on for a given business. Session works the same way
+Charge does once its four env vars are set; nothing in the server code
+changes when you flip it on later. What this pattern buys you is
+shipping Charge on day one without a rewrite pending.
+
+### Runtime status endpoint (`/info`)
+
+Not the OpenAPI discovery document below — this is a lighter, unauthenticated
+health check specific to this server's own deployment. A client (human or
+agent) shouldn't have to guess which intents are live. Report the true
+runtime state, not a static capability list — `enabled` reflects whether
+the instance actually initialized, which is also a live health check:
+
+```js
+app.get("/info", (_req, res) => {
+  res.json({
+    protocol: "mpp",
+    intents: {
+      charge: {
+        enabled: !!chargeMppx,
+        routes: { data: { path: "/data", price: "0.001 USDC" } },
+      },
+      session: {
+        enabled: isSessionEnabled(),
+        channelContract: process.env.MPP_CHANNEL_CONTRACT || null,
+        note: "Off-chain cumulative commitments, two on-chain txs total (deposit + close).",
+      },
+    },
+  });
+});
+```
+
+An agent that reads this before its first request can pick a working
+intent instead of finding out from a 500 that Session was never
+configured.
 
 ## Discovery: let agents find your paid API
 
