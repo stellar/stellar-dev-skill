@@ -149,7 +149,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Scaffold a Stellar smart contract project with OpenZeppelin's audited Stellar contract libraries. Walks through Rust toolchain setup, Stellar CLI install, workspace dependencies, and applying the pausable and ownable macros to your contract.",
     pathLabel: "OpenZeppelin/openzeppelin-skills",
     copyValue:
-      "https://github.com/OpenZeppelin/openzeppelin-skills/blob/main/skills/setup-stellar-contracts/SKILL.md",
+      "https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-skills/main/skills/setup-stellar-contracts/SKILL.md",
   },
   {
     title: "DeFindex SDK",
@@ -157,14 +157,14 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Integrate DeFindex vaults on Stellar with the @defindex/sdk TypeScript package. Covers vault deposits and withdrawals, balance and APY queries, programmatic vault creation, and the unsigned-XDR signing pattern for backend and bot integrations.",
     pathLabel: "paltalabs/defindex-sdk",
     copyValue:
-      "https://github.com/paltalabs/defindex-sdk/blob/main/defindex-sdk-skill.md",
+      "https://raw.githubusercontent.com/paltalabs/defindex-sdk/main/defindex-sdk-skill.md",
   },
   {
     title: "Soroswap SDK",
     description:
       "Trade on Soroswap DEX from a backend, bot, or swap widget using the @soroswap/sdk TypeScript package. Covers token swaps, liquidity pool operations, price and route queries, API key handling, and signing flows for both server keypairs and browser wallets.",
     pathLabel: "soroswap/sdk",
-    copyValue: "https://github.com/soroswap/sdk/blob/main/soroswap-sdk-skill.md",
+    copyValue: "https://raw.githubusercontent.com/soroswap/sdk/main/soroswap-sdk-skill.md",
   },
   {
     title: "Trustless Work Escrow",
@@ -172,7 +172,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Build escrow and milestone-based payment workflows on Stellar with the Trustless Work platform. Covers single-release and multi-release escrows, trustline configuration, dispute handling, and three integration paths: REST API, React SDK hooks, and pre-built Blocks UI components.",
     pathLabel: "Trustless-Work/trustless-work-dev-skill",
     copyValue:
-      "https://github.com/Trustless-Work/trustless-work-dev-skill/blob/main/SKILL.md",
+      "https://raw.githubusercontent.com/Trustless-Work/trustless-work-dev-skill/main/SKILL.md",
   },
   {
     title: "Agent Browser WebAuthn",
@@ -180,7 +180,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Drive passkey and Stellar smart account browser tests with agent-browser and Chrome DevTools virtual WebAuthn authenticators.",
     pathLabel: "kalepail/skills",
     copyValue:
-      "https://github.com/kalepail/skills/blob/main/skills/agent-browser-webauthn/SKILL.md",
+      "https://raw.githubusercontent.com/kalepail/skills/main/skills/agent-browser-webauthn/SKILL.md",
   },
   {
     title: "Anchors",
@@ -188,14 +188,14 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Integrate with or build Stellar anchors (fiat on/off-ramps, deposits/withdrawals, KYC). Covers core SEP flows (1/6/10/12/24/31/38) and common integration pitfalls.",
     pathLabel: "CheesecakeLabs/stellar-anchor-skill",
     copyValue:
-      "https://github.com/CheesecakeLabs/stellar-anchor-skill/blob/main/SKILL.md",
+      "https://raw.githubusercontent.com/CheesecakeLabs/stellar-anchor-skill/main/SKILL.md",
   },
   {
     title: "Eunomia Bounded Agent Treasury",
     description:
       "Give an AI agent a non-custodial, contract-bounded spending account on Stellar with Eunomia (formerly PRISM). Covers treasury deployment with per-payment and rolling daily limits, payee whitelists, time-bound agent session keys, escrow, x402-gated payments, and Groth16/BN254 ZK compliance proofs verified on-chain.",
     pathLabel: "eunomia-finance/eunomia",
-    copyValue: "https://github.com/eunomia-finance/eunomia/blob/main/SKILL.md",
+    copyValue: "https://raw.githubusercontent.com/eunomia-finance/eunomia/main/SKILL.md",
   },
   {
     title: "ROZO Intents",
@@ -203,7 +203,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Send USDC and USDT across Stellar, Ethereum, Arbitrum, Base, BSC, Polygon, and Solana using natural language. Covers cross-chain bridging, wallet detection, fee estimation, tiered confirmation logic, and QR code payment parsing inside Claude Code.",
     pathLabel: "RozoAI/rozo-intents-skills",
     copyValue:
-      "https://github.com/RozoAI/rozo-intents-skills/blob/main/SKILL.md",
+      "https://raw.githubusercontent.com/RozoAI/rozo-intents-skills/main/SKILL.md",
   },
   {
     title: "Caatinga",
@@ -211,7 +211,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Deploy and manage Soroban contract lifecycles with the Caatinga CLI (ctg). Covers the init → doctor → build → deploy → generate → invoke workflow, the multi-contract Deployment Graph, versioned caatinga.artifacts.json as the source of truth for contract IDs, generated TypeScript bindings, and wallet adapters (Freighter, Stellar Wallets Kit) — with hard rules against raw secret keys on the command line and hand-edited artifacts or bindings.",
     pathLabel: "Dione-b/caatinga-skill",
     copyValue:
-      "https://github.com/Dione-b/caatinga-skill/blob/master/skills/caatinga/SKILL.md",
+      "https://raw.githubusercontent.com/Dione-b/caatinga-skill/master/skills/caatinga/SKILL.md",
   },
   {
     title: "Sozu Testnet USDC Faucet",
@@ -219,7 +219,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Claim Circle USDC on Stellar testnet with a PoW-gated CLI, using an existing C…/G… address or a newly generated G… wallet with a USDC trustline.",
     pathLabel: "blessedux/agent-skills",
     copyValue:
-      "https://github.com/blessedux/agent-skills/blob/main/sozu-faucet/SKILL.md",
+      "https://raw.githubusercontent.com/blessedux/agent-skills/main/sozu-faucet/SKILL.md",
   },
   {
     title: "LumenLoop MCP Connect",
@@ -227,7 +227,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Connect any MCP client (Claude, ChatGPT, Gemini, Cursor) to LumenLoop's free read-only Stellar ecosystem MCP and learn its query tools for directory, content, and SCF data.",
     pathLabel: "lumenloop/lumenloop-skills",
     copyValue:
-      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/lumenloop-mcp-connect/SKILL.md",
+      "https://raw.githubusercontent.com/lumenloop/lumenloop-skills/main/skills/lumenloop-mcp-connect/SKILL.md",
   },
   {
     title: "SCF Submission Radar",
@@ -235,7 +235,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Position a Stellar Community Fund idea against prior submissions before applying: find similar past proposals, check what's been funded in an area, and sharpen positioning.",
     pathLabel: "lumenloop/lumenloop-skills",
     copyValue:
-      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/scf-submission-radar/SKILL.md",
+      "https://raw.githubusercontent.com/lumenloop/lumenloop-skills/main/skills/scf-submission-radar/SKILL.md",
   },
   {
     title: "Stellar Builder Quickstart",
@@ -243,7 +243,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Go from a Stellar product idea to a build path: pick the right primitives, check ecosystem prior art via LumenLoop, and route to the relevant build skill.",
     pathLabel: "lumenloop/lumenloop-skills",
     copyValue:
-      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-builder-quickstart/SKILL.md",
+      "https://raw.githubusercontent.com/lumenloop/lumenloop-skills/main/skills/stellar-builder-quickstart/SKILL.md",
   },
   {
     title: "Stellar Content Auditor",
@@ -251,7 +251,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Audit draft posts and announcements against Stellar ecosystem data: resolve project names and X handles, pull supporting citations, and flag unsupported claims.",
     pathLabel: "lumenloop/lumenloop-skills",
     copyValue:
-      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-content-auditor/SKILL.md",
+      "https://raw.githubusercontent.com/lumenloop/lumenloop-skills/main/skills/stellar-content-auditor/SKILL.md",
   },
   {
     title: "Stellar Ecosystem Digest",
@@ -259,7 +259,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Produce a dated, cited digest of recent Stellar ecosystem activity on a theme or entity from indexed news, talks, events, and research.",
     pathLabel: "lumenloop/lumenloop-skills",
     copyValue:
-      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-ecosystem-digest/SKILL.md",
+      "https://raw.githubusercontent.com/lumenloop/lumenloop-skills/main/skills/stellar-ecosystem-digest/SKILL.md",
   },
   {
     title: "Stellar Ecosystem Scout",
@@ -267,7 +267,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Map a sector of the Stellar ecosystem into a landscape of projects, categories, and regions using the LumenLoop directory and semantic search.",
     pathLabel: "lumenloop/lumenloop-skills",
     copyValue:
-      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-ecosystem-scout/SKILL.md",
+      "https://raw.githubusercontent.com/lumenloop/lumenloop-skills/main/skills/stellar-ecosystem-scout/SKILL.md",
   },
   {
     title: "Stellar Integration Finder",
@@ -275,7 +275,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Find the right existing Stellar project or tool to integrate (wallet, oracle, anchor, DEX, indexer) via the LumenLoop directory, then route to the matching build skill.",
     pathLabel: "lumenloop/lumenloop-skills",
     copyValue:
-      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-integration-finder/SKILL.md",
+      "https://raw.githubusercontent.com/lumenloop/lumenloop-skills/main/skills/stellar-integration-finder/SKILL.md",
   },
   {
     title: "Stellar Project Dossier",
@@ -283,7 +283,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Build a due-diligence profile of a single Stellar project: details, related content, talks, SCF history, and similar projects from the LumenLoop directory.",
     pathLabel: "lumenloop/lumenloop-skills",
     copyValue:
-      "https://github.com/lumenloop/lumenloop-skills/blob/main/skills/stellar-project-dossier/SKILL.md",
+      "https://raw.githubusercontent.com/lumenloop/lumenloop-skills/main/skills/stellar-project-dossier/SKILL.md",
   },
   {
     title: "Stellar Scout",
@@ -298,7 +298,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Integrate sealed coordination into Stellar apps with @sub-rosa/sdk: run sealed-bid asset auctions with SAC escrow and atomic lot settlement, confidential proposal rounds, Drand-timed reveal, permissionless lifecycle automation, and verifiable Core v2 receipts.",
     pathLabel: "karagozemin/Sub-Rosa",
     copyValue:
-      "https://github.com/karagozemin/Sub-Rosa/blob/main/skills/sub-rosa/SKILL.md",
+      "https://raw.githubusercontent.com/karagozemin/Sub-Rosa/main/skills/sub-rosa/SKILL.md",
   },
   {
     title: "ROZO Checkout",
@@ -306,7 +306,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Pay for AI services with Stellar USDC — e.g. OpenRouter and Venice.ai, which cannot take Stellar directly — through a one-time deposit order and automatic invoice settlement. More AI services coming.",
     pathLabel: "RozoAI/rozo-checkout-skill",
     copyValue:
-      "https://github.com/RozoAI/rozo-checkout-skill/blob/main/SKILL.md",
+      "https://raw.githubusercontent.com/RozoAI/rozo-checkout-skill/main/SKILL.md",
   },
   {
     title: "MPP Discover",
@@ -314,7 +314,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Find and pay APIs from 90+ services with Stellar USDC through MPP Router — including OpenAI, Anthropic, DeepSeek, Perplexity, Exa, Firecrawl, and Tavily. An agent fetches the live service catalog, picks a service, and settles per request. Every verified service is backed by a real paid call with a published Stellar transaction hash.",
     pathLabel: "mpprouter/stellar-agent-wallet-skill",
     copyValue:
-      "https://github.com/mpprouter/stellar-agent-wallet-skill/blob/main/skills/discover/SKILL.md",
+      "https://raw.githubusercontent.com/mpprouter/stellar-agent-wallet-skill/main/skills/discover/SKILL.md",
   },
   {
     title: "Stellar Agent Search",
@@ -322,7 +322,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Read-only, keyless MCP server that lets an AI agent discover, rank, and vet on-chain Stellar 8004 agents on mainnet by natural-language query, stopping before any payment or signing.",
     pathLabel: "berkingurcan/stellar-agent-search",
     copyValue:
-      "https://github.com/berkingurcan/stellar-agent-search/blob/main/skills/mcp/SKILL.md",
+      "https://raw.githubusercontent.com/berkingurcan/stellar-agent-search/main/skills/mcp/SKILL.md",
   },
   {
     title: "Cogladius",
@@ -330,7 +330,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Register an AI agent to earn XLM by completing on-chain tasks: one-call permissionless registration, task polling, solution submission, and payout from a non-custodial Soroban escrow on an ed25519-verified judge verdict.",
     pathLabel: "furkanyesildag/cogladius",
     copyValue:
-      "https://github.com/furkanyesildag/cogladius/blob/main/SKILL.md",
+      "https://raw.githubusercontent.com/furkanyesildag/cogladius/main/SKILL.md",
   },
   {
     title: "Soroban Common Mistakes",
@@ -338,14 +338,14 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Review Soroban contracts against 23 recurring security mistakes before shipping: missing authorization, storage and TTL pitfalls, arithmetic overflow, and unsafe panic handling. Ships with a reviewable checklist, a PR template, and a Scout CI workflow. Available in English and Spanish.",
     pathLabel: "mariaelisaaraya/stellar-security-guide",
     copyValue:
-      "https://github.com/mariaelisaaraya/stellar-security-guide/blob/main/skills/soroban-common-mistakes/SKILL.md",
+      "https://raw.githubusercontent.com/mariaelisaaraya/stellar-security-guide/main/skills/soroban-common-mistakes/SKILL.md",
   },
   {
     title: "StellarTools",
     description:
       "Stripe-level payment infrastructure for Stellar. Accept crypto and fiat payments with hosted checkouts, Soroban-powered subscriptions with flexible billing periods, customer portals, and normalized webhooks. Includes WooCommerce and Shopify adapters, an apps marketplace, and an MCP server for agent-driven payment management. ⁠",
     pathLabel: "payrouteshq/stellartools",
-    copyValue: "https://github.com/payrouteshq/stellartools/blob/main/SKILL.md",
+    copyValue: "https://raw.githubusercontent.com/payrouteshq/stellartools/main/SKILL.md",
   },
   {
     title: "Nirium Agentic Payments",
@@ -353,7 +353,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Charge AI agents per API call on Stellar with the Nirium toolkit: scaffold a working x402 seller with nirium-cli in one command, charge per route with x402Serve() from the nirium SDK, and read live protocol data, market state, autonomous loop status, and execution nodes through the nirium-mcp server. Live on mainnet since July 9, 2026.",
     pathLabel: "nirium-protocol/nirium-sdk",
     copyValue:
-      "https://github.com/nirium-protocol/nirium-sdk/blob/main/skills/nirium-agentic-payments/SKILL.md",
+      "https://raw.githubusercontent.com/nirium-protocol/nirium-sdk/main/skills/nirium-agentic-payments/SKILL.md",
   },
   {
     title: "Contextio SDK",
@@ -361,7 +361,7 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "Integrate contextio-sdk: verifiable, non-custodial legal context binding (Legal Context Protocol / LCP) for Stellar treasury and payroll. Covers Sign In With Stellar (SEP-53) wallet auth, reading a tenant's treasury/payroll/agent state, triggering an agent proposal, and independently hashing/verifying an LCP document against an on-chain hash.",
     pathLabel: "Eras256/Contextio",
     copyValue:
-      "https://github.com/Eras256/Contextio/blob/main/packages/sdk/SKILL.md",
+      "https://raw.githubusercontent.com/Eras256/Contextio/main/packages/sdk/SKILL.md",
   },
   {
     title: "PMLL",
