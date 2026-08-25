@@ -230,7 +230,7 @@ Directories (Stellar Ecosystem, SCF Project Tracker) and funding programs (SCF, 
 ## Community
 
 ### Developer Resources
-- [Stellar Developers Discord](https://discord.gg/stellar)
+- [Stellar Developers Discord](https://discord.gg/stellardev)
 - [Stellar Stack Exchange](https://stellar.stackexchange.com)
 - [GitHub Discussions](https://github.com/stellar/stellar-protocol/discussions)
 
