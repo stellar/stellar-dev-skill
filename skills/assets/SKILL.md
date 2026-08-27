@@ -406,6 +406,19 @@ SAC implements the standard SEP-41 token interface:
 > compatibility of a normal asset (DEX, anchors, wallets, trustlines) while
 > still layering on custom logic. Prefer a custom contract token only when
 > you need token behavior the SAC genuinely cannot express.
+>
+> **This runs in production today.** USDT0
+> (`USDT0:GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q`) is a
+> classic asset whose SAC admin is a contract: a role-gated manager that
+> forwards `mint`, `clawback`, `set_authorized`, and `set_admin` to the SAC,
+> with a cross-chain bridge holding only the minter role. See
+> [setting a custom SAC admin](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)
+> for the pattern and `../cross-chain/layerzero.md` for that deployment.
+>
+> One hard prerequisite: **lock the issuer** (master key weight `0`) before
+> handing administration to a contract. Payments from a classic issuer are
+> minting, so an unlocked issuer can mint outside the contract and bypass
+> the role model entirely.
 
 ### Use SAC When:
 - Need a Stellar asset inside a smart contract
@@ -460,6 +473,59 @@ const stats = await server
 // - flags: issuer flags
 ```
 
+### Pre-Listing Check (read-only)
+
+Before you list an asset, display it, or accept it as collateral, answer four
+questions from the ledger itself. Everything below **simulates only** —
+`--send=no` never signs or submits, and no step needs a key.
+
+USDT0 as the worked example (an asset with a locked issuer, a contract admin,
+and no `stellar.toml`):
+
+```bash
+ISSUER=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q
+SAC=CBSJZEIO5C7KC2SF3MKSNXXJSW5G3VTNBX4ATMKUI3B2MR4JKM4R26YF
+
+# 1. Is the issuer locked, and which flags are set?
+#    Look for: signers all weight 0 (locked), auth_revocable,
+#    auth_clawback_enabled, auth_immutable, and whether home_domain exists.
+stellar ledger entry fetch account --account $ISSUER --network mainnet
+
+# 2. Does the SAC address actually derive from this asset?
+#    Derive it yourself — never trust a SAC address from a website.
+stellar contract id asset --asset USDT0:$ISSUER --network mainnet   # must equal $SAC
+
+# 3. Does the contract agree about what it wraps?
+stellar contract invoke --id $SAC --source-account alice \
+  --network mainnet --send=no -- name      # "USDT0:GATISXX6…"
+stellar contract invoke --id $SAC --source-account alice \
+  --network mainnet --send=no -- symbol    # "USDT0"
+stellar contract invoke --id $SAC --source-account alice \
+  --network mainnet --send=no -- decimals  # 7 for every classic asset
+
+# 4. Who administers it? The instance entry carries the executable and admin.
+stellar ledger entry fetch contract-data --contract $SAC --instance \
+  --output json-formatted --network mainnet
+```
+
+Reading the results:
+
+- **Step 2 is the identity check**, not the domain. A real SAC's contract
+  instance has a `stellar_asset` executable rather than a Wasm hash, and its
+  `name()`/`symbol()` report the wrapped asset. Per the
+  [SAC docs](https://developers.stellar.org/docs/tokens/stellar-asset-contract#contract-interface),
+  a contract address and a current `admin` value are not by themselves proof
+  of provenance — verify the executable first, because `set_admin` can move
+  administration at any time.
+- **A locked issuer plus a contract admin is a deliberate design**, not a red
+  flag: it is how a classic asset gets programmable minting. But it moves the
+  trust question to that contract's roles, so identify the role holders.
+- **An unlocked issuer with clawback enabled is the actual risk.** The issuer
+  can then mint and claw back directly, whatever any admin contract says.
+- If the asset is bridged, read the bridge contract too — for a LayerZero
+  OFT: `token`, `shared_decimals`, `oft_type`, `endpoint`, and `is_paused`.
+  See `../cross-chain/layerzero.md`.
+
 ## SEP Standards for Assets
 
 ### SEP-0001 (stellar.toml)
@@ -513,3 +579,11 @@ Standard contract interface for NFTs on Stellar. Reference implementations avail
 - Be cautious of assets with clawback enabled
 - Verify stellar.toml from authoritative source
 - Use well-known asset lists for common tokens
+- **Some live assets have no `stellar.toml` at all.** A missing `home_domain`
+  is not evidence of a scam — USDT0 ships without one. Validate by issuer
+  plus SAC derivation, never by the presence of `home_domain` or a
+  `[[CURRENCIES]]` entry
+- **When `AUTH_REVOCABLE` and `AUTH_CLAWBACK_ENABLED` are both set, find out
+  who holds the admin role before listing the asset.** Those flags mean
+  balances can be frozen or clawed back, and if the SAC admin is a contract
+  the real authority is whoever holds its roles — not the issuer account
