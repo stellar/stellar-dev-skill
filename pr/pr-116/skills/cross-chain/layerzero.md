@@ -96,7 +96,7 @@ stellar contract invoke --id CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINK
      --send_param '{"dst_eid":30101,"to":"<32-byte hex>","amount_ld":"10000000","min_amount_ld":"9950000","extra_options":"","compose_msg":"","oft_cmd":""}'
 ```
 
-**Fees are paid in XLM.** `quote_send` returns a `MessagingFee`; `native_fee` is XLM in stroops, and `send` transfers it to the endpoint through the native SAC. A recent mainnet send of `0.5` USDT0 to Arbitrum cost `4864058` stroops (about `0.486` XLM) — quote it, never assume it. `refund_address` receives any excess.
+**Fees are paid in XLM.** `quote_send` returns a `MessagingFee`; `native_fee` is XLM in stroops, and `send` transfers it to the endpoint through the native SAC. The fee tracks the destination route, the DVN set, and executor pricing, so quote every send and never reuse a number from a previous one. `refund_address` receives any excess.
 
 One transaction does the whole outbound leg: `send` burns on the SAC and pays the fee inside a single auth tree, so the sender signs once.
 
@@ -122,8 +122,8 @@ Pathway coverage grows: mainnet traffic in late August 2026 already spanned Ethe
 
 ### Limitations and status notes
 
-- **No USDT0 testnet deployment.** USDT0's deployments page lists no Stellar testnet entry (checked 2026-08-27), so a testnet round trip of USDT0 itself is not available. Rehearse instead with LayerZero's own testnet endpoint (EID `40600`) and your own OApp or OFT, and keep mainnet USDT0 work to read-only simulation until the flow is proven.
-- **Testnet sends were previously blocked** by `#1213 UnsupportedMessageLib` (the required DVN did not support the endpoint's only registered message library, August 2026). The testnet endpoint has been redeployed since, so re-check current status rather than treating that error as permanent.
+- **No USDT0 testnet deployment.** USDT0's deployments page lists no Stellar testnet entry (checked 2026-08-27), so a testnet round trip of USDT0 itself is not available. Keep mainnet USDT0 work to read-only simulation until the flow is proven.
+- **A testnet rehearsal is not guaranteed.** You can deploy your own OApp or OFT against the testnet endpoint (EID `40600`), but testnet sends failed with `#1213 UnsupportedMessageLib` in August 2026 — the required DVN did not support the endpoint's only registered message library. That endpoint has been redeployed since, and this file does not record a successful testnet send after it. Send one small testnet message and confirm delivery before you treat testnet as a rehearsal path.
 - Fee basis points, rate limits, and the pause flag are live configuration — see the table above.
 - Anything deeper on deployment and wiring belongs to the [Stellar OFT docs](https://docs.layerzero.network/v2/developers/stellar/oft/overview) and the [OFT standard](https://docs.layerzero.network/v2/concepts/applications/oft-standard).
 
@@ -131,7 +131,7 @@ Pathway coverage grows: mainnet traffic in late August 2026 already spanned Ethe
 
 Source of truth: [LayerZero-Labs/monorepo-external](https://github.com/LayerZero-Labs/monorepo-external) — the protocol contracts (`contracts/protocol/stellar/`), the OApp packages (`apps/oapp-app/contracts/stellar/`), the OFT and SAC-manager contracts (`apps/oft-app/contracts/stellar/`), and the worked reference at `apps/project-types/omni-counter-app/contracts/stellar/`. There is no Stellar package in the public `LayerZero-v2` repo and no LayerZero Stellar crate on crates.io — work from this monorepo.
 
-The skeleton below compiles to `wasm32v1-none` with the full receive surface exported, and every import path and argument order in it was re-checked against the monorepo on 2026-08-27.
+Every import path, argument order, and trait signature below was checked against the monorepo at HEAD on 2026-08-27. It is a skeleton, not a compiled artifact: build it yourself for `wasm32v1-none` before you trust it, and confirm `lz_receive` appears in the exported interface.
 
 ```rust
 use common_macros::{contract_impl, lz_contract};

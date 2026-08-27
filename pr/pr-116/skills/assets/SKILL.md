@@ -475,7 +475,7 @@ const stats = await server
 
 ### Pre-Listing Check (read-only)
 
-Before you list an asset, display it, or accept it as collateral, answer four
+Before you list an asset, display it, or accept it as collateral, answer five
 questions from the ledger itself. Everything below **simulates only** —
 `--send=no` never signs or submits, and no step needs a key.
 
@@ -506,6 +506,22 @@ stellar contract invoke --id $SAC --source-account alice \
 # 4. Who administers it? The instance entry carries the executable and admin.
 stellar ledger entry fetch contract-data --contract $SAC --instance \
   --output json-formatted --network mainnet
+
+# 5. Is it bridged? Then read the bridge contract too.
+#    USDT0's LayerZero OFT: does it wrap this SAC, at what precision, in
+#    which mode, and is it halted right now?
+OFT=CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINKUMMF6
+
+stellar contract invoke --id $OFT --source-account alice \
+  --network mainnet --send=no -- token            # must equal $SAC
+stellar contract invoke --id $OFT --source-account alice \
+  --network mainnet --send=no -- shared_decimals  # 6: dust below it is dropped
+stellar contract invoke --id $OFT --source-account alice \
+  --network mainnet --send=no -- oft_type         # MintBurn(<SAC admin>)
+stellar contract invoke --id $OFT --source-account alice \
+  --network mainnet --send=no -- endpoint         # the LayerZero endpoint
+stellar contract invoke --id $OFT --source-account alice \
+  --network mainnet --send=no -- is_paused        # true stops every transfer
 ```
 
 Reading the results:
@@ -522,9 +538,10 @@ Reading the results:
   trust question to that contract's roles, so identify the role holders.
 - **An unlocked issuer with clawback enabled is the actual risk.** The issuer
   can then mint and claw back directly, whatever any admin contract says.
-- If the asset is bridged, read the bridge contract too — for a LayerZero
-  OFT: `token`, `shared_decimals`, `oft_type`, `endpoint`, and `is_paused`.
-  See `../cross-chain/layerzero.md`.
+- **Step 5 tells you who can mint.** `oft_type` returning `MintBurn(<address>)`
+  means that address mints on credit, so it must be the SAC admin from step 4
+  or a role holder on it. A `shared_decimals` below the SAC's 7 also means
+  sends drop the extra digits. See `../cross-chain/layerzero.md` for that rail.
 
 ## SEP Standards for Assets
 
