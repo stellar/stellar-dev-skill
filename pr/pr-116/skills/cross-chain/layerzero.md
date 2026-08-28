@@ -58,8 +58,25 @@ The SAC uses Stellar's 7 decimals. The OFT's `shared_decimals()` is **6**, the p
 ### Inbound: EVM → Stellar
 
 1. For a `G…` recipient, the trustline must exist first (rule 1 above). A `C…` recipient needs none.
-2. Send on the source chain against USDT0's OFT there, with Stellar's EID `30600` and the recipient encoded as a 32-byte value.
+2. Send on the source chain against USDT0's OFT there, with Stellar's EID `30600` and the recipient as its **decoded 32-byte strkey payload** — see below.
 3. LayerZero's DVNs verify, then the executor delivers. On Stellar the delivery lands as `ExecutorHelper.execute`, which sub-invokes `lz_receive` on the OFT; the OFT credits through the SAC manager (it holds `MINTER_ROLE`), which mints on the SAC.
+
+**Encoding the recipient is the fund-critical step.** The message carries a raw 32-byte payload, and the Stellar OFT feeds it straight to `resolve_address` (`oft-core/src/utils.rs`). Decode the strkey and send **only its payload**: the Ed25519 public key for a `G…` account, the contract ID hash for a `C…` contract. Never send the strkey string itself, and never keep its version byte or its 2-byte checksum. Any of those gives the OFT 32 different bytes, which it resolves anyway: the credit either lands on an address you do not control, or fails on a missing trustline and leaves the message undelivered. **Do not copy the CCTP pattern here** — CCTP carries the recipient strkey as UTF-8 hook data ([cctp.md](cctp.md#hook-data-layout)). LayerZero does not. It wants the raw payload:
+
+```ts
+import { StrKey } from "@stellar/stellar-sdk";
+
+function stellarRecipientToBytes32(strkey: string): `0x${string}` {
+  const raw = StrKey.isValidContract(strkey)
+    ? StrKey.decodeContract(strkey)              // C… → contract ID hash
+    : StrKey.isValidEd25519PublicKey(strkey)
+      ? StrKey.decodeEd25519PublicKey(strkey)    // G… → Ed25519 public key
+      : (() => { throw new Error(`Not a G… or C… address: ${strkey}`); })();
+  return `0x${Buffer.from(raw).toString("hex")}`; // 32 bytes, no version, no checksum
+}
+```
+
+Muxed (`M…`) addresses have no 32-byte form the OFT can resolve — resolve them to the underlying `G…` account first.
 
 Nothing on the Stellar side needs to be signed by the recipient. Watch for the `oft_received` event on the OFT — its topics are `["oft_received", guid, src_eid, to]` and its data carries `amount_received_ld`.
 
@@ -150,7 +167,7 @@ Pathway coverage grows: mainnet traffic in late August 2026 already spanned Ethe
 
 ### Limitations and status notes
 
-- **No USDT0 testnet deployment.** USDT0's deployments page lists no Stellar testnet entry (checked 2026-08-27), so a testnet round trip of USDT0 itself is not available. Keep mainnet USDT0 work to read-only simulation until the flow is proven.
+- **No USDT0 testnet deployment.** USDT0's deployments page lists no Stellar testnet entry (checked 2026-08-27), so a testnet round trip of USDT0 itself is not available. The rehearsal path is therefore read-only `quote_oft` and `quote_send` simulation, then a **dust-sized real mainnet transfer** — that transfer is how you prove the flow. Do it before you move a user's balance, and match the ["testnet first" rule](SKILL.md#pitfalls-shared-by-every-rail).
 - **A testnet rehearsal is not guaranteed.** You can deploy your own OApp or OFT against the testnet endpoint (EID `40600`), but testnet sends failed with `#1213 UnsupportedMessageLib` in August 2026 — the required DVN did not support the endpoint's only registered message library. That endpoint has been redeployed since, and this file does not record a successful testnet send after it. Send one small testnet message and confirm delivery before you treat testnet as a rehearsal path.
 - Fee basis points, rate limits, and the pause flag are live configuration — see the table above.
 - Anything deeper on deployment and wiring belongs to the [Stellar OFT docs](https://docs.layerzero.network/v2/developers/stellar/oft/overview) and the [OFT standard](https://docs.layerzero.network/v2/concepts/applications/oft-standard).
@@ -218,7 +235,11 @@ The shape rhymes with Axelar's derive pattern, and the same division of labor ap
 - The `#[oapp]` macro generates the public surface (`OAppCore`, sender internals, the `lz_receive` entrypoint, options handling). The generated `lz_receive` does peer validation and `endpoint.clear()` **before** dispatching to your `__lz_receive` — don't reimplement either.
 - **`custom = [receiver]` is a footgun.** Passing `#[oapp(custom = [receiver])]` tells the macro to *skip* generating the receiver surface; unless you then supply your own `#[contract_impl(contracttrait)] impl OAppReceiver` (as the counter example does, to customize `next_nonce`), the contract **compiles cleanly but exports no `lz_receive` at all** — an OApp that silently cannot receive. Use plain `#[oapp]` unless you're deliberately taking that surface over.
 - **Peers must be set on both sides.** `set_peer(&dst_eid, &Some(remote_oapp_bytes32), &caller)` on Stellar, and the mirror call on the destination OApp. A message from an unset peer never reaches `__lz_receive`.
-- **Fees are quoted, then paid — in XLM, or in ZRO.** Quote with `__quote(dst_eid, message, options, pay_in_zro)` into a `MessagingFee { native_fee, zro_fee }` and pass that value to `__lz_send`; underquoting fails the send. `__lz_send` pays ZRO whenever `fee.zro_fee` is not `0`. The endpoint rejects that payment unless a ZRO token is set on it (`zro()` → `Option<Address>`, error `ZroUnavailable`). Pass `pay_in_zro = false` unless you read a ZRO token on the endpoint you use.
+- **Fees are quoted, then paid — in XLM, or in ZRO.** Quote with `__quote(dst_eid, message, options, pay_in_zro)` into a `MessagingFee { native_fee, zro_fee }` and pass that value to `__lz_send`; underquoting fails the send. `__lz_send` pays ZRO whenever `fee.zro_fee` is not `0`. Both steps need a ZRO token set on the endpoint (`zro()` → `Option<Address>`), and **they fail in different places with different errors**:
+  - `__quote` with `pay_in_zro = true` reaches the endpoint, which panics `EndpointError::ZroUnavailable`.
+  - `__lz_send` with a non-zero `zro_fee` never reaches the endpoint. `__pay_zro` runs first and panics `OAppError::ZroTokenUnavailable`.
+
+  Don't match on the wrong one. Pass `pay_in_zro = false` unless you read a ZRO token on the endpoint you use.
 - **Auth is Soroban-native.** `require_auth()` replaces EVM's `msg.sender` checks throughout, and `FeePayer::{Verified, Unverified}` exists specifically to avoid double-auth in the auth tree.
 - The counter example additionally shows **ordered-nonce enforcement** (`origin.nonce` bookkeeping plus the endpoint's `skip`), **composed messages** (`send_compose` for A→B→C flows), and an **ABA round-trip** (receive triggers a send back) — read it before designing anything stateful.
 

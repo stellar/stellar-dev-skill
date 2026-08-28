@@ -482,7 +482,7 @@ const stats = await server
 
 ### Pre-Listing Check (read-only)
 
-Before you list an asset, display it, or accept it as collateral, answer five
+Before you list an asset, display it, or accept it as collateral, answer six
 questions from the ledger itself. Everything below **simulates only** —
 `--send=no` never signs or submits, and no step needs a key.
 
@@ -530,6 +530,24 @@ stellar contract invoke --id $OFT --source-account alice \
   --network mainnet --send=no -- endpoint         # the LayerZero endpoint
 stellar contract invoke --id $OFT --source-account alice \
   --network mainnet --send=no -- is_paused        # true stops every transfer
+
+# 6. Who can mint, freeze, claw back, or move the admin? Ask the admin
+#    contract from step 4. Roles are live state — read them, don't assume.
+MANAGER=CA3GUWLOS3QKN6WNRAELSUDSKLDTVTWEDJ3KLGAJG3SIWGA5L3KZYWGJ
+
+stellar contract invoke --id $MANAGER --source-account alice \
+  --network mainnet --send=no -- owner               # grants and revokes any role
+stellar contract invoke --id $MANAGER --source-account alice \
+  --network mainnet --send=no -- get_existing_roles  # roles with >= 1 member
+
+# Then, for every role that list returns:
+ROLE=MINTER_ROLE
+stellar contract invoke --id $MANAGER --source-account alice \
+  --network mainnet --send=no -- get_role_admin --role $ROLE
+stellar contract invoke --id $MANAGER --source-account alice \
+  --network mainnet --send=no -- get_role_member_count --role $ROLE
+stellar contract invoke --id $MANAGER --source-account alice \
+  --network mainnet --send=no -- get_role_member --role $ROLE --index 0
 ```
 
 Reading the results:
@@ -560,10 +578,24 @@ Reading the results:
 - **Step 5 names the bridge's minter, not every minter.** `oft_type` returning
   `MintBurn(<address>)` means that address mints on credit, so it must be the
   SAC admin from step 4 or a role holder on it. It does not enumerate the
-  others: on LayerZero's SAC manager the owner grants and revokes
-  `MINTER_ROLE`, so finish the trust question by listing the role holders and
-  the owner. A `shared_decimals` below the SAC's 7 also means sends drop the
-  extra digits. See `../cross-chain/layerzero.md` for that rail.
+  others — that is step 6. A `shared_decimals` below the SAC's 7 also means
+  sends drop the extra digits. See `../cross-chain/layerzero.md` for that rail.
+- **Step 6 is where the trust question actually gets answered.** Three parties
+  can act, not one:
+  1. The **role holders** themselves. Walk `get_role_member` from index `0` to
+     `get_role_member_count - 1` for each role.
+  2. The holders of the **admin role**, if `get_role_admin` returns one. They
+     grant and revoke that role, so they can grant it to themselves.
+  3. The **owner**, always. The owner can grant or revoke any role.
+  So **an empty role is not a safe role.** LayerZero's SAC manager gates
+  `mint`, `clawback`, `set_authorized` and `set_admin` behind `MINTER_ROLE`,
+  `CLAWBACK_ROLE`, `BLACKLISTER_ROLE` and `ADMIN_MANAGER_ROLE`. A role with no
+  members blocks nobody permanently — the owner fills it in one transaction.
+  Model the owner as holding every role.
+  USDT0 on 2026-08-28: `get_existing_roles` returns `MINTER_ROLE` only, its one
+  member is the OFT, it has no admin role, and the owner is the OneSig contract
+  `CBCZ5CET…`. So the OneSig signers are the real authority over minting,
+  clawback and blacklisting. Re-read it — this is live state.
 
 ## SEP Standards for Assets
 
