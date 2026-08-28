@@ -1,0 +1,13 @@
+{
+  "skills": [
+    "cross-chain"
+  ],
+  "query": "Write up what happens to the tokens when our treasury moves USDT0 from Stellar to Ethereum, and then back.",
+  "expected_behavior": [
+    "Does not describe the route as burn-and-mint on both ends: the OFT mode is per leg",
+    "Says the Stellar leg is a MintBurn OFT, so `send` burns on the SAC and an inbound message mints through the SAC manager",
+    "Says the Ethereum leg is an OFT Adapter over canonical Tether USDT, so it unlocks USDT on arrival and locks USDT on the way back, with an ERC-20 approval to the adapter first",
+    "Tells the reader to confirm the mode per route — `oft_type()` on Stellar, and the `OFT` versus `OFT Adapter` entry on USDT0's deployments page",
+    "Quotes with `quote_oft` and `quote_send` rather than assuming the sent amount equals the received amount"
+  ]
+}

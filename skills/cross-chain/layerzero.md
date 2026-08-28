@@ -24,7 +24,9 @@ Two Stellar-specific details in that data: the send and receive ULN 302 librarie
 
 ## USDT0: native USDT on Stellar
 
-USDT0 is USDT moved by burn-and-mint over LayerZero's OFT standard. There is no wrapped token and no pool: the OFT burns on the source chain and mints on the destination. On Stellar it is a **classic asset** with a locked issuer whose SAC admin is a contract.
+USDT0 is USDT moved over LayerZero's OFT standard. There is no wrapped token and no pool. On Stellar it is a **classic asset** with a locked issuer whose SAC admin is a contract.
+
+**The debit and credit shape is per leg, not global.** Stellar's deployment is a `MintBurn` OFT: it burns on send and mints on receive. Ethereum's is an **OFT Adapter** (`0x6C96dE32CEa08842dcc4058c14d3aaAD7Fa41dee`) over canonical Tether USDT (`0xdAC17F958D2ee523a2206206994597C13D831ec7`, confirmed by the adapter's `token()`). That leg locks and unlocks the reserve instead: a send to Ethereum unlocks USDT, and a send from Ethereum locks it, so the sender there approves the adapter first. Read the far chain's entry on the [deployments page](https://docs.usdt0.to/technical-documentation/deployments) — it says `OFT` or `OFT Adapter` — and read `oft_type()` on Stellar. Never promise burn-and-mint on both ends of a route.
 
 | Surface | Address |
 |---|---|
@@ -38,7 +40,7 @@ Addresses per [USDT0's deployments page](https://docs.usdt0.to/technical-documen
 
 ### The rules that save funds
 
-1. **The recipient needs a USDT0 trustline before anything inbound lands.** A `G…` account cannot hold an issued asset without one. This is the single most common inbound failure.
+1. **An account (`G…`) recipient needs a USDT0 trustline before anything inbound lands.** A `G…` account cannot hold an issued asset without one. This is the single most common inbound failure. A contract (`C…`) recipient needs none: SAC balances for contracts live in contract storage, not in a trustline. The OFT decides which one you get from the 32-byte recipient — it resolves to a contract address when a contract with that ID exists, and to a `G…` account otherwise.
 2. **Pin the code *and* the issuer.** `USDT0` is a 5-character code (`credit_alphanum12`), and asset code alone identifies nothing. Verify the SAC by derivation — `stellar contract id asset --asset USDT0:GATISXX6… --network mainnet` must return `CBSJZEIO…`.
 3. **There is no `stellar.toml`.** The issuer publishes no `home_domain`, so every check keyed on `home_domain` or a SEP-1 `[[CURRENCIES]]` entry fails on a legitimate, live asset. Validate by issuer plus SAC derivation instead. See `../assets/SKILL.md` for the full pre-listing recipe.
 4. **Dust below 6 decimals is dropped on send** — see below.
@@ -55,7 +57,7 @@ The SAC uses Stellar's 7 decimals. The OFT's `shared_decimals()` is **6**, the p
 
 ### Inbound: EVM → Stellar
 
-1. The recipient's trustline must exist first (rule 1 above).
+1. For a `G…` recipient, the trustline must exist first (rule 1 above). A `C…` recipient needs none.
 2. Send on the source chain against USDT0's OFT there, with Stellar's EID `30600` and the recipient encoded as a 32-byte value.
 3. LayerZero's DVNs verify, then the executor delivers. On Stellar the delivery lands as `ExecutorHelper.execute`, which sub-invokes `lz_receive` on the OFT; the OFT credits through the SAC manager (it holds `MINTER_ROLE`), which mints on the SAC.
 

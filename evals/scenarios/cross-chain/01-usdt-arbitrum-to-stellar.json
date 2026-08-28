@@ -5,7 +5,7 @@
   "query": "Our users hold USDT on Arbitrum. Let them move it into their Stellar accounts.",
   "expected_behavior": [
     "Routes to USDT0 over LayerZero's OFT rail, not CCTP (which carries USDC only) and not a hand-rolled wrapped-asset bridge",
-    "Requires the recipient's USDT0 trustline to exist before anything inbound is sent",
+    "Requires an account (`G…`) recipient's USDT0 trustline to exist before anything inbound is sent, and does not impose that trustline on a contract (`C…`) recipient, whose SAC balance lives in contract storage",
     "Pins the asset by code and issuer and derives the SAC with `stellar contract id asset` instead of copying an address from a website",
     "Names Stellar's LayerZero endpoint ID 30600 and encodes the Stellar recipient as a 32-byte value",
     "Does not treat the issuer's missing home_domain / stellar.toml as evidence the asset is fake"
