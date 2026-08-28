@@ -42,7 +42,7 @@ Addresses per [USDT0's deployments page](https://docs.usdt0.to/technical-documen
 
 1. **An account (`G…`) recipient needs a USDT0 trustline before anything inbound lands.** A `G…` account cannot hold an issued asset without one. This is the single most common inbound failure. A contract (`C…`) recipient needs none — but only while that contract exists. SAC balances for contracts live in contract storage, not in a trustline. The OFT decides which one you get from the 32-byte recipient: it resolves to a contract address when a contract with that ID exists, and to a `G…` account otherwise. **Confirm the recipient contract is deployed before the source chain sends** — see below.
 2. **Pin the code *and* the issuer.** `USDT0` is a 5-character code (`credit_alphanum12`), and asset code alone identifies nothing. Verify the SAC by derivation — `stellar contract id asset --asset USDT0:GATISXX6… --network mainnet` must return `CBSJZEIO…`.
-3. **There is no `stellar.toml`.** The issuer publishes no `home_domain`, so every check keyed on `home_domain` or a SEP-1 `[[CURRENCIES]]` entry fails on a legitimate, live asset. Validate by issuer plus SAC derivation instead. See `../assets/SKILL.md` for the full pre-listing recipe.
+3. **There is no `stellar.toml`.** The issuer publishes no `home_domain`, so every check keyed on `home_domain` or a SEP-1 `[[CURRENCIES]]` entry fails on a legitimate, live asset. Validate by issuer plus SAC derivation instead. See `../assets/pre-listing.md` for the full pre-listing recipe.
 4. **Dust below 6 decimals is dropped on send** — see below.
 
 ### Decimals: 7 local, 6 shared
@@ -89,7 +89,7 @@ stellar ledger entry fetch contract-data --contract "$RECIPIENT" --instance \
   --output json-formatted --network mainnet
 ```
 
-Existence is read when the message is delivered, not when you send it. Re-check right before the send, and never point a route at a contract you have not deployed yet.
+Existence is read when the message is delivered, not when you send it. That gap matters twice. Never point a route at a contract you have not deployed yet. And check the instance's remaining TTL in the entry above: an instance that is archived between your send and the delivery is not live state either, so the same `G…` fallback applies. Extend it with `stellar contract extend` and leave margin for source finality, DVN verification, and executor latency.
 
 Muxed (`M…`) addresses do not fit. An `M…` strkey decodes to 40 bytes — the `G…` key plus an 8-byte id — and the OFT reads 32. Sending the `G…` half works, but the id is gone, so a custodian loses the sub-account it routes on. Give each sub-account its own `G…` account, or credit it from your own records off the `oft_received` event. CCTP differs here: its hook data accepts an `M…` strkey directly.
 
@@ -142,17 +142,25 @@ stellar contract invoke --id "$OFT" --source-account alice \
 
 # 2. Show the user amount_received_ld, get their floor, then rebuild the
 #    parameter with it. This is the value you send with.
-read -r MIN_AMOUNT                     # the minimum the user accepts, in stroops
+read -r MIN_AMOUNT                     # the user's floor, in USDT0 7-decimal units
 PARAM='{"dst_eid":30101,"to":"'"$TO"'","amount_ld":"10000000","min_amount_ld":"'"$MIN_AMOUNT"'","extra_options":"","compose_msg":"","oft_cmd":""}'
 
-# 3. What does the message cost? Returns MessagingFee { native_fee, zro_fee }.
+# 3. Re-quote with that floor. Fee configuration is live, so this is the
+#    receipt the user signs against. An error here means the route now
+#    costs more than the floor: go back to the user, never to a lower floor
+#    you picked yourself.
+stellar contract invoke --id "$OFT" --source-account alice \
+  --network mainnet --send=no \
+  -- quote_oft --from "$SENDER" --send_param "$PARAM"
+
+# 4. What does the message cost? Returns MessagingFee { native_fee, zro_fee }.
 stellar contract invoke --id "$OFT" --source-account alice \
   --network mainnet --send=no \
   -- quote_send --from "$SENDER" --pay_in_zro false --send_param "$PARAM"
 
-# 4. The send itself. NATIVE_FEE is the stroop figure step 3 returned; quote
+# 5. The send itself. NATIVE_FEE is the stroop figure step 4 returned; quote
 #    it every time. Drop --send=no only when the user agreed to sign.
-read -r NATIVE_FEE                     # paste the native_fee from step 3
+read -r NATIVE_FEE                     # paste the native_fee from step 4
 FEE='{"native_fee":"'"$NATIVE_FEE"'","zro_fee":"0"}'
 
 stellar contract invoke --id "$OFT" --source-account alice \
@@ -161,7 +169,7 @@ stellar contract invoke --id "$OFT" --source-account alice \
      --fee "$FEE" --refund_address "$SENDER"
 ```
 
-**Never discover a route with a real slippage floor.** `quote_oft` and `quote_send` both call `__debit_view`, which asserts `amount_received_ld >= min_amount_ld` and panics `SlippageExceeded` (`oft/src/oft.rs`). A route charging more than your floor then returns an error instead of a receipt, and you cannot tell an expensive route from a broken one. Quote with `0`, show the user what arrives, and re-run both quotes with their floor immediately before `send`.
+**Never discover a route with a real slippage floor.** `quote_oft` and `quote_send` both call `__debit_view`, which asserts `amount_received_ld >= min_amount_ld` and panics `SlippageExceeded` (`oft/src/oft.rs`). A route charging more than your floor then returns an error instead of a receipt, and you cannot tell an expensive route from a broken one. Quote with `0`, show the user what arrives, and re-run both quotes with their floor immediately before `send`. `min_amount_ld` is a USDT0 amount in the token's 7 decimals. The messaging fee is XLM in stroops. They are different units — never carry a number from one into the other.
 
 **Two fees, two denominations. Do not confuse them.**
 
