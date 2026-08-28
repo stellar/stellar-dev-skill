@@ -76,7 +76,7 @@ function stellarRecipientToBytes32(strkey: string): `0x${string}` {
 }
 ```
 
-Muxed (`M…`) addresses have no 32-byte form the OFT can resolve — resolve them to the underlying `G…` account first.
+Muxed (`M…`) addresses do not fit. An `M…` strkey decodes to 40 bytes — the `G…` key plus an 8-byte id — and the OFT reads 32. Sending the `G…` half works, but the id is gone, so a custodian loses the sub-account it routes on. Give each sub-account its own `G…` account, or credit it from your own records off the `oft_received` event. CCTP differs here: its hook data accepts an `M…` strkey directly.
 
 Nothing on the Stellar side needs to be signed by the recipient. Watch for the `oft_received` event on the OFT — its topics are `["oft_received", guid, src_eid, to]` and its data carries `amount_received_ld`.
 
