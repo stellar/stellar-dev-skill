@@ -487,8 +487,9 @@ ISSUER=GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q
 SAC=CBSJZEIO5C7KC2SF3MKSNXXJSW5G3VTNBX4ATMKUI3B2MR4JKM4R26YF
 
 # 1. Is the issuer locked, and which flags are set?
-#    Look for: signers all weight 0 (locked), auth_revocable,
-#    auth_clawback_enabled, auth_immutable, and whether home_domain exists.
+#    Read: thresholds and signers (see "Step 1" below — the signer list
+#    alone does not answer this), auth_revocable, auth_clawback_enabled,
+#    auth_immutable, and whether home_domain exists.
 stellar ledger entry fetch account --account $ISSUER --network mainnet
 
 # 2. Does the SAC address actually derive from this asset?
@@ -526,6 +527,15 @@ stellar contract invoke --id $OFT --source-account alice \
 
 Reading the results:
 
+- **Step 1 hinges on the master key, not the signer list.** In the ledger entry,
+  `thresholds` is a 4-byte hex string and its **first** byte is the master key
+  weight; the other three are the low, medium and high thresholds. The `signers`
+  list holds only the *extra* signers, so "every listed signer has weight 0"
+  proves nothing on its own — an account with a live master key and no extra
+  signers has an empty `signers` list. Locked means the master weight is `0`
+  *and* no remaining signer can reach the medium or high threshold. USDT0's
+  issuer reads `thresholds` `00000000` with no extra signers. (Horizon differs:
+  its `/accounts` response folds the master key into its own `signers` array.)
 - **Step 2 is the identity check**, not the domain. A real SAC's contract
   instance has a `stellar_asset` executable rather than a Wasm hash, and its
   `name()`/`symbol()` report the wrapped asset. Per the
@@ -538,10 +548,13 @@ Reading the results:
   trust question to that contract's roles, so identify the role holders.
 - **An unlocked issuer with clawback enabled is the actual risk.** The issuer
   can then mint and claw back directly, whatever any admin contract says.
-- **Step 5 tells you who can mint.** `oft_type` returning `MintBurn(<address>)`
-  means that address mints on credit, so it must be the SAC admin from step 4
-  or a role holder on it. A `shared_decimals` below the SAC's 7 also means
-  sends drop the extra digits. See `../cross-chain/layerzero.md` for that rail.
+- **Step 5 names the bridge's minter, not every minter.** `oft_type` returning
+  `MintBurn(<address>)` means that address mints on credit, so it must be the
+  SAC admin from step 4 or a role holder on it. It does not enumerate the
+  others: on LayerZero's SAC manager the owner grants and revokes
+  `MINTER_ROLE`, so finish the trust question by listing the role holders and
+  the owner. A `shared_decimals` below the SAC's 7 also means sends drop the
+  extra digits. See `../cross-chain/layerzero.md` for that rail.
 
 ## SEP Standards for Assets
 
