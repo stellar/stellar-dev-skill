@@ -40,7 +40,7 @@ Addresses per [USDT0's deployments page](https://docs.usdt0.to/technical-documen
 
 ### The rules that save funds
 
-1. **An account (`G…`) recipient needs a USDT0 trustline before anything inbound lands.** A `G…` account cannot hold an issued asset without one. This is the single most common inbound failure. A contract (`C…`) recipient needs none: SAC balances for contracts live in contract storage, not in a trustline. The OFT decides which one you get from the 32-byte recipient — it resolves to a contract address when a contract with that ID exists, and to a `G…` account otherwise.
+1. **An account (`G…`) recipient needs a USDT0 trustline before anything inbound lands.** A `G…` account cannot hold an issued asset without one. This is the single most common inbound failure. A contract (`C…`) recipient needs none — but only while that contract exists. SAC balances for contracts live in contract storage, not in a trustline. The OFT decides which one you get from the 32-byte recipient: it resolves to a contract address when a contract with that ID exists, and to a `G…` account otherwise. **Confirm the recipient contract is deployed before the source chain sends** — see below.
 2. **Pin the code *and* the issuer.** `USDT0` is a 5-character code (`credit_alphanum12`), and asset code alone identifies nothing. Verify the SAC by derivation — `stellar contract id asset --asset USDT0:GATISXX6… --network mainnet` must return `CBSJZEIO…`.
 3. **There is no `stellar.toml`.** The issuer publishes no `home_domain`, so every check keyed on `home_domain` or a SEP-1 `[[CURRENCIES]]` entry fails on a legitimate, live asset. Validate by issuer plus SAC derivation instead. See `../assets/SKILL.md` for the full pre-listing recipe.
 4. **Dust below 6 decimals is dropped on send** — see below.
@@ -57,7 +57,7 @@ The SAC uses Stellar's 7 decimals. The OFT's `shared_decimals()` is **6**, the p
 
 ### Inbound: EVM → Stellar
 
-1. For a `G…` recipient, the trustline must exist first (rule 1 above). A `C…` recipient needs none.
+1. For a `G…` recipient, the trustline must exist first (rule 1 above). A `C…` recipient needs none, but it must already be deployed on Stellar.
 2. Send on the source chain against USDT0's OFT there, with Stellar's EID `30600` and the recipient as its **decoded 32-byte strkey payload** — see below.
 3. LayerZero's DVNs verify, then the executor delivers. On Stellar the delivery lands as `ExecutorHelper.execute`, which sub-invokes `lz_receive` on the OFT; the OFT credits through the SAC manager (it holds `MINTER_ROLE`), which mints on the SAC.
 
@@ -78,6 +78,18 @@ function stellarRecipientToBytes32(strkey: string): `0x${string}` {
   return `0x${Buffer.from(raw).toString("hex")}`; // 32 bytes, no version, no checksum
 }
 ```
+
+**A `C…` strkey that parses is not proof the contract is there.** `StrKey.isValidContract` reads the string; `resolve_address` reads the ledger. If that contract is not deployed when the message is delivered, the OFT reads the same 32 bytes as an Ed25519 account and credits a `G…` address instead. Those bytes are a contract ID hash, so no one holds the matching secret key. That account can never sign a `changeTrust`, so it never gets a USDT0 trustline and the delivery keeps failing — while the source chain has already burned or locked the tokens. LayerZero states the assumption in `oft-core/src/utils.rs`: the sender "is expected to deploy the destination contract beforehand". Deploy it first, and confirm it on the ledger immediately before the send:
+
+```bash
+RECIPIENT="CAAAA...ABCD"   # the contract you deployed to receive USDT0
+
+# An instance entry means the contract exists. An error means do not send.
+stellar ledger entry fetch contract-data --contract "$RECIPIENT" --instance \
+  --output json-formatted --network mainnet
+```
+
+Existence is read when the message is delivered, not when you send it. Re-check right before the send, and never point a route at a contract you have not deployed yet.
 
 Muxed (`M…`) addresses do not fit. An `M…` strkey decodes to 40 bytes — the `G…` key plus an 8-byte id — and the OFT reads 32. Sending the `G…` half works, but the id is gone, so a custodian loses the sub-account it routes on. Give each sub-account its own `G…` account, or credit it from your own records off the `oft_received` event. CCTP differs here: its hook data accepts an `M…` strkey directly.
 

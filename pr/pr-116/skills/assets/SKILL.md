@@ -482,7 +482,7 @@ const stats = await server
 
 ### Pre-Listing Check (read-only)
 
-Before you list an asset, display it, or accept it as collateral, answer six
+Before you list an asset, display it, or accept it as collateral, answer seven
 questions from the ledger itself. Everything below **simulates only** —
 `--send=no` never signs or submits, and no step needs a key.
 
@@ -548,6 +548,21 @@ stellar contract invoke --id $MANAGER --source-account alice \
   --network mainnet --send=no -- get_role_member_count --role $ROLE
 stellar contract invoke --id $MANAGER --source-account alice \
   --network mainnet --send=no -- get_role_member --role $ROLE --index 0
+
+# 7. Step 6 ends at an owner. If that owner is a contract, it is another
+#    governance layer, not an answer — read its own quorum too.
+#    USDT0's owner is a LayerZero OneSig multisig.
+ONESIG=CBCZ5CETG3XR5MZVDC7QBDOTIH6P7MOLUH2SSC52J3NVBYIV45D4QKR6
+
+stellar contract invoke --id $ONESIG --source-account alice \
+  --network mainnet --send=no -- get_signers   # 20-byte secp256k1 addresses
+stellar contract invoke --id $ONESIG --source-account alice \
+  --network mainnet --send=no -- threshold     # signatures needed to act
+
+# The same two values are in the ledger entries, with no ABI:
+# Threshold in the instance entry, Signers in a persistent one.
+stellar ledger entry fetch contract-data --contract $ONESIG --instance \
+  --output json-formatted --network mainnet
 ```
 
 Reading the results:
@@ -580,19 +595,28 @@ Reading the results:
   SAC admin from step 4 or a role holder on it. It does not enumerate the
   others — that is step 6. A `shared_decimals` below the SAC's 7 also means
   sends drop the extra digits. See `../cross-chain/layerzero.md` for that rail.
-- **Step 6 is where the trust question actually gets answered.** Three parties
-  can act on a role, not one: its **members** (walk `get_role_member` from
-  index `0` to `get_role_member_count - 1`), the members of its **admin role**
-  if `get_role_admin` returns one, and the **owner**, always.
+- **Step 6 names who can act on the SAC.** Three parties can act on a role, not
+  one: its **members** (walk `get_role_member` from index `0` to
+  `get_role_member_count - 1`), the members of its **admin role** if
+  `get_role_admin` returns one, and the **owner**, always.
 - **An empty role is not a safe role.** LayerZero's SAC manager gates `mint`,
   `clawback`, `set_authorized` and `set_admin` behind `MINTER_ROLE`,
   `CLAWBACK_ROLE`, `BLACKLISTER_ROLE` and `ADMIN_MANAGER_ROLE`. A role with no
   members blocks nobody permanently, because the owner fills it in one
   transaction. Model the owner as holding every role.
+- **Step 7 exists because an owner can be a contract.** "The owner is a
+  multisig" is not a finding. Walk the chain until it ends at keys, and record
+  the quorum you found. If the owner is a contract you cannot read — no source,
+  no view functions, no storage you can decode — then say so and mark ultimate
+  control **unresolved**. Do not report the asset as reviewed.
 - **USDT0 on 2026-08-28**: `get_existing_roles` returns `MINTER_ROLE` only, its
   one member is the OFT, it has no admin role, and the owner is the OneSig
-  contract `CBCZ5CET…`. So the OneSig signers are the real authority over
-  minting, clawback and blacklisting. Re-read this — it is live state.
+  contract `CBCZ5CET…`. That OneSig holds **5 signers with a threshold of 3**,
+  so any 3 of them can mint, claw back, blacklist or move the SAC admin. The
+  signers are Ethereum-style 20-byte secp256k1 addresses, not Stellar keys, so a
+  Stellar-only review never sees them. They can also replace themselves:
+  `set_signer` and `set_threshold` need the same quorum, nobody else.
+  Re-read all of this — it is live state.
 
 ## SEP Standards for Assets
 
