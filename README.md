@@ -118,7 +118,7 @@ Contributions are welcome! Please ensure any updates reflect current Stellar eco
 
 ## Evaluations
 
-[`evals/`](evals/README.md) holds ~3 task scenarios for each of seven skills (plus cross-skill routing checks and a negative control), each encoding a mistake agents actually make without the skill. Three grading tiers: machine-checkable compile checks, LLM-judged behavior assertions, and skill-trigger checks. Two gaps are open: `cross-chain` has no scenarios yet, and no baseline transcripts are committed, so the set is still unvalidated. See [evals/README.md](evals/README.md) for the format, how to run them, and what the missing baselines mean.
+[`evals/`](evals/README.md) holds ~3 task scenarios for each of the eight skills (plus cross-skill routing checks and a negative control), each encoding a mistake agents actually make without the skill. Three grading tiers: machine-checkable compile checks, LLM-judged behavior assertions, and skill-trigger checks. One gap is open: no baseline transcripts are committed, so the set is still unvalidated. See [evals/README.md](evals/README.md) for the format, how to run them, and what the missing baselines mean.
 
 ## Resources
 

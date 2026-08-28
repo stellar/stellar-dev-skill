@@ -1,0 +1,14 @@
+{
+  "skills": [
+    "assets",
+    "cross-chain"
+  ],
+  "query": "Is USDT0 safe to accept as collateral in our Stellar lending protocol?",
+  "expected_behavior": [
+    "Uses the assets pre-listing checks for the asset side and cross-chain/layerzero.md for the bridge side",
+    "Tests the issuer lock by the master key weight (the first byte of the account entry's thresholds), not by the signer list alone",
+    "Reports auth_revocable and auth_clawback_enabled as risks to model: balances can be frozen or clawed back",
+    "Derives the SAC from the asset rather than trusting a published address, and does not disqualify the asset for having no stellar.toml",
+    "Goes past oft_type's MintBurn address to the SAC admin contract's role holders, because the owner can grant MINTER_ROLE"
+  ]
+}

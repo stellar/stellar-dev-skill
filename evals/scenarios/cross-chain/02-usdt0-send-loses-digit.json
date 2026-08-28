@@ -1,0 +1,13 @@
+{
+  "skills": [
+    "cross-chain"
+  ],
+  "query": "When I send USDT0 off Stellar the last digit of my amount disappears. What is going wrong?",
+  "expected_behavior": [
+    "Explains the SAC's 7 local decimals against the OFT's shared_decimals of 6, so decimal_conversion_rate is 10 and the remainder below 6 decimals cannot cross",
+    "Says nothing is broken: the OFT removes that remainder before it builds the message",
+    "Makes the remainder's destination conditional on the route's OFT fee — it stays with the sender when effective_fee_bps(dst_eid) is 0, and is absorbed into the fee when the rate is above 0",
+    "Tells the user to trust quote_oft's OFTReceipt (amount_sent_ld and amount_received_ld) over their own input amount",
+    "Does not propose scaling the amount with floating-point arithmetic"
+  ]
+}
