@@ -581,21 +581,18 @@ Reading the results:
   others — that is step 6. A `shared_decimals` below the SAC's 7 also means
   sends drop the extra digits. See `../cross-chain/layerzero.md` for that rail.
 - **Step 6 is where the trust question actually gets answered.** Three parties
-  can act, not one:
-  1. The **role holders** themselves. Walk `get_role_member` from index `0` to
-     `get_role_member_count - 1` for each role.
-  2. The holders of the **admin role**, if `get_role_admin` returns one. They
-     grant and revoke that role, so they can grant it to themselves.
-  3. The **owner**, always. The owner can grant or revoke any role.
-  So **an empty role is not a safe role.** LayerZero's SAC manager gates
-  `mint`, `clawback`, `set_authorized` and `set_admin` behind `MINTER_ROLE`,
+  can act on a role, not one: its **members** (walk `get_role_member` from
+  index `0` to `get_role_member_count - 1`), the members of its **admin role**
+  if `get_role_admin` returns one, and the **owner**, always.
+- **An empty role is not a safe role.** LayerZero's SAC manager gates `mint`,
+  `clawback`, `set_authorized` and `set_admin` behind `MINTER_ROLE`,
   `CLAWBACK_ROLE`, `BLACKLISTER_ROLE` and `ADMIN_MANAGER_ROLE`. A role with no
-  members blocks nobody permanently — the owner fills it in one transaction.
-  Model the owner as holding every role.
-  USDT0 on 2026-08-28: `get_existing_roles` returns `MINTER_ROLE` only, its one
-  member is the OFT, it has no admin role, and the owner is the OneSig contract
-  `CBCZ5CET…`. So the OneSig signers are the real authority over minting,
-  clawback and blacklisting. Re-read it — this is live state.
+  members blocks nobody permanently, because the owner fills it in one
+  transaction. Model the owner as holding every role.
+- **USDT0 on 2026-08-28**: `get_existing_roles` returns `MINTER_ROLE` only, its
+  one member is the OFT, it has no admin role, and the owner is the OneSig
+  contract `CBCZ5CET…`. So the OneSig signers are the real authority over
+  minting, clawback and blacklisting. Re-read this — it is live state.
 
 ## SEP Standards for Assets
 
