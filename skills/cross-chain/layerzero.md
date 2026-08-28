@@ -130,21 +130,29 @@ OFT=CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINKUMMF6
 SENDER=$(stellar keys address alice)   # the account that pays and signs
 EVM_TO=0x1234...abcd                   # the EVM recipient, 20-byte hex
 TO=000000000000000000000000${EVM_TO#0x}   # left-padded to 32 bytes
-PARAM='{"dst_eid":30101,"to":"'"$TO"'","amount_ld":"10000000","min_amount_ld":"9950000","extra_options":"","compose_msg":"","oft_cmd":""}'
+
+# Discover with a zero floor. min_amount_ld is enforced by the quotes too,
+# so a real floor here hides the answer behind SlippageExceeded.
+DISCOVER='{"dst_eid":30101,"to":"'"$TO"'","amount_ld":"10000000","min_amount_ld":"0","extra_options":"","compose_msg":"","oft_cmd":""}'
 
 # 1. What actually arrives? Returns (OFTLimit, Vec<OFTFeeDetail>, OFTReceipt).
 stellar contract invoke --id "$OFT" --source-account alice \
   --network mainnet --send=no \
-  -- quote_oft --from "$SENDER" --send_param "$PARAM"
+  -- quote_oft --from "$SENDER" --send_param "$DISCOVER"
 
-# 2. What does the message cost? Returns MessagingFee { native_fee, zro_fee }.
+# 2. Show the user amount_received_ld, get their floor, then rebuild the
+#    parameter with it. This is the value you send with.
+read -r MIN_AMOUNT                     # the minimum the user accepts, in stroops
+PARAM='{"dst_eid":30101,"to":"'"$TO"'","amount_ld":"10000000","min_amount_ld":"'"$MIN_AMOUNT"'","extra_options":"","compose_msg":"","oft_cmd":""}'
+
+# 3. What does the message cost? Returns MessagingFee { native_fee, zro_fee }.
 stellar contract invoke --id "$OFT" --source-account alice \
   --network mainnet --send=no \
   -- quote_send --from "$SENDER" --pay_in_zro false --send_param "$PARAM"
 
-# 3. The send itself. NATIVE_FEE is the stroop figure step 2 returned; quote
+# 4. The send itself. NATIVE_FEE is the stroop figure step 3 returned; quote
 #    it every time. Drop --send=no only when the user agreed to sign.
-read -r NATIVE_FEE                     # paste the native_fee from step 2
+read -r NATIVE_FEE                     # paste the native_fee from step 3
 FEE='{"native_fee":"'"$NATIVE_FEE"'","zro_fee":"0"}'
 
 stellar contract invoke --id "$OFT" --source-account alice \
@@ -152,6 +160,8 @@ stellar contract invoke --id "$OFT" --source-account alice \
   -- send --from "$SENDER" --send_param "$PARAM" \
      --fee "$FEE" --refund_address "$SENDER"
 ```
+
+**Never discover a route with a real slippage floor.** `quote_oft` and `quote_send` both call `__debit_view`, which asserts `amount_received_ld >= min_amount_ld` and panics `SlippageExceeded` (`oft/src/oft.rs`). A route charging more than your floor then returns an error instead of a receipt, and you cannot tell an expensive route from a broken one. Quote with `0`, show the user what arrives, and re-run both quotes with their floor immediately before `send`.
 
 **Two fees, two denominations. Do not confuse them.**
 

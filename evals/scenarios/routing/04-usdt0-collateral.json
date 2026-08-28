@@ -10,6 +10,7 @@
     "Reports auth_revocable and auth_clawback_enabled as risks to model: balances can be frozen or clawed back",
     "Derives the SAC from the asset rather than trusting a published address, and does not disqualify the asset for having no stellar.toml",
     "Goes past oft_type's MintBurn address and enumerates the SAC admin contract's authority: get_existing_roles, then get_role_member for each role, plus get_role_admin and owner",
+    "Does not treat get_existing_roles as the role list: it returns only roles with a member today, so the answer queries MINTER_ROLE, CLAWBACK_ROLE, BLACKLISTER_ROLE and ADMIN_MANAGER_ROLE by name and reports each one's admin role, because an empty role's admin can still grant it",
     "Says an empty role is not a safe role, because the owner can grant any role at any time, and models the owner (the OneSig contract) as holding every role",
     "Does not stop at 'the owner is a multisig': reads the OneSig's own get_signers and threshold, reports the quorum (3 of 5 on 2026-08-28), and notes the signers are secp256k1 keys that can replace themselves",
     "Marks ultimate control unresolved if an owner contract's governance cannot be read, rather than reporting the asset as reviewed"

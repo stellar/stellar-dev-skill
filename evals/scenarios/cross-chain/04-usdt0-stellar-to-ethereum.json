@@ -8,6 +8,7 @@
     "Says the Stellar leg is a MintBurn OFT, so `send` burns on the SAC and an inbound message mints through the SAC manager",
     "Says the Ethereum leg is an OFT Adapter over canonical Tether USDT, so it unlocks USDT on arrival and locks USDT on the way back, with an ERC-20 approval to the adapter first",
     "Tells the reader to confirm the mode per route — `oft_type()` on Stellar, and the `OFT` versus `OFT Adapter` entry on USDT0's deployments page",
-    "Quotes with `quote_oft` and `quote_send` rather than assuming the sent amount equals the received amount"
+    "Quotes with `quote_oft` and `quote_send` rather than assuming the sent amount equals the received amount",
+    "Discovers the route with `min_amount_ld` set to 0, because both quotes enforce that floor and panic `SlippageExceeded`, then re-quotes with the treasury's accepted minimum immediately before `send`"
   ]
 }
