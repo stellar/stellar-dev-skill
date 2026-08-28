@@ -45,10 +45,12 @@ Addresses per [USDT0's deployments page](https://docs.usdt0.to/technical-documen
 
 ### Decimals: 7 local, 6 shared
 
-The SAC uses Stellar's 7 decimals. The OFT's `shared_decimals()` is **6**, the precision USDT0 uses on every chain. `decimal_conversion_rate()` is therefore `10 ^ (7 - 6)` = **10**, and the OFT removes any remainder before it builds the message:
+The SAC uses Stellar's 7 decimals. The OFT's `shared_decimals()` is **6**, the precision USDT0 uses on every chain. `decimal_conversion_rate()` is therefore `10 ^ (7 - 6)` = **10**, and the OFT removes any remainder before it builds the message. Where that remainder ends up depends on the route's OFT fee, so read `effective_fee_bps(dst_eid)` before you promise a user anything:
 
-- Send `1.0000001` USDT0 (`amount_ld` = `10000001`): `amount_sent_ld` is `10000000` and the trailing `0.0000001` **stays in your account**. It is not lost, but it is not sent either.
-- Quote first and compare. `quote_oft` returns an `OFTReceipt` whose `amount_sent_ld` and `amount_received_ld` are already dust-adjusted — treat those, not your input, as the truth.
+- **No fee on the route** (`effective_fee_bps` is `0`): send `1.0000001` USDT0 (`amount_ld` = `10000001`) and `amount_sent_ld` is `10000000`. The trailing `0.0000001` **stays in your account**. It is not lost, but it is not sent either.
+- **A fee on the route** (`effective_fee_bps` above `0`): the OFT debits your full `amount_ld` instead, and the rounded remainder is absorbed into the fee rather than left behind. `amount_sent_ld` is your whole input, and `amount_received_ld` is the dust-adjusted amount after the fee.
+- Fee basis points are live configuration (see the table below), so never hardcode the first case.
+- Quote first and compare. `quote_oft` returns an `OFTReceipt` whose `amount_sent_ld` and `amount_received_ld` are already dust- and fee-adjusted — treat those, not your input, as the truth.
 - Never derive one side from the other with floats, and test with amounts that exercise the seventh digit.
 
 ### Inbound: EVM → Stellar
@@ -96,9 +98,12 @@ stellar contract invoke --id CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINK
      --send_param '{"dst_eid":30101,"to":"<32-byte hex>","amount_ld":"10000000","min_amount_ld":"9950000","extra_options":"","compose_msg":"","oft_cmd":""}'
 ```
 
-**Fees are paid in XLM.** `quote_send` returns a `MessagingFee`; `native_fee` is XLM in stroops, and `send` transfers it to the endpoint through the native SAC. The fee tracks the destination route, the DVN set, and executor pricing, so quote every send and never reuse a number from a previous one. `refund_address` receives any excess.
+**Two fees, two denominations. Do not confuse them.**
 
-One transaction does the whole outbound leg: `send` burns on the SAC and pays the fee inside a single auth tree, so the sender signs once.
+- **The LayerZero messaging fee is XLM.** `quote_send` returns a `MessagingFee`; `native_fee` is XLM in stroops, and `send` transfers it to the endpoint through the native SAC. It tracks the destination route, the DVN set, and executor pricing, so quote every send and never reuse a number from a previous one. `refund_address` receives any excess.
+- **The OFT fee, when one is configured, is charged in USDT0 itself.** If `effective_fee_bps(dst_eid)` is above `0`, `send` transfers that share of the token to the OFT's fee deposit address, and `quote_oft` reports it as an `OFTFeeDetail` and a lower `amount_received_ld`. So a sender may need XLM *and* more USDT0 than the amount that arrives. Read `effective_fee_bps(dst_eid)` for the route in hand instead of assuming the rate is zero.
+
+One transaction does the whole outbound leg: `send` burns `amount_received_ld` on the SAC, transfers any OFT fee, and pays the messaging fee inside a single auth tree, so the sender signs once.
 
 ### State you must read live, never hardcode
 
@@ -131,7 +136,9 @@ Pathway coverage grows: mainnet traffic in late August 2026 already spanned Ethe
 
 Source of truth: [LayerZero-Labs/monorepo-external](https://github.com/LayerZero-Labs/monorepo-external) — the protocol contracts (`contracts/protocol/stellar/`), the OApp packages (`apps/oapp-app/contracts/stellar/`), the OFT and SAC-manager contracts (`apps/oft-app/contracts/stellar/`), and the worked reference at `apps/project-types/omni-counter-app/contracts/stellar/`. There is no Stellar package in the public `LayerZero-v2` repo and no LayerZero Stellar crate on crates.io — work from this monorepo.
 
-Every import path, argument order, and trait signature below was checked against the monorepo at HEAD on 2026-08-27. It is a skeleton, not a compiled artifact: build it yourself for `wasm32v1-none` before you trust it, and confirm `lz_receive` appears in the exported interface.
+Every import path, argument order, and trait signature below was read out of that monorepo at commit `3f1cf3adadca88aa7a4ee5a7ee251c8b7fefcf2f` (2026-08-26), whose `rust-toolchain.toml` pins Rust `1.90.0` and the `wasm32v1-none` target. Pin the same revision when you copy it, because these crates are not versioned on crates.io.
+
+It is a skeleton, not a compiled artifact. Signature comparison does not catch macro expansion, feature, dependency, or target errors, and no build was run against this snippet. Compile it yourself for `wasm32v1-none` before you trust it, and confirm `lz_receive` appears in the exported interface.
 
 ```rust
 use common_macros::{contract_impl, lz_contract};
