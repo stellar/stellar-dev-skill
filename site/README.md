@@ -27,6 +27,8 @@ pnpm lint               # eslint
 pnpm lint:ts            # tsc --noEmit
 pnpm sync:skills        # refresh public/skills/ from ../skills/
 pnpm generate:llms-txt  # regenerate public/llms.txt
+pnpm check:ecosystem-links # gate: reject a blob-URL ECOSYSTEM_CARDS copyValue
+pnpm test:ecosystem-links  # node --test for the two scripts above
 ```
 
 ## How content stays in sync
@@ -150,7 +152,7 @@ Append to `ECOSYSTEM_CARDS` in `src/data/skills.ts`:
   title: "Project Name",
   description: "Verb-led summary of what the skill does.",
   pathLabel: "owner/repo",
-  copyValue: "https://github.com/owner/repo/blob/main/path/to/SKILL.md",
+  copyValue: "https://raw.githubusercontent.com/owner/repo/main/path/to/SKILL.md",
 }
 ```
 
@@ -158,7 +160,11 @@ Append to `ECOSYSTEM_CARDS` in `src/data/skills.ts`:
   `owner/repo`).
 - `copyValue` is the full URL written to the clipboard when the user
   clicks the pill — point it directly at the raw SKILL.md so an agent
-  can fetch it.
+  can fetch it. For a GitHub-hosted skill that means
+  `raw.githubusercontent.com`, **not** a `github.com/.../blob/...` URL:
+  the latter serves an HTML page (`content-type: text/html`), not the
+  markdown itself, which is what earlier entries in `ECOSYSTEM_CARDS`
+  got wrong by following this example before it was fixed.
 
 Run `pnpm dev` to verify the card renders. No `sync:skills` step
 needed since ecosystem entries aren't mirrored locally.

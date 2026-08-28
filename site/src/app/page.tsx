@@ -4,6 +4,7 @@ import {
   FILTERS,
   SKILL_CARD_SOURCES,
 } from "@/data/skills";
+import { ecosystemSourceUrl } from "@/lib/ecosystem-source-url.mjs";
 import { readSkillMeta } from "@/lib/skill-meta.mjs";
 
 import { CommunitySearch } from "./_components/CommunitySearch";
@@ -55,7 +56,7 @@ const ADD_SKILL_SNIPPET = `{
   title: "Project Name",
   description: "Verb-led summary of what the skill does.",
   pathLabel: "owner/repo",
-  copyValue: "https://github.com/owner/repo/blob/main/path/to/SKILL.md",
+  copyValue: "https://raw.githubusercontent.com/owner/repo/main/path/to/SKILL.md",
 }`;
 
 export default function LandingPage() {
@@ -191,7 +192,7 @@ export default function LandingPage() {
                 description={c.description}
                 pathLabel={c.pathLabel}
                 copyValue={c.copyValue}
-                sourceUrl={c.copyValue}
+                sourceUrl={ecosystemSourceUrl(c.copyValue)}
                 headingLevel={3}
               />
             ))}

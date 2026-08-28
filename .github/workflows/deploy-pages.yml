@@ -59,6 +59,10 @@ jobs:
 
       - run: pnpm lint:ts
 
+      - run: pnpm check:ecosystem-links
+
+      - run: pnpm test:ecosystem-links
+
       - run: pnpm build
 
       - name: Verify hero text matches SITE_ORIGIN (no subpath leak)
