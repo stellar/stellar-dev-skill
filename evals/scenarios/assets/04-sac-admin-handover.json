@@ -1,0 +1,13 @@
+{
+  "skills": [
+    "assets"
+  ],
+  "query": "We want our Stellar token minted only by our contract, and the issuer account locked. What is the order of operations?",
+  "expected_behavior": [
+    "Calls `set_admin` on the SAC first, while the issuer can still sign, because the issuer is the SAC's initial admin",
+    "Locks the issuer (master key weight 0) only after that handover",
+    "Warns that locking the issuer first strands the SAC admin at the locked issuer forever, since nobody can authorize the first `set_admin`",
+    "Keeps the two controls apart: the issuer lock stops classic minting, the SAC admin decides who mints through the contract",
+    "Does not claim a locked issuer disables the SAC's `mint` under the new admin"
+  ]
+}
