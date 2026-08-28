@@ -7,6 +7,7 @@
     "Routes to USDT0 over LayerZero's OFT rail, not CCTP (which carries USDC only) and not a hand-rolled wrapped-asset bridge",
     "Requires an account (`G…`) recipient's USDT0 trustline to exist before anything inbound is sent, and does not impose that trustline on a contract (`C…`) recipient, whose SAC balance lives in contract storage",
     "Requires a `C…` recipient to be deployed before the source chain sends, because `resolve_address` falls back to a `G…` account when no contract with those 32 bytes exists, and that account can never be given a trustline",
+    "Checks the recipient contract's instance TTL as well, because delivery is asynchronous and an archived instance takes the same account fallback",
     "Pins the asset by code and issuer and derives the SAC with `stellar contract id asset` instead of copying an address from a website",
     "Names Stellar's LayerZero endpoint ID 30600 and encodes the recipient as the decoded 32-byte strkey payload (Ed25519 public key for `G…`, contract ID hash for `C…`), not the strkey string and not with its version byte or checksum",
     "Does not treat the issuer's missing home_domain / stellar.toml as evidence the asset is fake"
