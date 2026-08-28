@@ -540,14 +540,20 @@ stellar contract invoke --id $MANAGER --source-account alice \
 stellar contract invoke --id $MANAGER --source-account alice \
   --network mainnet --send=no -- get_existing_roles  # roles with >= 1 member
 
-# Then, for every role that list returns:
-ROLE=MINTER_ROLE
+# get_existing_roles lists only roles that have a member today. Ask about
+# the empty ones by name as well, and add anything new the call returned.
+# Both views below are safe on an empty role: None, and 0.
+for ROLE in MINTER_ROLE CLAWBACK_ROLE BLACKLISTER_ROLE ADMIN_MANAGER_ROLE; do
+  stellar contract invoke --id $MANAGER --source-account alice \
+    --network mainnet --send=no -- get_role_admin --role "$ROLE"
+  stellar contract invoke --id $MANAGER --source-account alice \
+    --network mainnet --send=no -- get_role_member_count --role "$ROLE"
+done
+
+# Then walk index 0 .. count-1 for each role that has members.
+# get_role_member panics with IndexOutOfBounds past the count.
 stellar contract invoke --id $MANAGER --source-account alice \
-  --network mainnet --send=no -- get_role_admin --role $ROLE
-stellar contract invoke --id $MANAGER --source-account alice \
-  --network mainnet --send=no -- get_role_member_count --role $ROLE
-stellar contract invoke --id $MANAGER --source-account alice \
-  --network mainnet --send=no -- get_role_member --role $ROLE --index 0
+  --network mainnet --send=no -- get_role_member --role MINTER_ROLE --index 0
 
 # 7. Step 6 ends at an owner. If that owner is a contract, it is another
 #    governance layer, not an answer — read its own quorum too.
@@ -604,6 +610,12 @@ Reading the results:
   `CLAWBACK_ROLE`, `BLACKLISTER_ROLE` and `ADMIN_MANAGER_ROLE`. A role with no
   members blocks nobody permanently, because the owner fills it in one
   transaction. Model the owner as holding every role.
+- **`get_existing_roles` is not the role list.** It returns only roles that have
+  at least one member right now, so an empty `CLAWBACK_ROLE` never appears in
+  it. A role's admin role is stored separately from its members, and it survives
+  an empty role: whoever holds that admin role can grant the empty role without
+  the owner. Iterating the returned list alone therefore hides real authority.
+  Query all four roles by name, plus any others that call reports.
 - **Step 7 exists because an owner can be a contract.** "The owner is a
   multisig" is not a finding. Walk the chain until it ends at keys, and record
   the quorum you found. If the owner is a contract you cannot read — no source,
