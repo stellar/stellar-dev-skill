@@ -88,14 +88,35 @@ fn send(env, from: &Address, send_param: &SendParam, fee: &MessagingFee,
         refund_address: &Address) -> (MessagingReceipt, OFTReceipt);
 ```
 
-Order matters: `quote_oft` tells you what will actually arrive, `quote_send` prices the message, `send` executes it. Both quotes are read-only — simulate them before you ask a user to sign anything:
+Order matters: `quote_oft` tells you what will actually arrive, `quote_send` prices the message, `send` executes it. The quotes are read-only, and `send` is shown below with `--send=no` so all three simulate. Run them in that order before you ask a user to sign anything:
 
 ```bash
-# Read-only. --send=no simulates and never signs or submits.
-stellar contract invoke --id CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINKUMMF6 \
-  --source-account alice --network mainnet --send=no \
-  -- quote_send --from <G_SENDER> --pay_in_zro false \
-     --send_param '{"dst_eid":30101,"to":"<32-byte hex>","amount_ld":"10000000","min_amount_ld":"9950000","extra_options":"","compose_msg":"","oft_cmd":""}'
+# --send=no simulates. The two quotes never sign; the third command would.
+OFT=CBOWOLFSDM5PZXNFIVDMP5NZ7U2GSIHED6H6R446QOHF266XINKUMMF6
+SENDER=$(stellar keys address alice)   # the account that pays and signs
+EVM_TO=0x1234...abcd                   # the EVM recipient, 20-byte hex
+TO=000000000000000000000000${EVM_TO#0x}   # left-padded to 32 bytes
+PARAM='{"dst_eid":30101,"to":"'"$TO"'","amount_ld":"10000000","min_amount_ld":"9950000","extra_options":"","compose_msg":"","oft_cmd":""}'
+
+# 1. What actually arrives? Returns (OFTLimit, Vec<OFTFeeDetail>, OFTReceipt).
+stellar contract invoke --id "$OFT" --source-account alice \
+  --network mainnet --send=no \
+  -- quote_oft --from "$SENDER" --send_param "$PARAM"
+
+# 2. What does the message cost? Returns MessagingFee { native_fee, zro_fee }.
+stellar contract invoke --id "$OFT" --source-account alice \
+  --network mainnet --send=no \
+  -- quote_send --from "$SENDER" --pay_in_zro false --send_param "$PARAM"
+
+# 3. The send itself. NATIVE_FEE is the stroop figure step 2 returned; quote
+#    it every time. Drop --send=no only when the user agreed to sign.
+read -r NATIVE_FEE                     # paste the native_fee from step 2
+FEE='{"native_fee":"'"$NATIVE_FEE"'","zro_fee":"0"}'
+
+stellar contract invoke --id "$OFT" --source-account alice \
+  --network mainnet --send=no \
+  -- send --from "$SENDER" --send_param "$PARAM" \
+     --fee "$FEE" --refund_address "$SENDER"
 ```
 
 **Two fees, two denominations. Do not confuse them.**
@@ -117,7 +138,7 @@ Peers, pause state, fee basis points, and rate limits are configuration. They ch
 | Will my amount fit the throttle? | `rate_limit_config(direction, eid)`, `rate_limit_capacity(direction, eid)` — `direction` is `Inbound` or `Outbound` |
 | What mode is the OFT in? | `oft_type()` → `MintBurn(<SAC manager>)` for USDT0; the alternative is `LockUnlock` |
 
-Storage keys mirror these names (`Peer(eid)`, `FeeBps(eid)`, `RateLimit(direction, eid)`, `EnforcedOptions(eid, msg_type)`), so `stellar ledger entry fetch contract-data --contract <OFT> --key-xdr <key>` reads them without any invocation at all.
+Storage keys mirror these names (`Peer(eid)`, `FeeBps(eid)`, `RateLimit(direction, eid)`, `EnforcedOptions(eid, msg_type)`), so `stellar ledger entry fetch contract-data --contract "$OFT" --key-xdr "$KEY"` reads them without any invocation at all.
 
 Pathway coverage grows: mainnet traffic in late August 2026 already spanned Ethereum (`30101`), Polygon (`30109`), Arbitrum (`30110`) and several more in both directions. Resolve the destination with `peer(eid)` for the route the user actually asked for.
 

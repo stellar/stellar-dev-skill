@@ -613,7 +613,10 @@ Standard contract interface for NFTs on Stellar. Reference implementations avail
   is not evidence of a scam — USDT0 ships without one. Validate by issuer
   plus SAC derivation, never by the presence of `home_domain` or a
   `[[CURRENCIES]]` entry
-- **When `AUTH_REVOCABLE` and `AUTH_CLAWBACK_ENABLED` are both set, find out
-  who holds the admin role before listing the asset.** Those flags mean
-  balances can be frozen or clawed back, and if the SAC admin is a contract
-  the real authority is whoever holds its roles — not the issuer account
+- **When `AUTH_REVOCABLE` and `AUTH_CLAWBACK_ENABLED` are both set, check the
+  issuer lock *and* the admin roles before listing the asset.** Those flags
+  mean balances can be frozen or clawed back. A contract SAC admin does not
+  contain that power on its own: an issuer whose master key still signs can
+  mint, freeze and claw back directly, whatever the admin contract allows. So
+  confirm the master key weight is `0` (see the pre-listing check above), then
+  identify who holds the admin contract's roles
