@@ -495,8 +495,11 @@ SAC=CBSJZEIO5C7KC2SF3MKSNXXJSW5G3VTNBX4ATMKUI3B2MR4JKM4R26YF
 
 # 1. Is the issuer locked, and which flags are set?
 #    Read: thresholds and signers (see "Step 1" below — the signer list
-#    alone does not answer this), auth_revocable, auth_clawback_enabled,
-#    auth_immutable, and whether home_domain exists.
+#    alone does not answer this), flags, and whether home_domain exists.
+#    flags is one number here, not the named booleans Horizon returns:
+#    1 auth_required, 2 auth_revocable, 4 auth_immutable,
+#    8 auth_clawback_enabled. USDT0's issuer reads 10, so it is revocable
+#    and clawback-enabled, and auth_immutable is not set.
 stellar ledger entry fetch account --account $ISSUER --network mainnet
 
 # 2. Does the SAC address actually derive from this asset?
@@ -550,8 +553,10 @@ for ROLE in MINTER_ROLE CLAWBACK_ROLE BLACKLISTER_ROLE ADMIN_MANAGER_ROLE; do
     --network mainnet --send=no -- get_role_member_count --role "$ROLE"
 done
 
-# Then walk index 0 .. count-1 for each role that has members.
-# get_role_member panics with IndexOutOfBounds past the count.
+# Every role that get_role_admin named is now part of the list too: its
+# members can grant the role it administers, even while that role is empty.
+# Walk index 0 .. count-1 for each role that has members. get_role_member
+# panics with IndexOutOfBounds past the count.
 stellar contract invoke --id $MANAGER --source-account alice \
   --network mainnet --send=no -- get_role_member --role MINTER_ROLE --index 0
 
@@ -584,6 +589,12 @@ Reading the results:
   sum, not the largest single signer.
   USDT0's issuer reads `thresholds` `00000000` with no extra signers. (Horizon differs:
   its `/accounts` response folds the master key into its own `signers` array.)
+- **`flags` is a bitmask here, not four booleans.** The ledger entry carries the
+  raw `u32`: `1` auth_required, `2` auth_revocable, `4` auth_immutable, `8`
+  auth_clawback_enabled. USDT0's issuer reads `10`, which is auth_revocable plus
+  auth_clawback_enabled. Horizon's `/accounts` names the same four flags for
+  you, so decode the number or read Horizon — but do not expect named fields
+  from `stellar ledger entry fetch account`.
 - **Step 2 is the identity check**, not the domain. A real SAC's contract
   instance has a `stellar_asset` executable rather than a Wasm hash, and its
   `name()`/`symbol()` report the wrapped asset. Per the
@@ -615,7 +626,9 @@ Reading the results:
   it. A role's admin role is stored separately from its members, and it survives
   an empty role: whoever holds that admin role can grant the empty role without
   the owner. Iterating the returned list alone therefore hides real authority.
-  Query all four roles by name, plus any others that call reports.
+  Query all four roles by name, plus any others that call reports, and then
+  enumerate the members of every admin role you find. Those members belong in
+  the answer next to the role's own members.
 - **Step 7 exists because an owner can be a contract.** "The owner is a
   multisig" is not a finding. Walk the chain until it ends at keys, and record
   the quorum you found. If the owner is a contract you cannot read — no source,
