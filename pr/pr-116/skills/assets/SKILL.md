@@ -415,10 +415,17 @@ SAC implements the standard SEP-41 token interface:
 > [setting a custom SAC admin](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)
 > for the pattern and `../cross-chain/layerzero.md` for that deployment.
 >
-> One hard prerequisite: **lock the issuer** (master key weight `0`) before
-> handing administration to a contract. Payments from a classic issuer are
-> minting, so an unlocked issuer can mint outside the contract and bypass
-> the role model entirely.
+> One hard prerequisite: **lock the issuer** (master key weight `0`).
+> Payments from a classic issuer are minting, so an unlocked issuer can mint
+> outside the contract and bypass the role model entirely.
+>
+> **Do it in this order: `set_admin` first, then lock the issuer.** A SAC's
+> admin starts as the issuer account, and only the *current* admin can
+> authorize the first `set_admin`. Lock the issuer before that call and the
+> admin stays the locked issuer forever, because nobody can sign the handover
+> ([SAC admin guide](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)).
+> After the handover the SAC still mints under the new admin, so lock the
+> issuer then.
 
 ### Use SAC When:
 - Need a Stellar asset inside a smart contract
@@ -533,8 +540,10 @@ Reading the results:
   list holds only the *extra* signers, so "every listed signer has weight 0"
   proves nothing on its own — an account with a live master key and no extra
   signers has an empty `signers` list. Locked means the master weight is `0`
-  *and* no remaining signer can reach the medium or high threshold. USDT0's
-  issuer reads `thresholds` `00000000` with no extra signers. (Horizon differs:
+  *and* the extra signers cannot reach the medium or high threshold *together*.
+  Stellar adds up the weights of every signature on a transaction, so test the
+  sum, not the largest single signer.
+  USDT0's issuer reads `thresholds` `00000000` with no extra signers. (Horizon differs:
   its `/accounts` response folds the master key into its own `signers` array.)
 - **Step 2 is the identity check**, not the domain. A real SAC's contract
   instance has a `stellar_asset` executable rather than a Wasm hash, and its
