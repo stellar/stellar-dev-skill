@@ -67,11 +67,14 @@ The SAC uses Stellar's 7 decimals. The OFT's `shared_decimals()` is **6**, the p
 import { StrKey } from "@stellar/stellar-sdk";
 
 function stellarRecipientToBytes32(strkey: string): `0x${string}` {
-  const raw = StrKey.isValidContract(strkey)
-    ? StrKey.decodeContract(strkey)              // C… → contract ID hash
-    : StrKey.isValidEd25519PublicKey(strkey)
-      ? StrKey.decodeEd25519PublicKey(strkey)    // G… → Ed25519 public key
-      : (() => { throw new Error(`Not a G… or C… address: ${strkey}`); })();
+  let raw;
+  if (StrKey.isValidContract(strkey)) {
+    raw = StrKey.decodeContract(strkey);          // C… → contract ID hash
+  } else if (StrKey.isValidEd25519PublicKey(strkey)) {
+    raw = StrKey.decodeEd25519PublicKey(strkey);  // G… → Ed25519 public key
+  } else {
+    throw new Error(`Not a G… or C… address: ${strkey}`);
+  }
   return `0x${Buffer.from(raw).toString("hex")}`; // 32 bytes, no version, no checksum
 }
 ```
