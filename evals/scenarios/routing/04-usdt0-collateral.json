@@ -9,6 +9,7 @@
     "Tests the issuer lock by the master key weight (the first byte of the account entry's thresholds), not by the signer list alone, and treats the extra signers' combined weight against the thresholds",
     "Reports auth_revocable and auth_clawback_enabled as risks to model: balances can be frozen or clawed back",
     "Derives the SAC from the asset rather than trusting a published address, and does not disqualify the asset for having no stellar.toml",
-    "Goes past oft_type's MintBurn address to the SAC admin contract's role holders, because the owner can grant MINTER_ROLE"
+    "Goes past oft_type's MintBurn address and enumerates the SAC admin contract's authority: get_existing_roles, then get_role_member for each role, plus get_role_admin and owner",
+    "Says an empty role is not a safe role, because the owner can grant any role at any time, and models the owner (the OneSig contract) as holding every role"
   ]
 }

@@ -6,7 +6,8 @@
   "expected_behavior": [
     "Quotes with `__quote` and passes the returned `MessagingFee` to `__lz_send`, rather than guessing an amount",
     "Names both fee fields: `native_fee` in XLM and `zro_fee` in the ZRO token",
-    "Says `__lz_send` pays ZRO whenever `zro_fee` is not 0, and that the endpoint fails with `ZroUnavailable` when no ZRO token is set on it",
+    "Says `__lz_send` pays ZRO whenever `zro_fee` is not 0",
+    "Separates the two no-ZRO failures: `__quote` with `pay_in_zro = true` fails in the endpoint with `EndpointError::ZroUnavailable`, while `__lz_send` fails earlier in `__pay_zro` with `OAppError::ZroTokenUnavailable` and never reaches the endpoint",
     "Passes `pay_in_zro = false` unless a ZRO token is read on that endpoint",
     "Re-quotes per send instead of reusing an earlier fee number"
   ]
