@@ -9,6 +9,7 @@
     "If it reuses soroban-build-workflow, resolves the current release itself and pins a full commit SHA rather than a version tag copied from documentation",
     "Grants contents: write for publishing the release and id-token: write plus attestations: write for the attestation, without presenting all three as attestation requirements",
     "Says to deploy the WASM attached to the release the workflow produced, because a local rebuild may not match the attested hash",
-    "States the limits: the source repo must be public to be checkable, and the attestation proves which workflow run and commit built the binary, not that the code is safe"
+    "States the limits: the source repo must be public to be checkable, and the attestation proves which workflow run and commit built the binary, not that the code is safe",
+    "Says the commit pin covers release.yml only, not the actions release.yml calls on mutable tags, rather than presenting the pin as closing the whole supply chain"
   ]
 }
