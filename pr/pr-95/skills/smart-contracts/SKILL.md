@@ -207,6 +207,8 @@ gh api "repos/$REPO/commits/$TAG" --jq .sha                         # its commit
 
 Read that release's `release.yml` before wiring it in — it should check out the tagged commit, build from source, and attest the same file it uploads. If it doesn't, stop and tell the user rather than pinning it anyway. Then pin the full commit SHA, not the tag: tags are mutable, and this workflow runs with your repository token, OIDC, and attestation permissions.
 
+Tell the user where that pin stops. It freezes `release.yml`, not the actions `release.yml` calls — `v25.1.0` reaches `actions/checkout@v4`, `stellar/stellar-cli@v25.1.0`, `actions/setup-node@v4` and `actions/attest-build-provenance@v1`, all mutable tags resolved at run time under the same permissions. A caller cannot pin those. Fork the workflow if that risk is unacceptable.
+
 ```yaml
 # .github/workflows/release.yml — verified build on every version tag
 name: Build and Release
