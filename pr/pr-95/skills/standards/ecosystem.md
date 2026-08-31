@@ -173,9 +173,10 @@ SDK for integrating multiple Stellar wallets.
 
 ### Smart Account & Authentication
 
-#### Smart Account Kit (Recommended)
+#### Smart Account Kit
 Comprehensive TypeScript SDK for OpenZeppelin Smart Accounts on Stellar.
-- **GitHub**: https://github.com/kalepail/smart-account-kit
+- **GitHub**: https://github.com/stellar/smart-account-kit
+- **Authorization model**: OpenZeppelin context rules + an auth digest
 - **Use Case**: Production smart wallets with passkeys
 - **Built On**: [OpenZeppelin stellar-contracts](https://github.com/OpenZeppelin/stellar-contracts)
 - **Features**:
@@ -186,11 +187,11 @@ Comprehensive TypeScript SDK for OpenZeppelin Smart Accounts on Stellar.
   - Built-in indexer for contract discovery
   - Multiple signer types (passkeys, Ed25519, policies)
 
-#### Passkey Kit (Legacy)
-Original TypeScript SDK for passkey-based smart wallets.
-- **GitHub**: https://github.com/kalepail/passkey-kit
-- **Status**: Legacy - use Smart Account Kit for new projects
-- **Use Case**: Simple passkey wallet integration
+#### Passkey Kit
+TypeScript SDK for passkey-based smart wallets. Sibling to Smart Account Kit, with a different authorization model — the two are not drop-in compatible.
+- **GitHub**: https://github.com/stellar/passkey-kit
+- **Authorization model**: A flat multi-signer `Signatures` map
+- **Use Case**: Passkey wallet integration where the flat signer model is enough
 - **Integration**: OpenZeppelin Relayer (gasless tx), Mercury (indexing)
 - **Demo**: [passkey-kit-demo.pages.dev](https://passkey-kit-demo.pages.dev)
 - **Example**: [Super Peach](https://github.com/kalepail/superpeach)

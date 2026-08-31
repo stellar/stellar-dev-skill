@@ -217,6 +217,62 @@ console.log("Channel closed:", txHash);
 **Env vars (server):** `CHANNEL_CONTRACT`, `COMMITMENT_PUBKEY`, `MPP_SECRET_KEY`, `FEE_PAYER_SECRET`
 **Env vars (client):** `COMMITMENT_SECRET`
 
+## Discovery: let agents find your paid API
+
+Charge and Session modes answer one question: how do I charge? Discovery answers a second: how does a paying agent find me? Without discovery you ship a working paid API that no agent can locate.
+
+A paid MPP server publishes an [OpenAPI 3.1](https://spec.openapis.org/oas/v3.1.0) document at `GET /openapi.json`. Each paid operation carries an `x-payment-info` extension holding an `offers[]` array. Registries aggregate those documents so agents can search for paid APIs.
+
+> **Discovery is advisory.** The document is an informational hint for display and planning. The runtime **402 Challenge is authoritative** for price, token, network, expiry, and terms. Read the payment terms from the Challenge, never from the discovery document.
+
+### Serve the document
+
+`mppx/express` exports `discovery()`. It mounts `GET /openapi.json` and derives each offer from the method config and the per-route handler, so the document stays in step with the Challenges the route returns.
+
+Edit the Charge mode server above — don't append this to it. A second `mppx/express` import redeclares `Mppx`, and a second `/data` route never runs.
+
+```js
+// charge-server.js
+
+// 1. Replace the existing `mppx/express` import with this one.
+import { Mppx, discovery } from "mppx/express";
+
+// 2. Replace the inline app.get("/data", ...) block with these two.
+//    discovery() reads the price off the handler object, so name it.
+const pay = mppx.charge({ amount: "0.001", description: "paid API call" });
+
+app.get("/data", pay, (req, res) => {
+  res.json({ result: "paid content", price: "$0.001 USDC" });
+});
+
+// 3. Add this after the route, before app.listen().
+discovery(app, mppx, {
+  info: { title: "Paid Data API", version: "1.0.0" },
+  routes: [{ handler: pay, method: "get", path: "/data" }],
+});
+```
+
+Session mode works the same way — pass the `mppx.channel(...)` handler in `routes`.
+
+Validate the document before you publish it:
+
+```bash
+npx mppx discover validate http://localhost:3002/openapi.json
+```
+
+### Register the service (optional)
+
+| Registry | What it is | How to list |
+|----------|------------|-------------|
+| [MPPScan](https://mppscan.com) | Public registry of MPP services, with search and analytics | [Register](https://www.mppscan.com/register) |
+| [MPP services directory](https://mpp.dev/services) | Curated list of live services on mpp.dev | [Submission guide](https://mpp.dev/services#list-your-service) |
+
+Agents can query the curated directory over MCP at `https://mpp.dev/mcp/services`. That server is read-only.
+
+A registry listing advertises your service. It does not verify any client payment. Your server still issues the 402 Challenge and verifies the Credential on every request.
+
+Full reference: [MPP discovery docs](https://mpp.dev/advanced/discovery).
+
 ## Packages and subpath imports
 
 ```bash
@@ -230,7 +286,7 @@ npm install @stellar/mpp mppx @stellar/stellar-sdk
 | `@stellar/mpp/channel/server` | `import * as stellar from "@stellar/mpp/channel/server"` — use `stellar.channel(...)`, `stellar.close(...)`, `stellar.getChannelState(...)`, `stellar.watchChannel(...)` |
 | `@stellar/mpp/channel/client` | `import * as stellar from "@stellar/mpp/channel/client"` — use `stellar.channel(...)` |
 | `@stellar/mpp/channel` | Zod schema definitions for channel types |
-| `mppx/express` | `import { Mppx } from "mppx/express"` — Express adapter; `Mppx.create(...)` returns per-route handlers |
+| `mppx/express` | `import { Mppx, discovery } from "mppx/express"` — Express adapter; `Mppx.create(...)` returns per-route handlers, `discovery(...)` mounts `/openapi.json` |
 | `mppx/server` | `import { Mppx, Store } from "mppx/server"` — framework-agnostic server + `Store` |
 | `mppx/client` | `import { Mppx } from "mppx/client"` — client; also re-exported by `@stellar/mpp/charge/client` |
 
@@ -276,6 +332,14 @@ npm install @stellar/mpp mppx @stellar/stellar-sdk
 **Charge: client has no XLM for fees**
 - Symptom: `op_insufficient_balance` or fee errors on client-submitted transactions
 - Fix: set `mode: "pull"` on the client and configure `feePayer` on the server so the server pays fees. The client only signs auth entries.
+
+**Discovery: client trusts the discovery price**
+- Symptom: the client pays the amount from `/openapi.json` and the server rejects the Credential
+- Fix: the discovery document is advisory. Take price, token, network, expiry, and terms from the 402 Challenge.
+
+**Discovery: route missing from `/openapi.json`**
+- Symptom: the document builds, but a paid route carries no `x-payment-info`
+- Fix: on Express, `discovery()` only documents routes listed in `routes`. Add one entry per paid route, and pass the same handler object you mounted on the route.
 
 **`Store.memory()` in production**
 - Symptom: server loses track of channel state on restart, enables double-spend
