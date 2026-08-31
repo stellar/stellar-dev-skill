@@ -57,8 +57,8 @@ Curated documentation, SDK, tooling, and learning links. Companion to [SKILL.md]
 - [Contract Wizard](https://wizard.openzeppelin.com/stellar) - Generate contracts
 
 ### Smart Account SDKs
-- [Smart Account Kit](https://github.com/kalepail/smart-account-kit) - Production smart wallet SDK (recommended)
-- [Passkey Kit](https://github.com/kalepail/passkey-kit) - Legacy passkey wallet SDK
+- [Smart Account Kit](https://github.com/stellar/smart-account-kit) - Smart wallet SDK using OpenZeppelin context rules + auth digest
+- [Passkey Kit](https://github.com/stellar/passkey-kit) - Sibling smart wallet SDK using a flat multi-signer `Signatures` map
 - [Super Peach](https://github.com/kalepail/superpeach) - Smart wallet implementation example
 
 ### Developer Tools
@@ -230,7 +230,7 @@ Directories (Stellar Ecosystem, SCF Project Tracker) and funding programs (SCF, 
 ## Community
 
 ### Developer Resources
-- [Stellar Developers Discord](https://discord.gg/stellar)
+- [Stellar Developers Discord](https://discord.gg/stellardev)
 - [Stellar Stack Exchange](https://stellar.stackexchange.com)
 - [GitHub Discussions](https://github.com/stellar/stellar-protocol/discussions)
 

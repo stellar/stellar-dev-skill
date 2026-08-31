@@ -1,0 +1,97 @@
+name: Site CI for fork PRs
+
+# Secretless lint/type/build check for the PRs `preview-pr.yml` skips.
+#
+# The preview workflow deliberately excludes fork PRs: it needs a write
+# token to push to `gh-pages` and comment, and fork code must never run
+# next to write access. That leaves fork PRs with no CI evidence that
+# the site still lints and builds, so a reviewer has to build the
+# branch locally before merging site changes.
+#
+# This job closes that gap safely. It runs the same checks the preview
+# runs (install, lint, lint:ts, the ecosystem-links gate and its tests,
+# build) but holds nothing an attacker could take: no secrets are
+# referenced, and `permissions` limits the GITHUB_TOKEN to read-only
+# contents access. Untrusted code executed here (dependency postinstall
+# hooks, the build itself) can only waste this runner's minutes.
+#
+# check:ecosystem-links/test:ecosystem-links matter here specifically:
+# this is the only pre-merge lane a fork PR adding an ECOSYSTEM_CARDS
+# entry ever runs (preview-pr.yml skips forks; deploy-pages.yml only
+# runs after merge), so without this step here the gate's first real
+# run against a new card is the production deploy.
+#
+# There is intentionally NO workflow_dispatch trigger: a manual
+# dispatch would execute fork code in a trusted (default-branch)
+# context, where its cache writes land in default-branch scope and can
+# be restored later by write-capable workflows. To produce evidence for
+# a fork PR opened before this workflow landed, close and reopen the PR
+# (or have the author push): the `reopened` event re-runs this check in
+# the untrusted pull_request context. First-time contributors' runs
+# still wait for a maintainer's "Approve and run" click, as usual.
+
+on:
+  pull_request:
+    branches: [main]
+    # Same trigger set as `deploy-pages.yml`, because the build reads
+    # both trees: `prebuild` copies every `source:` advertised in
+    # site/src/data/skills.ts out of `skills/`, and fails when one is
+    # missing. A PR that renames or deletes a skill file without
+    # updating skills.ts breaks the build from `skills/` alone.
+    paths:
+      - "skills/**"
+      - "site/**"
+      - ".github/workflows/site-ci-fork.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: site
+
+jobs:
+  site-ci:
+    # Internal PRs already get these checks from `preview-pr.yml`; only
+    # fork PRs need this job.
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Build the PR head, not the auto-generated merge commit, for the
+      # same reason as preview-pr.yml: the evidence should match exactly
+      # what was pushed.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          # Drop the token from .git/config once the fetch is done. The
+          # token is read-only on a public repo, so it grants nothing an
+          # anonymous clone lacks, but this leaves the checkout with
+          # literally no credential for fork code to read.
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: site/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm lint:ts
+
+      - run: pnpm check:ecosystem-links
+
+      - run: pnpm test:ecosystem-links
+
+      - run: pnpm build

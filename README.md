@@ -123,7 +123,7 @@ Contributions are welcome! Please ensure any updates reflect current Stellar eco
 ## Resources
 
 - [Stellar Developers](https://developers.stellar.org)
-- [Stellar Discord](https://discord.gg/stellar)
+- [Stellar Discord](https://discord.gg/stellardev)
 - [Stellar Stack Exchange](https://stellar.stackexchange.com)
 - [SDF Blog](https://stellar.org/blog)
 

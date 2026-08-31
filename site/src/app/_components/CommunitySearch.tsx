@@ -1,11 +1,13 @@
 "use client";
 
-import { Children, ReactNode, useId, useState } from "react";
+import { Children, ReactNode, useEffect, useId, useState } from "react";
 
 import { Input, Pagination } from "@stellar/design-system";
 
 /** Cards shown per page in the 2-column community grid. */
 const PAGE_SIZE = 8;
+/** URL query param the search term is synced to, e.g. `?q=dex`. */
+const QUERY_PARAM = "q";
 
 type Props = {
   /** Lowercased "title description" haystack for each child, in the
@@ -35,6 +37,30 @@ export const CommunitySearch = ({ searchTexts, children }: Props) => {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
 
+  // Restore the search term from the URL on first load, so a shared
+  // link opens with the same filtered results. Read directly from
+  // `window` (not `useSearchParams`) to keep this component free of
+  // Suspense, since the cards it wraps must stay in the static export.
+  useEffect(() => {
+    const initial = new URLSearchParams(window.location.search).get(
+      QUERY_PARAM,
+    );
+    if (initial) setQuery(initial);
+  }, []);
+
+  const updateQuery = (value: string) => {
+    setQuery(value);
+    setPage(1);
+
+    const url = new URL(window.location.href);
+    if (value.trim()) {
+      url.searchParams.set(QUERY_PARAM, value);
+    } else {
+      url.searchParams.delete(QUERY_PARAM);
+    }
+    window.history.replaceState(null, "", url);
+  };
+
   const needle = query.trim().toLowerCase();
   const matches = searchTexts.reduce<number[]>((acc, text, index) => {
     if (text.includes(needle)) acc.push(index);
@@ -59,10 +85,7 @@ export const CommunitySearch = ({ searchTexts, children }: Props) => {
           placeholder="Search community skills"
           aria-label="Search community skills by title or description"
           value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setPage(1);
-          }}
+          onChange={(event) => updateQuery(event.target.value)}
         />
       </div>
 

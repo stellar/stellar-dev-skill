@@ -4,7 +4,7 @@ Passkey smart wallets with Smart Account Kit and gasless transactions via the Op
 
 ## Smart Accounts (Passkey Wallets)
 
-For passwordless authentication using WebAuthn passkeys, use Smart Account Kit.
+For passwordless authentication using WebAuthn passkeys, use Smart Account Kit. [Passkey Kit](https://github.com/stellar/passkey-kit) is a sibling SDK built on a different authorization model — see [Choosing between the two kits](#choosing-between-the-two-kits) before you commit to one.
 
 ### Installation
 ```bash
@@ -77,7 +77,18 @@ const response = await client.submitSorobanTransaction({
 - **Production**: Self-host via Docker ([GitHub](https://github.com/OpenZeppelin/openzeppelin-relayer))
 - **Stellar docs**: https://developers.stellar.org/docs/tools/openzeppelin-relayer
 
+### Choosing between the two kits
+
+Passkey Kit and Smart Account Kit are sibling SDKs, not successive versions. They use different on-chain authorization models, so they are **not drop-in compatible**. Pick the model that fits your app.
+
+| Kit | Authorization model | Reach for it when |
+|-----|--------------------|-------------------|
+| [smart-account-kit](https://github.com/stellar/smart-account-kit) | OpenZeppelin context rules + an auth digest, on the audited [stellar-contracts](https://github.com/OpenZeppelin/stellar-contracts) account | You need context rules, thresholds, or spending-limit policies |
+| [passkey-kit](https://github.com/stellar/passkey-kit) | A flat multi-signer `Signatures` map | The flat signer model covers your authorization needs |
+
+Both are maintained. Neither README declares the other deprecated.
+
 ### Resources
-- **GitHub**: https://github.com/kalepail/smart-account-kit
+- **GitHub**: https://github.com/stellar/smart-account-kit
 - **OpenZeppelin Contracts**: https://github.com/OpenZeppelin/stellar-contracts
-- **Legacy SDK**: https://github.com/kalepail/passkey-kit (for simpler use cases)
+- **Passkey Kit**: https://github.com/stellar/passkey-kit (sibling SDK — see above)

@@ -50,8 +50,11 @@ client component.
   `@stellar/design-system`. No headers function (GitHub Pages doesn't
   set response headers), no middleware.
 
-There is no routing beyond `/`, no API routes, no backend, no test
-runner.
+There is no routing beyond `/`, no API routes, no backend. There is a
+minimal test runner: Node's own built-in `node:test`, used only for
+pure logic in `scripts/` and `src/lib/` (`check-ecosystem-links.mjs`,
+`ecosystem-source-url.mjs`), zero new dependencies. Still no Jest,
+Playwright, or component-level testing; see "Don't add" below.
 
 ## Quick reference
 
@@ -62,6 +65,8 @@ pnpm lint               # eslint
 pnpm lint:ts            # tsc --noEmit
 pnpm sync:skills        # refresh public/skills/ from ../skills/
 pnpm generate:llms-txt  # regenerate public/llms.txt
+pnpm check:ecosystem-links # gate: reject a blob-URL ECOSYSTEM_CARDS copyValue
+pnpm test:ecosystem-links  # node --test for the two scripts above
 ```
 
 ## Adding a skill
@@ -92,9 +97,14 @@ other wiring needed.
   title: "Project Name",
   description: "Verb-led summary of what the skill does.",
   pathLabel: "owner/repo",
-  copyValue: "https://github.com/owner/repo/blob/main/path/to/SKILL.md",
+  copyValue: "https://raw.githubusercontent.com/owner/repo/main/path/to/SKILL.md",
 }
 ```
+
+`copyValue` must resolve to raw markdown (`raw.githubusercontent.com`),
+**not** a `github.com/.../blob/...` URL: the latter serves an HTML page,
+not the SKILL.md content an agent fetches. `pnpm check:ecosystem-links`
+enforces this.
 
 ## Conventions
 

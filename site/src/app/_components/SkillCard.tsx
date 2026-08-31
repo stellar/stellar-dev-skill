@@ -28,9 +28,16 @@ export const SkillCard = ({
   headingLevel = 2,
 }: SkillCardProps) => {
   const Heading = headingLevel === 3 ? "h3" : "h2";
-  // Ecosystem cards copy the same URL the header already links to, so the
-  // open-in-new-tab chip would be a second link to one destination. Skill
-  // cards copy the mirrored markdown URL, which nothing else links to.
+  // Skill cards copy the mirrored markdown URL, which nothing else links
+  // to, so the chip always shows. Ecosystem cards used to copy the same
+  // URL the header already linked to (copyValue === sourceUrl), so the
+  // chip never rendered there; now that ecosystem copyValue is raw
+  // markdown and sourceUrl is GitHub's rendered blob page (see
+  // ecosystemSourceUrl in page.tsx), the two differ for every
+  // GitHub-hosted card, so the chip renders there too, a second, direct
+  // link to the raw file alongside the header's link to the rendered
+  // page. A card not hosted on GitHub at all keeps copyValue and
+  // sourceUrl equal, so it still shows none.
   const showOpenLink = copyValue !== sourceUrl;
   return (
     <Card>
