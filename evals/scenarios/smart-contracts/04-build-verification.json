@@ -1,0 +1,15 @@
+{
+  "skills": [
+    "smart-contracts"
+  ],
+  "query": "I'm deploying my Soroban contract to mainnet next week. How do I make it so users can check that the deployed WASM really came from my GitHub repo?",
+  "expected_behavior": [
+    "Points at SEP-55 build verification — source_repo metadata in the WASM plus a GitHub build attestation — rather than improvising a scheme like publishing the hash in the README",
+    "Names either stellar contract build --meta source_repo=github:<owner>/<repo> or the soroban-build-workflow reusable workflow",
+    "If it reuses soroban-build-workflow, resolves the current release itself, reads release.yml at that commit rather than at the tag, and pins the full commit SHA rather than a version tag copied from documentation",
+    "Grants contents: write for publishing the release and id-token: write plus attestations: write for the attestation, without presenting all three as attestation requirements",
+    "Says to deploy the WASM attached to the release the workflow produced, because a local rebuild may not match the attested hash",
+    "States the limits: the source repo must be public to be checkable, and the attestation proves which workflow run and commit built the binary, not that the code is safe",
+    "Says the commit pin covers release.yml only, not the actions release.yml calls on mutable tags, rather than presenting the pin as closing the whole supply chain"
+  ]
+}

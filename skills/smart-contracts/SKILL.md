@@ -186,6 +186,59 @@ stellar contract invoke \
 
 To upload WASM without instantiating (e.g. for factories or upgrades), use `stellar contract upload` (the older `stellar contract install` is a deprecated alias).
 
+## Verify your build
+
+Nothing on-chain ties a deployed WASM to its source. [SEP-0055](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0055.md) (Draft) closes that gap: build in GitHub Actions, stamp the source repository into the WASM's `contractmetav0` section, and publish a [GitHub build attestation](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) over the binary — anyone can then walk from the on-chain WASM hash back to the commit and the workflow run that produced it. Verifiers read the attestation from `api.github.com/repos/<owner>/<repo>/attestations/sha256:<wasm-hash>` unauthenticated, so the source repository has to be public for that "anyone" to hold. On the Free, Pro, and Team plans a private or internal repo cannot publish an attestation at all. Enterprise Cloud can, but only accounts with repository access read it, so no user of your contract can. Make it a standard step before **any** mainnet deploy; it costs one workflow file, so there's no reason to reserve it for user-facing contracts.
+
+Two metadata entries carry it (`stellar contract build --meta key=value`, read back with `stellar contract info meta --wasm <file>`):
+
+- `source_repo=github:<owner>/<repo>` — where the source lives
+- `home_domain=<domain>` — domain serving your SEP-1 `stellar.toml`, for org/token lookup (optional; bare domain, no scheme or path)
+
+[soroban-build-workflow](https://github.com/stellar-expert/soroban-build-workflow) does the whole job — build with the metadata, optimize, attest, publish a release with the WASM attached, and register the build with stellar.expert's contract validation.
+
+Resolve its version yourself instead of copying a pin out of any documentation, this file included. Pins go stale, and the newest tag in that repo is not always a published release:
+
+```bash
+REPO=stellar-expert/soroban-build-workflow
+TAG=$(gh release view --repo "$REPO" --json tagName --jq .tagName)  # latest release
+SHA=$(gh api "repos/$REPO/commits/$TAG" --jq .sha)                  # its commit
+gh api "repos/$REPO/contents/.github/workflows/release.yml?ref=$SHA" \
+  -H "Accept: application/vnd.github.raw"                           # the file you will pin
+```
+
+Read `release.yml` at that SHA, never at the tag. A tag can move between the two steps, and then you review one commit and pin another. It should check out the tagged commit, build from source, and attest the same file it uploads. If it doesn't, stop and tell the user rather than pinning it anyway. Then pin that full SHA, because this workflow runs with your repository token, OIDC, and attestation permissions.
+
+Tell the user where that pin stops. It freezes `release.yml`, not the actions `release.yml` calls. Those sit on mutable tags of their own (`actions/checkout@v4`, the CLI, the attest action) and resolve at run time under the same permissions, and a caller cannot pin them. Fork the workflow if that residual risk is unacceptable.
+
+```yaml
+# .github/workflows/release.yml — verified build on every version tag
+name: Build and Release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:            # inherited by the called workflow, which cannot elevate them
+  contents: write       # create the release, attach the WASM
+  id-token: write       # sign the attestation
+  attestations: write   # publish it
+
+jobs:
+  release:
+    # the SHA you resolved and reviewed; keep the version in the comment
+    uses: stellar-expert/soroban-build-workflow/.github/workflows/release.yml@<commit-sha>  # vX.Y.Z
+    with:
+      release_name: ${{ github.ref_name }}
+      home_domain: example.com   # optional
+      package: my-contract       # optional — omit to build the working directory
+    secrets:
+      release_token: ${{ secrets.GITHUB_TOKEN }}   # created by GitHub, nothing to configure
+```
+
+Then deploy **the WASM attached to that release**, not a local rebuild — compilation environments vary, and a hash that differs by one byte matches no attestation.
+
+The result shows up in [Stellar Lab's contract explorer](https://developers.stellar.org/docs/tools/lab/smart-contracts/contract-explorer#build-info) and on stellar.expert. Be precise with users about what it proves: a specific workflow run built this binary from this commit. It says nothing about whether that code is safe or was ever reviewed.
+
 ## Minimal test
 
 ```rust
@@ -211,7 +264,7 @@ Auth mocking, event assertions, fuzzing, fork tests, and CI setup: [testing.md](
 
 ## Before mainnet
 
-Work through the checklists in [security.md](security.md) — authorization, reinitialization, arithmetic, storage TTLs, and cross-contract validation are the recurring failure modes.
+Work through the checklists in [security.md](security.md) — authorization, reinitialization, arithmetic, storage TTLs, and cross-contract validation are the recurring failure modes. Ship the deploy through a [verified build](#verify-your-build) so the on-chain WASM hash traces back to a reviewable commit.
 
 ## Documentation
 
