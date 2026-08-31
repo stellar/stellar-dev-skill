@@ -202,10 +202,12 @@ Resolve its version yourself instead of copying a pin out of any documentation, 
 ```bash
 REPO=stellar-expert/soroban-build-workflow
 TAG=$(gh release view --repo "$REPO" --json tagName --jq .tagName)  # latest release
-gh api "repos/$REPO/commits/$TAG" --jq .sha                         # its commit
+SHA=$(gh api "repos/$REPO/commits/$TAG" --jq .sha)                  # its commit
+gh api "repos/$REPO/contents/.github/workflows/release.yml?ref=$SHA" \
+  -H "Accept: application/vnd.github.raw"                           # the file you will pin
 ```
 
-Read that release's `release.yml` before wiring it in — it should check out the tagged commit, build from source, and attest the same file it uploads. If it doesn't, stop and tell the user rather than pinning it anyway. Then pin the full commit SHA, not the tag: tags are mutable, and this workflow runs with your repository token, OIDC, and attestation permissions.
+Read `release.yml` at that SHA, never at the tag. A tag can move between the two steps, and then you review one commit and pin another. It should check out the tagged commit, build from source, and attest the same file it uploads. If it doesn't, stop and tell the user rather than pinning it anyway. Then pin that full SHA, because this workflow runs with your repository token, OIDC, and attestation permissions.
 
 Tell the user where that pin stops. It freezes `release.yml`, not the actions `release.yml` calls. Those sit on mutable tags of their own (`actions/checkout@v4`, the CLI, the attest action) and resolve at run time under the same permissions, and a caller cannot pin them. Fork the workflow if that residual risk is unacceptable.
 
@@ -223,7 +225,7 @@ permissions:            # inherited by the called workflow, which cannot elevate
 
 jobs:
   release:
-    # full SHA of the release you just reviewed; keep the version in the comment
+    # the SHA you resolved and reviewed; keep the version in the comment
     uses: stellar-expert/soroban-build-workflow/.github/workflows/release.yml@<commit-sha>  # vX.Y.Z
     with:
       release_name: ${{ github.ref_name }}
