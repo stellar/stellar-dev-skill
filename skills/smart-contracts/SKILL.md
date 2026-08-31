@@ -200,8 +200,9 @@ Two metadata entries carry it (`stellar contract build --meta key=value`, read b
 Resolve its version yourself instead of copying a pin out of any documentation, this file included. Pins go stale, and the newest tag in that repo is not always a published release:
 
 ```bash
-gh release view --repo stellar-expert/soroban-build-workflow --json tagName  # latest release
-gh api repos/stellar-expert/soroban-build-workflow/commits/<tag> --jq .sha   # its commit
+REPO=stellar-expert/soroban-build-workflow
+TAG=$(gh release view --repo "$REPO" --json tagName --jq .tagName)  # latest release
+gh api "repos/$REPO/commits/$TAG" --jq .sha                         # its commit
 ```
 
 Read that release's `release.yml` before wiring it in — it should check out the tagged commit, build from source, and attest the same file it uploads. If it doesn't, stop and tell the user rather than pinning it anyway. Then pin the full commit SHA, not the tag: tags are mutable, and this workflow runs with your repository token, OIDC, and attestation permissions.
