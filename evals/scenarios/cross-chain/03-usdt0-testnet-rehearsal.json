@@ -1,0 +1,12 @@
+{
+  "skills": [
+    "cross-chain"
+  ],
+  "query": "Before we ship, rehearse our USDT0 bridge integration end to end on Stellar testnet.",
+  "expected_behavior": [
+    "States that USDT0 publishes no Stellar testnet deployment, so a USDT0 testnet round trip is not available",
+    "Offers the real alternatives: read-only quote_oft and quote_send simulation, then a dust-sized mainnet transfer",
+    "Mentions that LayerZero's own testnet endpoint (EID 40600) can carry your own OApp or OFT, and says to confirm one delivered testnet message before trusting it as a rehearsal path",
+    "Does not invent a USDT0 testnet contract address or claim a testnet deployment exists"
+  ]
+}

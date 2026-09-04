@@ -84,7 +84,7 @@ skills/
 ├── agentic-payments/          # AI/machine payments — SKILL.md router + x402 / mpp files
 ├── zk-proofs/SKILL.md         # ZK verification (BLS12-381/BN254 Groth16, UltraHonk), Circom/Noir/RISC Zero
 ├── standards/                 # SEPs & CAPs — SKILL.md router + ecosystem / resources files
-└── cross-chain/               # Cross-chain — SKILL.md router + cctp file
+└── cross-chain/               # Cross-chain — SKILL.md router + cctp / axelar / layerzero files
 ```
 
 Each sub-skill is a self-contained Agent Skill with its own frontmatter. Larger skills follow [Anthropic's progressive-disclosure guidance](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices): a sub-500-line `SKILL.md` router with a task-to-file table, plus companion files (one level deep) that load only when the task needs them. Cross-references link related skills (e.g., the `agentic-payments` skill points to `smart-contracts` for the SACs the protocols call, and to `assets` for USDC). The AI reads only the files relevant to the task at hand.
@@ -118,7 +118,7 @@ Contributions are welcome! Please ensure any updates reflect current Stellar eco
 
 ## Evaluations
 
-[`evals/`](evals/README.md) holds ~3 task scenarios for each of seven skills (plus cross-skill routing checks and a negative control), each encoding a mistake agents actually make without the skill. Three grading tiers: machine-checkable compile checks, LLM-judged behavior assertions, and skill-trigger checks. Two gaps are open: `cross-chain` has no scenarios yet, and no baseline transcripts are committed, so the set is still unvalidated. See [evals/README.md](evals/README.md) for the format, how to run them, and what the missing baselines mean.
+[`evals/`](evals/README.md) holds ~3 task scenarios for each of the eight skills (plus cross-skill routing checks and a negative control), each encoding a mistake agents actually make without the skill. Three grading tiers: machine-checkable compile checks, LLM-judged behavior assertions, and skill-trigger checks. One gap is open: no baseline transcripts are committed, so the set is still unvalidated. See [evals/README.md](evals/README.md) for the format, how to run them, and what the missing baselines mean.
 
 ## Resources
 
