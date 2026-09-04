@@ -1,6 +1,6 @@
 ---
 name: assets
-description: Stellar Assets (classic) + trustlines + Stellar Asset Contract (SAC) bridge to smart contracts. Covers asset issuance, distribution, authorization flags, clawback, regulated assets, trustline management, the SAC interop layer that exposes classic assets as SEP-41 contract tokens, and read-only due diligence on an asset before listing it. Use when tokenizing real-world assets, issuing stablecoins, managing trustlines, bridging classic assets to smart contracts, or deciding whether to list, display or accept an asset as collateral.
+description: Stellar Assets (classic) + trustlines + Stellar Asset Contract (SAC) bridge to smart contracts. Covers asset issuance, distribution, authorization flags, clawback, regulated assets, trustline management, and the SAC interop layer that exposes classic assets as SEP-41 contract tokens. Use when tokenizing real-world assets, issuing stablecoins, managing trustlines, or bridging classic assets to smart contracts.
 user-invocable: true
 argument-hint: "[asset task]"
 ---
@@ -15,7 +15,6 @@ Stellar's native token mechanism: classic asset issuance, trustlines, and the St
 - Managing issuer flags (auth required, auth revocable, clawback)
 - Bridging a classic asset into a smart contract via SAC
 - Building regulated-asset flows (compliance, KYC, freeze)
-- Reviewing an asset before you list it, display it, or take it as collateral → [pre-listing.md](pre-listing.md)
 
 ## Related skills
 - Custom token contracts (when classic isn't enough) → `../smart-contracts/SKILL.md`
@@ -481,27 +480,6 @@ const stats = await server
 // - flags: issuer flags
 ```
 
-### Pre-Listing Check (read-only)
-
-Before you list an asset, display it, or accept it as collateral, answer seven
-questions from the ledger itself: the issuer's lock and flags, the SAC
-derivation, what the contract says it wraps, its admin, any bridge on top, that
-admin's roles, and finally whoever controls the admin. Every step simulates
-only, and none of them needs a key.
-
-**The full recipe, with commands and a worked USDT0 example, is in
-[pre-listing.md](pre-listing.md).** Read it before you sign off on an asset.
-
-Two rules decide most reviews:
-
-- **Walk the chain until it ends at keys.** A locked issuer with a contract
-  admin is a normal design, not a red flag. It moves the trust question to that
-  contract's roles, and then to whoever controls that contract. "The owner is a
-  multisig" is a governance layer, not an answer.
-- **Read state, never reputation.** Derive the SAC yourself, decode the issuer's
-  `flags` bitmask, and treat role membership as live state. A missing
-  `stellar.toml` is not evidence of a fake asset.
-
 ## SEP Standards for Assets
 
 ### SEP-0001 (stellar.toml)
@@ -564,5 +542,5 @@ Standard contract interface for NFTs on Stellar. Reference implementations avail
   mean balances can be frozen or clawed back. A contract SAC admin does not
   contain that power on its own: an issuer whose master key still signs can
   mint, freeze and claw back directly, whatever the admin contract allows. So
-  confirm the master key weight is `0` (see [pre-listing.md](pre-listing.md)),
-  then identify who holds the admin contract's roles
+  confirm the master key weight is `0`, then identify who holds the admin
+  contract's roles
