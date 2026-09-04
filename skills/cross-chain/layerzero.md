@@ -201,7 +201,7 @@ Pathway coverage grows: mainnet traffic in late August 2026 already spanned Ethe
 ### Limitations and status notes
 
 - **No USDT0 testnet deployment.** USDT0's deployments page lists no Stellar testnet entry (checked 2026-08-27), so a testnet round trip of USDT0 itself is not available. The rehearsal path is therefore read-only `quote_oft` and `quote_send` simulation, then a **dust-sized real mainnet transfer** — that transfer is how you prove the flow. Do it before you move a user's balance, and match the ["testnet first" rule](SKILL.md#pitfalls-shared-by-every-rail).
-- **A testnet rehearsal is not guaranteed.** You can deploy your own OApp or OFT against the testnet endpoint (EID `40600`), but testnet sends failed with `#1213 UnsupportedMessageLib` in August 2026 — the required DVN did not support the endpoint's only registered message library. That endpoint has been redeployed since, and this file does not record a successful testnet send after it. Send one small testnet message and confirm delivery before you treat testnet as a rehearsal path.
+- **A testnet rehearsal needs one explicit step.** Verified 2026-09-04 on the redeployed testnet endpoint, with a fresh OApp built from the skeleton below: the **default** send configs for EIDs `40161` and `40102` still name a deprecated DVN that rejects the registered ULN, so an out-of-the-box `send` fails with `#1213 UnsupportedMessageLib` — after the executor fee event, and `quote` succeeds misleadingly first. The fix is the per-OApp security config this rail is built around: read the active DVN address from the metadata API, then call `endpoint.set_config` (`config_type` `2`, the send ULN config) naming it in `required_dvns`. With that one config transaction, the same `send` succeeds and the endpoint emits `PacketSent` ([sample transaction](https://stellar.expert/explorer/testnet/tx/9d0d471b90a5c94143bb8dd09dc803fa731145a9891fd2338bec706d6fd7cea4)). Re-check the defaults before shipping — LayerZero may fix them, and this file records 2026-09-04.
 - Fee basis points, rate limits, and the pause flag are live configuration — see the table above.
 - Anything deeper on deployment and wiring belongs to the [Stellar OFT docs](https://docs.layerzero.network/v2/developers/stellar/oft/overview) and the [OFT standard](https://docs.layerzero.network/v2/concepts/applications/oft-standard).
 
@@ -211,9 +211,10 @@ Source of truth: [LayerZero-Labs/monorepo-external](https://github.com/LayerZero
 
 Every import path, argument order, and trait signature below was read out of that monorepo at commit `3f1cf3adadca88aa7a4ee5a7ee251c8b7fefcf2f` (2026-08-26), whose `rust-toolchain.toml` pins Rust `1.90.0` and the `wasm32v1-none` target. Pin the same revision when you copy it, because these crates are not versioned on crates.io.
 
-It is a skeleton, not a compiled artifact. Signature comparison does not catch macro expansion, feature, dependency, or target errors, and no build was run against this snippet. Compile it yourself for `wasm32v1-none` before you trust it, and confirm `lz_receive` appears in the exported interface.
+This exact snippet was compiled on 2026-09-04 against the monorepo at the pinned commit (Rust `1.90.0`, target `wasm32v1-none`): a 45 kB wasm whose exported interface includes `lz_receive`, `quote`, `send`, `set_peer`, and the full generated OApp surface. Two things the build needs that the snippet cannot carry: the crate must start with `#![no_std]` (the target has no std; without the attribute the build fails with `E0463: can't find crate for std`), and a standalone copy must pin `soroban-sdk-macros = "=25.1.1"` and lock `soroban-spec`/`soroban-spec-rust` to `25.1.1` — soroban-sdk `25.1.1` declares caret ranges, so a fresh lockfile resolves those to `25.3.x`, which requires a newer rustc than the monorepo's pinned `1.90.0`.
 
 ```rust
+#![no_std]
 use common_macros::{contract_impl, lz_contract};
 use endpoint_v2::{MessagingFee, Origin};
 use oapp::{
