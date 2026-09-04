@@ -42,7 +42,7 @@ Addresses per [USDT0's deployments page](https://docs.usdt0.to/technical-documen
 
 1. **An account (`G…`) recipient needs a USDT0 trustline before anything inbound lands.** A `G…` account cannot hold an issued asset without one. This is the single most common inbound failure. A contract (`C…`) recipient needs none — but only while that contract exists. SAC balances for contracts live in contract storage, not in a trustline. The OFT decides which one you get from the 32-byte recipient: it resolves to a contract address when a contract with that ID exists, and to a `G…` account otherwise. **Confirm the recipient contract is deployed before the source chain sends** — see below.
 2. **Pin the code *and* the issuer.** `USDT0` is a 5-character code (`credit_alphanum12`), and asset code alone identifies nothing. Verify the SAC by derivation — `stellar contract id asset --asset USDT0:GATISXX6… --network mainnet` must return `CBSJZEIO…`.
-3. **There is no `stellar.toml`.** The issuer publishes no `home_domain`, so every check keyed on `home_domain` or a SEP-1 `[[CURRENCIES]]` entry fails on a legitimate, live asset. Validate by issuer plus SAC derivation instead. See `../assets/pre-listing.md` for the full pre-listing recipe.
+3. **There is no `stellar.toml`.** The issuer publishes no `home_domain`, so every check keyed on `home_domain` or a SEP-1 `[[CURRENCIES]]` entry fails on a legitimate, live asset. Validate by issuer plus SAC derivation instead.
 4. **Dust below 6 decimals is dropped on send** — see below.
 
 ### Decimals: 7 local, 6 shared
