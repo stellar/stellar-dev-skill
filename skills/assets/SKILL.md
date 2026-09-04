@@ -406,6 +406,26 @@ SAC implements the standard SEP-41 token interface:
 > compatibility of a normal asset (DEX, anchors, wallets, trustlines) while
 > still layering on custom logic. Prefer a custom contract token only when
 > you need token behavior the SAC genuinely cannot express.
+>
+> **This runs in production today.** USDT0
+> (`USDT0:GATISXX6BZ6NC7IKQBY37CJD4SOZL3CYZJWXEDG6JVIY4WBS6KXJHN6Q`) is a
+> classic asset whose SAC admin is a contract: a role-gated manager that
+> forwards `mint`, `clawback`, `set_authorized`, and `set_admin` to the SAC,
+> with a cross-chain bridge holding only the minter role. See
+> [setting a custom SAC admin](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)
+> for the pattern and `../cross-chain/layerzero.md` for that deployment.
+>
+> One hard prerequisite: **lock the issuer** (master key weight `0`).
+> Payments from a classic issuer are minting, so an unlocked issuer can mint
+> outside the contract and bypass the role model entirely.
+>
+> **Do it in this order: `set_admin` first, then lock the issuer.** A SAC's
+> admin starts as the issuer account, and only the *current* admin can
+> authorize the first `set_admin`. Lock the issuer before that call and the
+> admin stays the locked issuer forever, because nobody can sign the handover
+> ([SAC admin guide](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)).
+> After the handover the SAC still mints under the new admin, so lock the
+> issuer then.
 
 ### Use SAC When:
 - Need a Stellar asset inside a smart contract
@@ -513,3 +533,14 @@ Standard contract interface for NFTs on Stellar. Reference implementations avail
 - Be cautious of assets with clawback enabled
 - Verify stellar.toml from authoritative source
 - Use well-known asset lists for common tokens
+- **Some live assets have no `stellar.toml` at all.** A missing `home_domain`
+  is not evidence of a scam — USDT0 ships without one. Validate by issuer
+  plus SAC derivation, never by the presence of `home_domain` or a
+  `[[CURRENCIES]]` entry
+- **When `AUTH_REVOCABLE` and `AUTH_CLAWBACK_ENABLED` are both set, check the
+  issuer lock *and* the admin roles before listing the asset.** Those flags
+  mean balances can be frozen or clawed back. A contract SAC admin does not
+  contain that power on its own: an issuer whose master key still signs can
+  mint, freeze and claw back directly, whatever the admin contract allows. So
+  confirm the master key weight is `0`, then identify who holds the admin
+  contract's roles
