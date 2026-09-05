@@ -1,0 +1,19 @@
+{
+  "skills": [
+    "agentic-payments"
+  ],
+  "query": "I have three x402-protected Express routes (GET /signals, GET /market, POST /execute), each at a different USDC price, all behind the same OZ Channels facilitator. Right now I'm calling paymentMiddleware separately for each one. Is there a cleaner way?",
+  "expected_behavior": [
+    "Switches to paymentMiddlewareFromConfig from @x402/express with a single route-keyed object (keys like \"GET /signals\") instead of one paymentMiddleware/x402ResourceServer call per route",
+    "States that a request whose method+path doesn't match any key falls through to next() unpriced, not a 402 or an error",
+    "Puts description (and mimeType, when set) at the route-config level, not nested inside accepts — PaymentOption has no description field, so nesting it there compiles but the 402 response serves it empty",
+    "Does not crash the process at startup when the recipient/payTo env var is unset — wraps middleware initialization in a check instead, and fails CLOSED per request: every request under the paid mount point gets a 503, never a silent 200",
+    "Resolves payTo through the same recipient-resolution function as mpp.md (recovering a secret key pasted where the public key belongs, rejecting a malformed G... via StrKey.isValidEd25519PublicKey), not a bare process.env.STELLAR_RECIPIENT read — payTo is echoed back unvalidated in every 402 response body, and an unrejected malformed value would reach paymentMiddlewareFromConfig() as real config instead of tripping the fail-closed fallback",
+    "Mounts the payment middleware under its own path prefix (e.g. app.use(\"/paid\", x402Middleware)) rather than at the app root, and does NOT try to hand-replicate @x402/core's own route matching (method uppercasing, path normalization, wildcard/:param/[param] regex compilation) to decide which unconfigured requests deserve a 503 — every request that reaches the mounted middleware is a paid route by construction, so the unconfigured fallback can respond 503 unconditionally instead of risking a case, encoding, or dynamic-route variant slipping through free",
+    "Moves the actual route handlers (app.get/app.post for /signals, /market, /execute) under the same /paid prefix as the middleware mount, not just the middleware itself — a handler left registered at the old top-level path never passes through the payment middleware at all and serves its content free regardless of whether PAY_TO is configured",
+    "Sets an explicit fallback for the facilitator URL using || (e.g. process.env.FACILITATOR_URL || \"https://channels.openzeppelin.com/x402/testnet\"), NOT ?? — ?? only falls back on null/undefined, so FACILITATOR_URL= (set to an empty string in a .env file) passes \"\" straight through, which is falsy inside @x402/core's own 'config?.url || DEFAULT_FACILITATOR_URL' check and silently lands on the library's generic x402.org fallback anyway, sending the OZ_API_KEY Bearer token to the wrong operator and, on mainnet, hitting a facilitator with no stellar:pubnet entry at all"
+  ],
+  "machine_checkable": [
+    "Generated server passes tsc --noEmit / node --check against @x402/express, @x402/core, @x402/stellar"
+  ]
+}
