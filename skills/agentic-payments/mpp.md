@@ -1,5 +1,7 @@
 # MPP — Machine Payments Protocol (Charge + Session)
 
+MPP is a payment-method-agnostic HTTP 402 protocol, not a Stellar-only one: the core protocol standardizes the 402 Challenge/Credential exchange, and each **payment method** defines how one network settles it ([protocol spec](https://mpp.dev/protocol)). Tempo, Stripe and EVM are other payment methods; this guide documents the [Stellar payment method](https://mpp.dev/payment-methods/stellar). The packages split the same way: `mppx` is the general MPP framework, and `@stellar/mpp` is the Stellar payment method that extends it.
+
 Facilitator-free machine payments settled directly on Stellar: per-request Charge mode and channel-backed Session mode. Companion to [SKILL.md](SKILL.md) (decision table, shared testnet setup, USDC addresses); the facilitator-based alternative lives in [x402.md](x402.md).
 
 ## When to use MPP
