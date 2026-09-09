@@ -5,7 +5,7 @@
   "query": "Monetize my Express API so AI agents can pay per request.",
   "expected_behavior": [
     "Uses the decision table and picks x402 for the lowest-friction facilitator flow (or states why MPP fits better)",
-    "Requires OZ_API_KEY on both testnet and mainnet for the OZ Channels facilitator",
+    "Requires OZ_API_KEY on both testnet and mainnet for the OZ Channels facilitator, and attributes that key to OZ Channels rather than to x402 — the protocol is permissionless and other facilitators (the keyless x402.org one on stellar:testnet, or self-facilitation) need no key",
     "payTo is a classic G... account that holds a USDC trustline (not the SAC C... address)",
     "Prices like $0.001 convert at 7 decimals (10000 base units), not 6 like EVM USDC"
   ],
