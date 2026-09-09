@@ -70,7 +70,7 @@ The skills installed via the methods above, grouped by category.
 
 ### Agentic Payments
 
-- [Agent Payments (x402 + MPP)](https://skills.stellar.org/skills/agentic-payments/SKILL.md): Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs via OZ Channels facilitator, fee-sponsored clients) and MPP (Machine Payments Protocol) in both Charge mode (per-request SAC) and Session mode (channel-backed off-chain commits, high-frequency; formerly called Channel mode). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
+- [Agent Payments (x402 + MPP)](https://skills.stellar.org/skills/agentic-payments/SKILL.md): Agentic and machine-to-machine payments on Stellar. Covers x402 (HTTP 402 paid APIs through a facilitator, fee-sponsored clients; the guide configures OZ Channels) and MPP (Machine Payments Protocol) in both Charge mode (per-request SAC) and Session mode (channel-backed off-chain commits, high-frequency; formerly called Channel mode). Defaults to USDC (SEP-41 SAC) on `stellar:testnet`/`stellar:pubnet` (CAIP-2). Use when selling a paid API to AI agents, building an x402 client, or designing a payment-channel architecture for high-frequency agent traffic.
   - [MPP — Machine Payments Protocol (Charge + Session)](https://skills.stellar.org/skills/agentic-payments/mpp.md)
   - [x402 — Paid APIs + Agent Buyer Clients](https://skills.stellar.org/skills/agentic-payments/x402.md)
 
