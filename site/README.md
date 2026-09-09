@@ -145,7 +145,9 @@ page. There's no upstream copy — the card just links out to the
 external SKILL.md, and the user copies that URL to install it with
 their agent.
 
-Append to `ECOSYSTEM_CARDS` in `src/data/skills.ts`:
+Insert the entry alphabetically by `title` (case-insensitive) in
+`ECOSYSTEM_CARDS` in `src/data/skills.ts`, not appended at the end, so a
+card's position reflects its name rather than merge order:
 
 ```ts
 {
