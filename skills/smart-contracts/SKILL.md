@@ -67,12 +67,13 @@ rustup target add wasm32v1-none     # once per toolchain
 crate-type = ["lib", "cdylib"]   # lib is needed for tests and fuzzing
 
 [dependencies]
-soroban-sdk = "27.0.0-rc.1"  # protocol 27; pre-releases need the exact version string.
-                             # Mainnet is on protocol 26 at the time of writing — use "26" there
-                             # until the network upgrades. Check crates.io for the latest.
+soroban-sdk = "27"  # protocol 27, which mainnet runs at the time of writing.
+                    # Pre-releases (`-rc.x`) exist only during a rollout and need the
+                    # exact version string. Check crates.io for the latest release, and
+                    # the live protocol version of your target network, before deploying.
 
 [dev-dependencies]
-soroban-sdk = { version = "27.0.0-rc.1", features = ["testutils"] }  # match above
+soroban-sdk = { version = "27", features = ["testutils"] }  # match above
 
 [profile.release]
 opt-level = "z"
