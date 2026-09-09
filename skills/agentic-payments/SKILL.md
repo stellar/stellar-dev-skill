@@ -52,7 +52,7 @@ This file carries the decision table, the shared testnet account setup, and the 
 
 Both protocols need the same base setup: a **client/payer** account (signs and pays from a USDC balance) and a **server/recipient** account. Both need a USDC trustline.
 
-One step is web-only (Captcha) and cannot be scripted: the Circle USDC faucet. Everything else can be automated — [x402.md](x402.md) ships a `setup.js` that does steps 1–3 and writes a starter `.env`. (The OZ Channels facilitator that x402.md configures adds one more web-only step, its key generator. Each facilitator sets its own auth requirement — the x402.org one needs none — and MPP needs no third party at all.)
+One step of this shared setup is web-only (Captcha) and cannot be scripted: the Circle USDC faucet. The rest of it can be automated — [x402.md](x402.md) ships a `setup.js` that does steps 1–3 and writes a starter `.env`. (Outside this setup, the OZ Channels facilitator that x402.md configures has its own web-only key generator. Each facilitator sets its own auth requirement — the x402.org one needs none — and MPP needs no third party at all.)
 
 1. **Generate two keypairs**
    ```bash
