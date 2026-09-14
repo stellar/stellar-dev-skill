@@ -1,0 +1,10 @@
+{
+  "skills": ["standards"],
+  "query": "Which lending protocols on Stellar can my agent integrate with, and what contract or docs do I actually start from?",
+  "expected_behavior": [
+    "Loads the standards skill and reads ecosystem.md rather than answering from memory",
+    "Names Blend, K2, Slender, and XOXNO from the catalog and does not treat any one protocol as the default lending answer",
+    "Uses only entry points the catalog actually documents (K2 kinetic_router, XOXNO controller and swap aggregator) and does not invent Blend or Slender contract addresses",
+    "Points at each protocol's documented integration surface (Blend GitHub, K2 docs/llms.txt, XOXNO skill + docs/llms.txt, Slender's catalog notes); for XOXNO, tells the reader to load skills/xoxno-lending/SKILL.md rather than reciting hub/spoke/math from this catalog, and notes that listed addresses can change"
+  ]
+}
