@@ -172,6 +172,7 @@ Any contract that takes a token address must assume it may be native XLM's SAC, 
 - [ ] Events emitted for auditable state changes (and error codes never renumbered)
 - [ ] Upgrade path gated, tested (happy + failure), and replay-safe
 - [ ] Emergency controls (pause) and incident runbook defined for value-bearing contracts
+- [ ] Deployed WASM traceable to its source — SEP-55 build metadata plus a GitHub attestation from a public repo, deployed from the release artifact ([SKILL.md](SKILL.md#verify-your-build))
 
 ### Client-side
 
