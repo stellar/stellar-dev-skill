@@ -79,13 +79,13 @@ First non-custodial lending protocol on Stellar with flash loan support.
 #### XOXNO Lending
 Money market on Stellar with a hub-and-spoke architecture: one central liquidity pool and a controller that orchestrates everything. An NFT is the position (collateral and debt together) and can be transferred between wallets. Health factor is per NFT; one user can hold an unlimited number of NFTs. Live on mainnet and testnet.
 
-**Load the skill** when the task mentions XOXNO Lending, `rs-lending-xlm`, hub/spoke, `HubAssetKey`, position NFT, account id, `multiply`, `flash_position` (vs `flash_loan`), `@xoxno/sdk-js` `stellar-lending`, `api.xoxno.com/stellar-lending`, or `stellar-swap.xoxno.com`. Fetch [skills/xoxno-lending/SKILL.md](https://raw.githubusercontent.com/XOXNO/rs-lending-xlm/main/skills/xoxno-lending/SKILL.md) and follow its routing table.
+**Load the skill** when the task names XOXNO Lending or a distinctive identifier: `rs-lending-xlm`, hub/spoke, `HubAssetKey`, position NFT, `flash_position` (vs `flash_loan`), `@xoxno/sdk-js` `stellar-lending`, `api.xoxno.com/stellar-lending`, or `stellar-swap.xoxno.com`. Fetch [skills/xoxno-lending/SKILL.md](https://raw.githubusercontent.com/XOXNO/rs-lending-xlm/main/skills/xoxno-lending/SKILL.md) and follow its routing table.
 
 - **Use Case**: Supply, borrow, leverage, collateral and debt swaps, flash loans, liquidations
 - **GitHub**: https://github.com/XOXNO/rs-lending-xlm
 - **Docs**: [overview](https://xoxno.com/docs/stellar-lending/overview), [dev quickstart](https://xoxno.com/docs/stellar-lending/dev/quickstart), [llms.txt](https://xoxno.com/llms.txt)
 - **Types / API spec**: `@xoxno/sdk-js` (`stellar-lending`) is fully typed TypeScript. Lending REST: Swagger UI at [api.xoxno.com](https://api.xoxno.com/) (`GET /swagger.json`). Swap quotes and XDR: Swagger UI at [stellar-swap.xoxno.com](https://stellar-swap.xoxno.com/) (`GET /api-docs/openapi.json`)
-- **Entry point**: lending — `controller` `CAUCMIN5KSXEVZ7NMXR3LZATGD5EFIEUI5XWTFLYRO2R5OTXI22WE5JX` (not the pool). Swaps — aggregator router `CCVENFSVCBYDHVOACFZXMNNYVOZ3LKXPZYU5LUI4N7KTXOKRVYD7F3TR`. Hubs, spokes, listed markets, and every other address: [addresses.md](https://github.com/XOXNO/rs-lending-xlm/blob/main/skills/xoxno-lending/addresses.md), generated from `configs/networks.json` — re-check before hard-coding.
+- **Entry point (mainnet)**: lending — `controller` `CAUCMIN5KSXEVZ7NMXR3LZATGD5EFIEUI5XWTFLYRO2R5OTXI22WE5JX` (not the pool). Swaps — aggregator router `CCVENFSVCBYDHVOACFZXMNNYVOZ3LKXPZYU5LUI4N7KTXOKRVYD7F3TR`. Testnet IDs differ; resolve the testnet controller and router, plus hubs, spokes, listed markets, and every other address on either network, from [addresses.md](https://github.com/XOXNO/rs-lending-xlm/blob/main/skills/xoxno-lending/addresses.md), generated from `configs/networks.json` — re-check before hard-coding.
 
 ### DEXs & AMMs
 
