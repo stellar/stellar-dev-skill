@@ -1,0 +1,9 @@
+{
+  "skills": ["smart-contracts"],
+  "query": "In a Soroban contract, how do I store an account id and multiply two i128 amounts without overflowing?",
+  "expected_behavior": [
+    "Loads the smart-contracts skill for storage and checked arithmetic",
+    "Does not fetch skills/xoxno-lending/SKILL.md or cite XOXNO controller, pool, or swap-aggregator addresses",
+    "Does not treat XOXNO Lending as the destination for generic account-id or multiply questions"
+  ]
+}
