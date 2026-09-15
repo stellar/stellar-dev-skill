@@ -342,6 +342,17 @@ Bulk payment infrastructure for enterprises.
 - **GitHub**: https://github.com/stellar/stellar-disbursement-platform
 - **Use Case**: Mass payments, aid distribution, payroll
 
+### Escrow
+
+#### Trustless Work
+Escrow-as-a-Service platform for non-custodial stablecoin escrows.
+- **Use Case**: Milestone-based payments, marketplace escrows, freelance platforms, grant disbursements
+- **Website**: https://www.trustlesswork.com
+- **Docs**: https://docs.trustlesswork.com
+- **GitHub**: https://github.com/Trustless-Work
+- **Agent Skill**: https://github.com/Trustless-Work/trustlesswork-skill
+- **Features**: Single-release and multi-release escrows, role-based permissions, dispute resolution, REST API, React SDK, pre-built Blocks UI
+
 ## Example Repositories
 
 ### Official Examples
@@ -411,6 +422,7 @@ Notable teams shipping production-level code on Stellar. For a broader directory
 | **CoinFabrik** | [coinfabrik.com](https://www.coinfabrik.com) | [CoinFabrik](https://github.com/CoinFabrik) | [@coinfabrik](https://x.com/coinfabrik) | Scout Soroban (static analysis) |
 | **Creit Tech** | [creit.tech](https://creit.tech) | [Creit-Tech](https://github.com/Creit-Tech) | [@CreitTech_](https://x.com/CreitTech_) | Stellar Wallets Kit, xBull, SorobanHub |
 | **Ultra Stellar** | [ultrastellar.com](https://ultrastellar.com) | [lobstrco](https://github.com/lobstrco) | [@Lobstrco](https://x.com/Lobstrco) | LOBSTR wallet, StellarExpert |
+| **Trustless Work** | [trustlesswork.com](https://www.trustlesswork.com) | [Trustless-Work](https://github.com/Trustless-Work) | [@TrustlessWork](https://x.com/TrustlessWork) | Escrow-as-a-Service platform |
 
 ## Project Directories
 

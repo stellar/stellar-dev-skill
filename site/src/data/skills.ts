@@ -170,9 +170,9 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     title: "Trustless Work Escrow",
     description:
       "Build escrow and milestone-based payment workflows on Stellar with the Trustless Work platform. Covers single-release and multi-release escrows, trustline configuration, dispute handling, and three integration paths: REST API, React SDK hooks, and pre-built Blocks UI components.",
-    pathLabel: "Trustless-Work/trustless-work-dev-skill",
+    pathLabel: "Trustless-Work/trustlesswork-skill",
     copyValue:
-      "https://raw.githubusercontent.com/Trustless-Work/trustless-work-dev-skill/main/SKILL.md",
+      "https://raw.githubusercontent.com/Trustless-Work/trustlesswork-skill/main/trustless-work-dev/SKILL.md",
   },
   {
     title: "Agent Browser WebAuthn",
