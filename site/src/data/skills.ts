@@ -378,4 +378,12 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://raw.githubusercontent.com/pollar-xyz/pollar/main/skills/pollar-wallet-auth/SKILL.md",
   },
+  {
+    title: "stellarpath-cli",
+    description:
+      "A fast, Rust-based static analyzer for Stellar and Soroban repositories. Identifies SDK usage (RPC vs Horizon), smart contract anti-patterns, and implemented SEPs (10/24/53). Includes a dedicated security lint mode to catch bare panics, missing events, and unsafe unwraps before deployment.",
+    pathLabel: "STELLAR-PATH/stellarpath-cli",
+    copyValue:
+      "https://raw.githubusercontent.com/STELLAR-PATH/stellarpath-cli/main/SKILL.md",
+  },
 ] as const;
