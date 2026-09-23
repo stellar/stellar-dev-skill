@@ -378,4 +378,12 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://raw.githubusercontent.com/pollar-xyz/pollar/main/skills/pollar-wallet-auth/SKILL.md",
   },
+  {
+    title: "XOXNO Lending & Borrowing",
+    description:
+      "Integrate XOXNO Lending on Stellar from a contract, dApp, backend, or bot. Covers supply, borrow, repay, withdraw, and leverage through the controller, position NFT accounts, liquidations, flash loans, aggregator swaps, and the REST and quote APIs.",
+    pathLabel: "XOXNO/rs-lending-xlm",
+    copyValue:
+      "https://raw.githubusercontent.com/XOXNO/rs-lending-xlm/main/skills/xoxno-lending/SKILL.md",
+  },
 ] as const;
