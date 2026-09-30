@@ -378,4 +378,12 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://raw.githubusercontent.com/pollar-xyz/pollar/main/skills/pollar-wallet-auth/SKILL.md",
   },
+  {
+    title: "Stellar Prices API",
+    description:
+      "Get USD and XLM prices for classic and Soroban assets without computing them from Horizon trades: prices across SDEX, Soroswap, Aquarius, Phoenix and SushiSwap with a 24h cross-venue VWAP, OHLCV candles, Reflector oracle readings and 100-asset batch lookups. Free API key via Discord.",
+    pathLabel: "rumblefishdev/stellar-prices-api",
+    copyValue:
+      "https://raw.githubusercontent.com/rumblefishdev/stellar-prices-api/master/skills/stellar-prices-api/SKILL.md",
+  },
 ] as const;
