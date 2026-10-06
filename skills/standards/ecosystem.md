@@ -230,6 +230,13 @@ Cloud execution environment for blockchain data processing.
 - **Use Case**: Indexing, monitoring, automation
 - **Features**: Self-hostable, ledger-close execution
 
+#### Stellar Prices API
+REST API with USD and XLM prices for assets traded on SDEX and Soroban AMMs, by Rumble Fish.
+- **Website**: https://sorobanscan.rumblefish.dev/prices-api/
+- **Docs**: https://sorobanscan.rumblefish.dev/prices-api/docs
+- **Use Case**: Current prices, OHLCV candles, batch price lookups
+- **Features**: 24h cross-venue VWAP (SDEX, Soroswap, Aquarius, Phoenix, SushiSwap), Reflector oracle readings, free API key via Discord
+
 ### Contract Libraries
 
 #### OpenZeppelin Stellar Contracts
