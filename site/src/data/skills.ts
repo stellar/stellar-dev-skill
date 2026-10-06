@@ -379,6 +379,14 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "https://raw.githubusercontent.com/pollar-xyz/pollar/main/skills/pollar-wallet-auth/SKILL.md",
   },
   {
+    title: "Stellar Registry",
+    description:
+      "Publish, deploy, and reuse named Soroban contracts through the Stellar Registry. Covers the `stellar registry` CLI (publish, deploy, create-alias, upgrade), the open `unverified/` channel for hackathon projects, and the `import_contract!`, `import_contract_client!`, and `import_asset!` macros for type-safe cross-contract calls to registry contracts, XLM, and other Stellar assets.",
+    pathLabel: "stellar-registry/cli",
+    copyValue:
+      "https://raw.githubusercontent.com/stellar-registry/cli/main/skills/stellar-registry/SKILL.md",
+  },
+  {
     title: "Stellar Prices API",
     description:
       "Get USD and XLM prices for classic and Soroban assets without computing them from Horizon trades: prices across SDEX, Soroswap, Aquarius, Phoenix and SushiSwap with a 24h cross-venue VWAP, OHLCV candles, Reflector oracle readings and 100-asset batch lookups. Free API key via Discord.",
