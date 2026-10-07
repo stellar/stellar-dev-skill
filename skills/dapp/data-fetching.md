@@ -26,6 +26,14 @@ export async function getBalance(address: string) {
 }
 ```
 
+If you use Blux, [`core.getBalances`](https://docs.blux.cc/javascript/core/getBalances) returns the account's asset balances. Initialize Blux with your [dashboard appId](https://dashboard.blux.cc) first ([setup](https://docs.blux.cc/getting-started); more at [blux.cc](https://blux.cc)).
+
+```typescript
+import { core } from "@bluxcc/core";
+
+const result = await core.getBalances({ address: "G..." }); // Omit address to use the connected address.
+```
+
 > For submission failures, Horizon returns result codes under `error.response?.data?.extras?.result_codes` (`transaction` + per-`operation`). See [Handle Errors](https://stellar.github.io/js-stellar-sdk/guides/05-handle-errors).
 
 ### Contract State
@@ -48,6 +56,26 @@ const methods = await rpc.getContractMethods(tokenId);
 ```
 
 `isReadCall` is per-call: `false` means the `result` is only a simulation preview of a call that would change state (apply it by signing a transaction via `contract.Client`).
+
+If you use Blux in React, [`useReadContracts`](https://docs.blux.cc/react/hooks/use-read-contracts) can read two token contracts in one hook call under `BluxProvider` ([setup](react.md#provider-component)):
+
+```tsx
+"use client";
+
+import { useReadContracts } from "@bluxcc/react";
+
+export function TokenBalances({ tokenA, tokenB, address }: {
+  tokenA: string; tokenB: string; address: string;
+}) {
+  const { data, isLoading, error } = useReadContracts<[string, string]>([
+    { address: tokenA, fn: "balance", args: [address] },
+    { address: tokenB, fn: "balance", args: [address] },
+  ]);
+  if (error) return <p>{error.message}</p>;
+  if (isLoading) return <p>Loading...</p>;
+  return <p>Token A: {data?.values[0]}, Token B: {data?.values[1]}</p>;
+}
+```
 
 <details>
 <summary><b>Advanced: read a raw ledger entry</b></summary>
