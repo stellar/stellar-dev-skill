@@ -408,4 +408,12 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "docs.blux.cc/SKILLS.md",
     copyValue: "https://docs.blux.cc/SKILLS.md",
   },
+  {
+    title: "Wasit",
+    description:
+      "Protocol-compliance testing for x402 and MPP on Stellar. Runs the real payment flow against a live service, then verifies settlement independently on Stellar RPC from the token contract's own transfer event rather than the service's own response. Ships as a CLI and an MCP server, with every check mapped to a written spec clause in a published catalogue.",
+    pathLabel: "wasit-dev/wasit",
+    copyValue:
+      "https://raw.githubusercontent.com/wasit-dev/wasit/main/skills/wasit/SKILL.md",
+  },
 ] as const;
