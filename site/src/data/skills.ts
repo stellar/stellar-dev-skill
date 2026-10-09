@@ -160,14 +160,6 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "https://raw.githubusercontent.com/paltalabs/defindex-sdk/main/defindex-sdk-skill.md",
   },
   {
-    title: "CosmosPay",
-    description:
-      "Integrate Stellar checkout and wallet flows with @cosmosapp/pay_sdk. Covers SEP-7 payment intents, browser wallet approval, server-side transaction validation, signed webhooks, and secure patterns for swaps, liquidity and fiat ramps.",
-    pathLabel: "CosmosPay/cosmospay-skill",
-    copyValue:
-      "https://raw.githubusercontent.com/CosmosPay/cosmospay-skill/main/SKILL.md",
-  },
-  {
     title: "Soroswap SDK",
     description:
       "Trade on Soroswap DEX from a backend, bot, or swap widget using the @soroswap/sdk TypeScript package. Covers token swaps, liquidity pool operations, price and route queries, API key handling, and signing flows for both server keypairs and browser wallets.",
@@ -385,5 +377,13 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     pathLabel: "pollar-xyz/pollar",
     copyValue:
       "https://raw.githubusercontent.com/pollar-xyz/pollar/main/skills/pollar-wallet-auth/SKILL.md",
+  },
+  {
+    title: "CosmosPay",
+    description:
+      "Integrate Stellar checkout and wallet flows with @cosmosapp/pay_sdk. Covers SEP-7 payment intents, browser wallet approval, server-side transaction validation, signed webhooks, and secure patterns for swaps, liquidity and fiat ramps.",
+    pathLabel: "CosmosPay/cosmospay-skill",
+    copyValue:
+      "https://raw.githubusercontent.com/CosmosPay/cosmospay-skill/main/SKILL.md",
   },
 ] as const;
