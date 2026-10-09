@@ -416,4 +416,12 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue:
       "https://raw.githubusercontent.com/wasit-dev/wasit/main/skills/wasit/SKILL.md",
   },
+  {
+    title: "CosmosPay",
+    description:
+      "Integrate Stellar checkout and wallet flows with @cosmosapp/pay_sdk. Covers SEP-7 payment intents, browser wallet approval, server-side transaction validation, signed webhooks, and secure patterns for swaps, liquidity and fiat ramps.",
+    pathLabel: "CosmosPay/cosmospay-skill",
+    copyValue:
+      "https://raw.githubusercontent.com/CosmosPay/cosmospay-skill/main/SKILL.md",
+  },
 ] as const;
