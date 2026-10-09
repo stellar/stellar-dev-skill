@@ -28,6 +28,7 @@ This file carries the SEP/CAP standards routing map. The other two live alongsid
 - Frontend SEP-7 / SEP-10 flows → `../dapp/SKILL.md`
 - CAPs for cryptography (BLS, BN254, Poseidon) → `../zk-proofs/SKILL.md`
 - x402/MPP protocol context → `../agentic-payments/SKILL.md`
+- SEP-55 verified builds for mainnet contracts → `../smart-contracts/SKILL.md`
 
 ---
 
