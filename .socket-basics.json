@@ -1,0 +1,10 @@
+{
+  "workspace": ".",
+  "javascript_sast_enabled": true,
+  "sast_ignore_overrides": "js-express-async-no-error-handler:site/src/app/_components/CommunitySearch.tsx,js-sensitive-data-in-logs:site/scripts/check-ecosystem-links.mjs,js-sensitive-data-in-logs:site/scripts/copy-skills.mjs,js-sensitive-data-in-logs:site/scripts/generate-llms-txt.mjs,js-sensitive-data-in-logs:site/src/app/error.tsx",
+  "secret_scanning_enabled": true,
+  "console_tabular_enabled": true,
+  "socket_tier_1_enabled": false,
+  "trivy_vuln_enabled": false,
+  "trufflehog_exclude_dir": "node_modules,dist,build,.git,yarn.lock,package-lock.json,pnpm-lock.yaml,Cargo.lock,go.sum,poetry.lock,Gemfile.lock,composer.lock"
+}
