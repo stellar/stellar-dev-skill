@@ -76,6 +76,17 @@ First non-custodial lending protocol on Stellar with flash loan support.
 - **Features**: Pool-based strategy, sTokens, dTokens, utilization caps
 - **Oracle**: SEP-40 compatible (Reflector)
 
+#### XOXNO Lending
+Money market on Stellar with a hub-and-spoke architecture: one central liquidity pool and a controller that orchestrates everything. An NFT is the position (collateral and debt together) and can be transferred between wallets. Health factor is per NFT; one user can hold an unlimited number of NFTs. Live on mainnet and testnet.
+
+**Load the skill** when the task names XOXNO Lending or a distinctive identifier: `rs-lending-xlm`, hub/spoke, `HubAssetKey`, position NFT, `flash_position` (vs `flash_loan`), `@xoxno/sdk-js` `stellar-lending`, `api.xoxno.com/stellar-lending`, or `stellar-swap.xoxno.com`. Fetch [skills/xoxno-lending/SKILL.md](https://raw.githubusercontent.com/XOXNO/rs-lending-xlm/main/skills/xoxno-lending/SKILL.md) and follow its routing table.
+
+- **Use Case**: Supply, borrow, leverage, collateral and debt swaps, flash loans, liquidations
+- **GitHub**: https://github.com/XOXNO/rs-lending-xlm
+- **Docs**: [overview](https://xoxno.com/docs/stellar-lending/overview), [dev quickstart](https://xoxno.com/docs/stellar-lending/dev/quickstart), [llms.txt](https://xoxno.com/llms.txt)
+- **Types / API spec**: `@xoxno/sdk-js` (`stellar-lending`) is fully typed TypeScript. Lending REST: Swagger UI at [api.xoxno.com](https://api.xoxno.com/) (`GET /swagger.json`). Swap quotes and XDR: Swagger UI at [stellar-swap.xoxno.com](https://stellar-swap.xoxno.com/) (`GET /api-docs/openapi.json`)
+- **Entry point (mainnet)**: lending — `controller` `CAUCMIN5KSXEVZ7NMXR3LZATGD5EFIEUI5XWTFLYRO2R5OTXI22WE5JX` (not the pool). Swaps — aggregator router `CCVENFSVCBYDHVOACFZXMNNYVOZ3LKXPZYU5LUI4N7KTXOKRVYD7F3TR`. Testnet IDs differ; resolve the testnet controller and router, plus hubs, spokes, listed markets, and every other address on either network, from [addresses.md](https://github.com/XOXNO/rs-lending-xlm/blob/main/skills/xoxno-lending/addresses.md), generated from `configs/networks.json` — re-check before hard-coding.
+
 ### DEXs & AMMs
 
 #### Soroswap
@@ -230,6 +241,13 @@ Cloud execution environment for blockchain data processing.
 - **Use Case**: Indexing, monitoring, automation
 - **Features**: Self-hostable, ledger-close execution
 
+#### Stellar Prices API
+REST API with USD and XLM prices for assets traded on SDEX and Soroban AMMs, by Rumble Fish.
+- **Website**: https://sorobanscan.rumblefish.dev/prices-api/
+- **Docs**: https://sorobanscan.rumblefish.dev/prices-api/docs
+- **Use Case**: Current prices, OHLCV candles, batch price lookups
+- **Features**: 24h cross-venue VWAP (SDEX, Soroswap, Aquarius, Phoenix, SushiSwap), Reflector oracle readings, free API key via Discord
+
 ### Contract Libraries
 
 #### OpenZeppelin Stellar Contracts
@@ -256,6 +274,15 @@ Usage details, detector lists, and workflow guidance live in [the smart contract
 Official command-line interface for Stellar.
 - **Docs**: https://developers.stellar.org/docs/tools/stellar-cli
 - **Features**: Contract build, deploy, invoke, bindings generation
+
+#### Stellar Registry
+On-chain registry of named, versioned Soroban contracts and Wasms, with a `stellar registry` CLI plugin and Rust import macros.
+- **Website**: https://rgstry.xyz
+- **GitHub**: https://github.com/stellar-registry
+- **CLI**: `cargo install --locked stellar-registry-cli` (adds `stellar registry`)
+- **Crate**: `stellar-registry` (`import_contract!`, `import_contract_client!`, `import_asset!`)
+- **Agent Skill**: https://github.com/stellar-registry/cli/tree/main/skills/stellar-registry
+- **Use Case**: Share and reuse contracts by name instead of hardcoded addresses; cross-contract calls resolved at build time
 
 #### Stellar SDK (JavaScript)
 Official JavaScript/TypeScript SDK.
@@ -342,6 +369,17 @@ Bulk payment infrastructure for enterprises.
 - **GitHub**: https://github.com/stellar/stellar-disbursement-platform
 - **Use Case**: Mass payments, aid distribution, payroll
 
+### Escrow
+
+#### Trustless Work
+Escrow-as-a-Service platform for non-custodial stablecoin escrows.
+- **Use Case**: Milestone-based payments, marketplace escrows, freelance platforms, grant disbursements
+- **Website**: https://www.trustlesswork.com
+- **Docs**: https://docs.trustlesswork.com
+- **GitHub**: https://github.com/Trustless-Work
+- **Agent Skill**: https://github.com/Trustless-Work/trustlesswork-skill
+- **Features**: Single-release and multi-release escrows, role-based permissions, dispute resolution, REST API, React SDK, pre-built Blocks UI
+
 ## Example Repositories
 
 ### Official Examples
@@ -403,7 +441,7 @@ Notable teams shipping production-level code on Stellar. For a broader directory
 |------|---------|--------|-----------|-----------------|
 | **Lightsail Network** | [lightsail.network](https://lightsail.network) | [lightsail-network](https://github.com/lightsail-network) | [@overcat_me](https://x.com/overcat_me) | Quasar RPC, Java/Python SDKs, Ledger app, validators |
 | **PaltaLabs** | [paltalabs.io](https://paltalabs.io) | [paltalabs](https://github.com/paltalabs) | [@PaltaLabs](https://x.com/PaltaLabs) | Soroswap, DeFindex |
-| **Aha Labs** | [ahalabs.dev](https://ahalabs.dev) | [AhaLabs](https://github.com/AhaLabs) | [@AhaLabsDev](https://x.com/AhaLabsDev) | Scaffold Stellar, Soroban CLI contributions |
+| **The Aha Company** | [theaha.co](https://theaha.co) | [theahaco](https://github.com/theahaco) | [@theahaco](https://x.com/theahaco) | Stellar Scaffold, Stellar Registry, Soroban CLI contributions |
 | **OpenZeppelin** | [openzeppelin.com](https://www.openzeppelin.com/networks/stellar) | [OpenZeppelin](https://github.com/OpenZeppelin/stellar-contracts) | [@OpenZeppelin](https://x.com/OpenZeppelin) | Contracts library, Relayer, Monitor, Security Detectors SDK |
 | **Cheesecake Labs** | [cheesecakelabs.com](https://cheesecakelabs.com) | [CheesecakeLabs](https://github.com/CheesecakeLabs) | [@CheesecakeLabs](https://x.com/CheesecakeLabs) | Stellar Plus library |
 | **Script3 / Blend Capital** | [script3.io](https://script3.io) | [script3](https://github.com/script3), [blend-capital](https://github.com/blend-capital) | [@script3official](https://x.com/script3official) | Blend Protocol |
@@ -411,6 +449,7 @@ Notable teams shipping production-level code on Stellar. For a broader directory
 | **CoinFabrik** | [coinfabrik.com](https://www.coinfabrik.com) | [CoinFabrik](https://github.com/CoinFabrik) | [@coinfabrik](https://x.com/coinfabrik) | Scout Soroban (static analysis) |
 | **Creit Tech** | [creit.tech](https://creit.tech) | [Creit-Tech](https://github.com/Creit-Tech) | [@CreitTech_](https://x.com/CreitTech_) | Stellar Wallets Kit, xBull, SorobanHub |
 | **Ultra Stellar** | [ultrastellar.com](https://ultrastellar.com) | [lobstrco](https://github.com/lobstrco) | [@Lobstrco](https://x.com/Lobstrco) | LOBSTR wallet, StellarExpert |
+| **Trustless Work** | [trustlesswork.com](https://www.trustlesswork.com) | [Trustless-Work](https://github.com/Trustless-Work) | [@TrustlessWork](https://x.com/TrustlessWork) | Escrow-as-a-Service platform |
 
 ## Project Directories
 

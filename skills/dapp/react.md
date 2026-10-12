@@ -4,6 +4,8 @@ React components and Next.js App Router wiring for a Stellar dapp. Companion to 
 
 ## React Components
 
+The Blux examples below assume the app is wrapped in `BluxProvider` with an `appId` from [dashboard.blux.cc](https://dashboard.blux.cc) ([setup](#provider-component); more at [blux.cc](https://blux.cc)).
+
 ### Connect Wallet Button
 ```tsx
 // components/ConnectButton.tsx
@@ -36,6 +38,23 @@ export function ConnectButton() {
       className="px-4 py-2 bg-blue-500 text-white rounded"
     >
       Connect Wallet
+    </button>
+  );
+}
+```
+
+If you use Blux, [`useBlux`](https://docs.blux.cc/react/usage/login) provides the login modal and connection state:
+
+```tsx
+"use client";
+
+import { useBlux } from "@bluxcc/react";
+
+export function BluxConnectButton() {
+  const { login, isReady, isAuthenticated } = useBlux();
+  return (
+    <button onClick={login} disabled={!isReady || isAuthenticated}>
+      {isAuthenticated ? "Connected" : "Connect Wallet"}
     </button>
   );
 }
@@ -111,6 +130,55 @@ export function SendPayment() {
 }
 ```
 
+If you use Blux, [`useTransfer`](https://docs.blux.cc/react/hooks/use-transfer) builds, signs, and submits the XLM payment:
+
+```tsx
+"use client";
+
+import { useState } from "react";
+import { useBlux, useTransfer } from "@bluxcc/react";
+
+export function BluxSendPayment() {
+  const { isAuthenticated } = useBlux();
+  const { transfer, isPending, data, error } = useTransfer();
+  const [to, setTo] = useState("");
+  const [amount, setAmount] = useState("");
+
+  return (
+    <form onSubmit={(event) => {
+      event.preventDefault();
+      transfer({ to, amount });
+    }}>
+      <input aria-label="Destination address" required value={to} onChange={(e) => setTo(e.target.value)} />
+      <input aria-label="Amount (XLM)" required value={amount} onChange={(e) => setAmount(e.target.value)} />
+      <button disabled={!isAuthenticated || isPending}>Send XLM</button>
+      {data && <p>Sent: {data.hash}</p>}
+      {error && <p>{error.message}</p>}
+    </form>
+  );
+}
+```
+
+For an existing transaction XDR, use [`useBlux().sendTransaction`](https://docs.blux.cc/react/usage/send-transaction); it signs and submits classic or Soroban transactions:
+
+```tsx
+"use client";
+
+import { useBlux } from "@bluxcc/react";
+
+export function BluxSendButton({ xdr }: { xdr: string }) {
+  const { sendTransaction, isAuthenticated } = useBlux();
+  return (
+    <button
+      disabled={!isAuthenticated}
+      onClick={() => sendTransaction(xdr).catch(console.error)}
+    >
+      Send
+    </button>
+  );
+}
+```
+
 ## Next.js App Router Setup
 
 ### Provider Component
@@ -123,6 +191,27 @@ import { ReactNode } from "react";
 // Add any context providers here
 export function Providers({ children }: { children: ReactNode }) {
   return <>{children}</>;
+}
+```
+
+If you use Blux, install `@bluxcc/react` and use this provider instead:
+
+```tsx
+// app/providers.tsx
+"use client";
+
+import type { ReactNode } from "react";
+import { BluxProvider, networks } from "@bluxcc/react";
+
+export function Providers({ children }: { children: ReactNode }) {
+  return (
+    <BluxProvider config={{
+      appId: "your-app-id", // take this from https://dashboard.blux.cc
+      networks: [networks.testnet],
+    }}>
+      {children}
+    </BluxProvider>
+  );
 }
 ```
 

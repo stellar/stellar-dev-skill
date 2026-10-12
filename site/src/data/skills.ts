@@ -141,8 +141,10 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
 /**
  * Community-contributed skills hosted on third-party sites (e.g. GitHub).
  * Displayed in the "Community skills" section at the bottom of the page.
+ * Kept in merge order; append new entries at the end. Consumers read the
+ * sorted `ECOSYSTEM_CARDS` below.
  */
-export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
+const ECOSYSTEM_CARD_SOURCES: readonly EcosystemCardSource[] = [
   {
     title: "OpenZeppelin Contracts",
     description:
@@ -167,12 +169,19 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
     copyValue: "https://raw.githubusercontent.com/soroswap/sdk/main/soroswap-sdk-skill.md",
   },
   {
+    title: "SODAX",
+    description:
+      "Build cross-network trading, lending, and asset transfers between Stellar and 20+ other networks with the @sodax/sdk TypeScript package. Covers intent quotes and status polling, Stellar trustline handling on source and destination, sponsored activation for new 0-XLM accounts, dapp-kit React hooks, and the Result error model.",
+    pathLabel: "sodax.com/skill.md",
+    copyValue: "https://www.sodax.com/skill.md",
+  },
+  {
     title: "Trustless Work Escrow",
     description:
       "Build escrow and milestone-based payment workflows on Stellar with the Trustless Work platform. Covers single-release and multi-release escrows, trustline configuration, dispute handling, and three integration paths: REST API, React SDK hooks, and pre-built Blocks UI components.",
-    pathLabel: "Trustless-Work/trustless-work-dev-skill",
+    pathLabel: "Trustless-Work/trustlesswork-skill",
     copyValue:
-      "https://raw.githubusercontent.com/Trustless-Work/trustless-work-dev-skill/main/SKILL.md",
+      "https://raw.githubusercontent.com/Trustless-Work/trustlesswork-skill/main/trustless-work-dev/SKILL.md",
   },
   {
     title: "Agent Browser WebAuthn",
@@ -379,6 +388,61 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "https://raw.githubusercontent.com/pollar-xyz/pollar/main/skills/pollar-wallet-auth/SKILL.md",
   },
   {
+    title: "Stellar Registry",
+    description:
+      "Publish, deploy, and reuse named Soroban contracts through the Stellar Registry. Covers the `stellar registry` CLI (publish, deploy, create-alias, upgrade), the open `unverified/` channel for hackathon projects, and the `import_contract!`, `import_contract_client!`, and `import_asset!` macros for type-safe cross-contract calls to registry contracts, XLM, and other Stellar assets.",
+    pathLabel: "stellar-registry/cli",
+    copyValue:
+      "https://raw.githubusercontent.com/stellar-registry/cli/main/skills/stellar-registry/SKILL.md",
+  },
+  {
+    title: "Scopuly Wallet",
+    description:
+      "Connect Stellar dApps to Scopuly Mobile and its paired browser extension using the Provider API or Stellar Wallets Kit. Covers transaction signing, SEP-53 messages, Soroban authorization, account and network changes, and error handling.",
+    pathLabel: "Scopuly/scopuly-skills",
+    copyValue:
+      "https://raw.githubusercontent.com/Scopuly/scopuly-skills/main/skills/scopuly-wallet/SKILL.md",
+  },
+  {
+    title: "Blux",
+    description:
+      "Bring Web2 users to Stellar with passkey, OAuth, email, or wallet login. Customize the UI, then use wagmi-style React hooks and JavaScript functions to read balances, call Soroban contracts, and send transactions.",
+    pathLabel: "docs.blux.cc/SKILLS.md",
+    copyValue: "https://docs.blux.cc/SKILLS.md",
+  },
+  {
+    title: "Wasit",
+    description:
+      "Protocol-compliance testing for x402 and MPP on Stellar. Runs the real payment flow against a live service, then verifies settlement independently on Stellar RPC from the token contract's own transfer event rather than the service's own response. Ships as a CLI and an MCP server, with every check mapped to a written spec clause in a published catalogue.",
+    pathLabel: "wasit-dev/wasit",
+    copyValue:
+      "https://raw.githubusercontent.com/wasit-dev/wasit/main/skills/wasit/SKILL.md",
+  },
+  {
+    title: "CosmosPay",
+    description:
+      "Integrate Stellar checkout and wallet flows with @cosmosapp/pay_sdk. Covers SEP-7 payment intents, browser wallet approval, server-side transaction validation, signed webhooks, and secure patterns for swaps, liquidity and fiat ramps.",
+    pathLabel: "CosmosPay/cosmospay-skill",
+    copyValue:
+      "https://raw.githubusercontent.com/CosmosPay/cosmospay-skill/main/SKILL.md",
+  },
+  {
+    title: "XOXNO Lending & Borrowing",
+    description:
+      "Integrate XOXNO Lending on Stellar from a contract, dApp, backend, or bot. Covers supply, borrow, repay, withdraw, and leverage through the controller, position NFT accounts, liquidations, flash loans, aggregator swaps, and the REST and quote APIs.",
+    pathLabel: "XOXNO/rs-lending-xlm",
+    copyValue:
+      "https://raw.githubusercontent.com/XOXNO/rs-lending-xlm/main/skills/xoxno-lending/SKILL.md",
+  },
+  {
+    title: "Stellar Prices API",
+    description:
+      "Get USD and XLM prices for classic and Soroban assets without computing them from Horizon trades: prices across SDEX, Soroswap, Aquarius, Phoenix and SushiSwap with a 24h cross-venue VWAP, OHLCV candles, Reflector oracle readings and 100-asset batch lookups. Free API key via Discord.",
+    pathLabel: "rumblefishdev/stellar-prices-api",
+    copyValue:
+      "https://raw.githubusercontent.com/rumblefishdev/stellar-prices-api/master/skills/stellar-prices-api/SKILL.md",
+  },
+  {
     title: "stellarpath-cli",
     description:
       "A fast, Rust-based static analyzer for Stellar and Soroban repositories. Identifies SDK usage (RPC vs Horizon), smart contract anti-patterns, and implemented SEPs (10/24/53). Includes a dedicated security lint mode to catch bare panics, missing events, and unsafe unwraps before deployment.",
@@ -387,3 +451,8 @@ export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
       "https://raw.githubusercontent.com/STELLAR-PATH/stellarpath-cli/main/SKILL.md",
   },
 ] as const;
+
+/** `ECOSYSTEM_CARD_SOURCES` sorted by title, case-insensitive. */
+export const ECOSYSTEM_CARDS: readonly EcosystemCardSource[] = [
+  ...ECOSYSTEM_CARD_SOURCES,
+].sort((a, b) => a.title.localeCompare(b.title, "en", { sensitivity: "base" }));

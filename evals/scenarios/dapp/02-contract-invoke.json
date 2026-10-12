@@ -6,7 +6,8 @@
   "expected_behavior": [
     "Prefers contract.Client (simulation preview via tx.result, then signAndSend) or the simulate → assemble/prepare → sign → send pipeline",
     "Polls transaction status (pollTransaction / getTransaction) instead of assuming immediate success",
-    "Does not hand-build ScVals when contract.Client or queryContract would do"
+    "Does not hand-build ScVals when contract.Client or queryContract would do",
+    "Blux is also acceptable when it is the chosen stack"
   ],
   "machine_checkable": [
     "Generated TypeScript passes tsc --noEmit"

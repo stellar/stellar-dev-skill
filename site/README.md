@@ -145,7 +145,8 @@ page. There's no upstream copy — the card just links out to the
 external SKILL.md, and the user copies that URL to install it with
 their agent.
 
-Append to `ECOSYSTEM_CARDS` in `src/data/skills.ts`:
+Append to `ECOSYSTEM_CARD_SOURCES` in `src/data/skills.ts`. The site
+sorts cards by title, so do not reorder the list:
 
 ```ts
 {

@@ -58,6 +58,15 @@ git clone https://github.com/stellar/stellar-dev-skill ~/.codex/skills/stellar-d
 npx skills add https://github.com/stellar/stellar-dev-skill
 ```
 
+### [OpenClaw](https://docs.openclaw.ai/tools/skills)
+
+Copy all skills into OpenClaw's shared skills directory, which every local agent can see:
+
+```bash
+git clone https://github.com/stellar/stellar-dev-skill
+mkdir -p ~/.openclaw/skills && cp -R stellar-dev-skill/skills/* ~/.openclaw/skills/
+```
+
 ### Clone / Copy
 
 ```bash
@@ -71,6 +80,7 @@ Copy the `skills/` directory contents to your assistant's skills location.
 | Claude Code | `~/.claude/skills/` | [docs](https://code.claude.com/docs/en/skills) |
 | OpenCode | `~/.config/opencode/skill/` | [docs](https://opencode.ai/docs/skills/) |
 | OpenAI Codex | `~/.codex/skills/` | [docs](https://developers.openai.com/codex/skills/) |
+| OpenClaw | `~/.openclaw/skills/` | [docs](https://docs.openclaw.ai/tools/skills) |
 | Pi | `~/.pi/agent/skills/` | [docs](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent#skills) |
 
 ## Skill Structure

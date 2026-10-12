@@ -43,6 +43,15 @@ export const INSTALLERS = [
     commands: ["npx skills add https://github.com/stellar/stellar-dev-skill"],
   },
   {
+    name: "OpenClaw",
+    description:
+      "Clone the repo and copy every skill into OpenClaw's shared skills directory:",
+    commands: [
+      "git clone https://github.com/stellar/stellar-dev-skill",
+      "mkdir -p ~/.openclaw/skills && cp -R stellar-dev-skill/skills/* ~/.openclaw/skills/",
+    ],
+  },
+  {
     name: "Clone repo",
     description:
       "Clone the repo and copy the skills directory to your agent's skills location:",

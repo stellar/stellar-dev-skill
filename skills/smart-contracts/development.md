@@ -95,7 +95,7 @@ let m: Map<Symbol, u32> = Map::new(&env);
 
 - `i128` is the canonical token amount type (SEP-41). It admits negatives — validate `amount >= 0` on inputs.
 - 256-bit math: `U256`/`I256` with `checked_add/sub/mul/pow/div/rem_euclid/shl/shr` returning `Option` (protocol 26+).
-- `MuxedAddress` distinguishes sub-accounts of one address (exchanges, custodians); token `transfer` accepts it for the destination and a plain `Address` converts into it.
+- `MuxedAddress` distinguishes sub-accounts of one address (exchanges, custodians); token `transfer` takes it for the destination. Pass an `&Address` directly — `client.transfer(&from, &to, &amount)` — and let the conversion happen implicitly. Do **not** write `&to.into()`: type inference fails (E0283) because two `From` impls apply.
 - `Timepoint` and `Duration` exist for time values; `env.ledger().timestamp()` is a `u64` in seconds.
 
 Custom types derive `#[contracttype]` and work as storage keys/values, arguments, and return values:
@@ -306,7 +306,7 @@ sac.mint(&to, &amount);                                   // mint, clawback, set
 
 What to internalize:
 
-- Amounts are `i128`; reject negatives explicitly. `transfer`'s destination is a `MuxedAddress` (an `Address` converts into it), letting exchanges attach sub-account IDs.
+- Amounts are `i128`; reject negatives explicitly. `transfer`'s destination is a `MuxedAddress`, letting exchanges attach sub-account IDs; pass an `&Address` directly (`&to`), never `&to.into()`, which fails to compile (E0283).
 - Auth pattern: `transfer`/`approve`/`burn` auth `from`; `transfer_from`/`burn_from` auth the `spender` (the allowance pre-authorized the `from` side). Reads need no auth. `mint`/`clawback`/`set_admin`/`set_authorized`/`trust` are SAC/admin surface, not SEP-41.
 - **Allowances expire**: `approve(from, spender, amount, expiration_ledger)`. Convention is temporary storage keyed `(from, spender)` with TTL matching the expiration. Re-approving overwrites — the classic race applies (spender can front-run an allowance reduction and spend old + new); mitigate by approving to 0 first or using exact-amount auth instead of standing allowances.
 - **SAC carries classic-asset semantics into contracts**: account (`G...`) balances live in trustlines (missing or unauthorized trustline → transfer fails; 64-bit balance cap), contract (`C...`) balances live in contract storage (full i128). Issuer flags apply — `AUTH_REQUIRED`, freezes via `AUTH_REVOCABLE`, clawback. Transfers to the issuer burn; from the issuer mint. A protocol that accepts arbitrary token addresses must survive all of this — see [security.md](security.md) for the token-consumer review checklist.

@@ -25,7 +25,7 @@ One JSON file per scenario under `scenarios/<skill>/`:
 | `machine_checkable` | (optional) Assertions a script can verify without a judge — compile checks, real CLI syntax. |
 | `negative` | (optional) This is an off-topic control; loading any Stellar skill is a failure. |
 
-`scenarios/routing/` holds cross-skill scenarios that no single-skill eval catches: multi-skill loads and the off-topic negative control.
+`scenarios/routing/` holds cross-skill scenarios that no single-skill eval catches: multi-skill loads, the off-topic negative control, and false-positive third-party skill loads.
 
 ## Grading tiers
 
