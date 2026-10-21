@@ -42,7 +42,7 @@ Before implementation, always confirm:
 |-----------|--------------|-------|---------------------|
 | Circom + snarkjs (`-p bls12381`) | Groth16 | BLS12-381 | ✅ via CAP-0059 (Protocol 22+) |
 | Circom + snarkjs (default `bn128`) | Groth16 | BN254 | ✅ via CAP-0074 (Protocol 25+) |
-| Noir + Barretenberg | UltraHonk | BN254 | ✅ via CAP-0074 + CAP-0080 (**Protocol 26+**) — needs the [rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk) verifier contract |
+| Noir + Barretenberg | UltraHonk | BN254 | ✅ via CAP-0074 + CAP-0080 (**Protocol 26+**) — needs the [rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk) verifier contract; **non-ZK proofs only** (see the Noir walkthrough) |
 | RISC Zero (STARK → Groth16 wrap) | Groth16 | BN254 | ✅ via CAP-0074 (Protocol 25+) |
 
 ## The on-chain verifier (Groth16 over BLS12-381)
@@ -164,6 +164,8 @@ For real applications the per-proof flow is: client proves locally (WASM prover 
 
 Noir's standard backend (Barretenberg) produces UltraHonk proofs over BN254. The curve's base operations are native since Protocol 25 (CAP-0074), and UltraHonk verification runs on-chain through [Nethermind's rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk) verifier contract, whose host calls include `env.crypto().bn254()`'s `g1_msm`, Fr arithmetic (`fr_add/sub/mul/pow/inv`) and `pairing_check` — the MSM and Fr functions come from CAP-0080, so this verifier needs **Protocol 26+** and will fail to link on a Protocol-25 network. This is the stack OpenZeppelin's [Confidential Tokens developer preview](https://stellar.org/blog/developers/developer-preview-confidential-tokens-on-stellar) runs on (testnet). It is a young, community-maintained verifier: check its audit status and maturity before mainnet use.
 
+> **Non-ZK only.** The rs-soroban-ultrahonk verifier implements Barretenberg's non-zero-knowledge flavor (`UltraKeccakFlavor`). Its [README](https://github.com/NethermindEth/rs-soroban-ultrahonk/tree/main/crates/ultrahonk-soroban-verifier) says a proof gives **no witness-hiding guarantee**: a private circuit input is not secret just because it is not a public input. In the example below, the proof does not protect `age`. Use this verifier to prove that a statement holds, not to hide data. For hidden inputs on-chain today, use a Groth16 stack such as Circom. ZK verification is in progress in [PR #38](https://github.com/NethermindEth/rs-soroban-ultrahonk/pull/38).
+
 ```bash
 # Local proving workflow
 nargo new age_check && cd age_check
@@ -220,6 +222,7 @@ For Merkle-tree commitments (privacy pools, allowlists): CAP-0075 (Protocol 25+)
 - **Verifying the proof but not the statement.** A valid proof only shows *some* witness satisfies the circuit. The contract must validate the public inputs' semantics: who is this proof for, which Merkle root, which action, which amount.
 - **Missing anti-replay binding.** Valid proofs can be replayed. Bind a nonce/session/action into the public inputs and persist a replay guard (nullifier set) on-chain.
 - **Curve/verifier mismatch.** The proof's curve must match the verifier contract's host functions: the canonical example verifier is BLS12-381, so a default-`bn128` Circom proof fails against it (and vice versa for a BN254 verifier). Since Protocol 25 both curves work — just keep circuit and verifier on the same one.
+- **Assuming a proof hides its private inputs.** Only a zero-knowledge proof does. The on-chain UltraHonk verifier accepts non-ZK proofs only, so do not use it for privacy-sensitive circuits until it supports the ZK flavor.
 - **Trusted-setup hygiene.** Groth16 needs a circuit-specific phase-2 setup; for production use a real multi-party ceremony, not a single-contributor dev setup.
 - **Hardcoded protocol assumptions.** Capability-gate; don't assume draft CAPs are live on the target network.
 
