@@ -9,7 +9,7 @@ argument-hint: "[zk task]"
 
 ZK verification on Stellar. Capability is protocol- and SDK-version dependent — always verify CAP status, network version, and `soroban-sdk` host-function support before relying on a primitive.
 
-> **Last verified against Protocol 27** (mainnet, August 2026). CAP-0074/0075 shipped in Protocol 25 "X-Ray" and CAP-0080 (BN254 MSM, Fr arithmetic, on-curve checks) in Protocol 26 — if a doc tells you BN254 or Poseidon is "proposed", it predates that.
+> **Last verified against Protocol 29** (mainnet, October 2026). CAP-0074/0075 shipped in Protocol 25 "X-Ray" and CAP-0080 (BN254 MSM, Fr arithmetic, on-curve checks) in Protocol 26 — if a doc tells you BN254 or Poseidon is "proposed", it predates that.
 
 ## When to use this skill
 - Implementing a Groth16 (or other SNARK) verifier as a Stellar smart contract
@@ -36,13 +36,13 @@ Before implementation, always confirm:
 2. Target network protocol version ([software versions](https://developers.stellar.org/docs/networks/software-versions))
 3. `soroban-sdk` release support for the host functions you need
 
-**Both curves have base host functions since Protocol 25** — the curve no longer decides everything. What still matters is the proof *system*: Groth16 verifies with a small contract on either curve, while UltraHonk needs a dedicated in-contract verifier (one exists — see the Noir walkthrough — but it relies on CAP-0080 host functions, so Protocol 26+).
+**Both curves have base host functions since Protocol 25** — the curve no longer decides everything. What still matters is the proof *system*: Groth16 verifies with a small contract on either curve, while UltraHonk needs a dedicated in-contract verifier (one exists — see the Noir walkthrough — but it relies on CAP-0080 host functions and its current release builds on `soroban-sdk` 28, so Protocol 28+).
 
 | Toolchain | Proof system | Curve | On-chain on Stellar |
 |-----------|--------------|-------|---------------------|
 | Circom + snarkjs (`-p bls12381`) | Groth16 | BLS12-381 | ✅ via CAP-0059 (Protocol 22+) |
 | Circom + snarkjs (default `bn128`) | Groth16 | BN254 | ✅ via CAP-0074 (Protocol 25+) |
-| Noir + Barretenberg | UltraHonk | BN254 | ✅ via CAP-0074 + CAP-0080 (**Protocol 26+**) — needs the [rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk) verifier contract; **non-ZK proofs only** (see the Noir walkthrough) |
+| Noir + Barretenberg | UltraHonk | BN254 | ✅ via CAP-0074 + CAP-0080 (**Protocol 28+** for the current verifier release) — needs the [rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk) verifier contract; **non-ZK proofs only** (see the Noir walkthrough) |
 | RISC Zero (STARK → Groth16 wrap) | Groth16 | BN254 | ✅ via CAP-0074 (Protocol 25+) |
 
 ## The on-chain verifier (Groth16 over BLS12-381)
@@ -160,31 +160,38 @@ Then convert `proof.json` / `verification_key.json` (decimal-string coordinates)
 
 For real applications the per-proof flow is: client proves locally (WASM prover or native), submits `(proof, public_signals)` in a contract invocation, contract verifies + applies policy + updates state.
 
-## Walkthrough: Noir (UltraHonk, on-chain verifiable since Protocol 26)
+## Walkthrough: Noir (UltraHonk, on-chain verifiable on Protocol 28+)
 
-Noir's standard backend (Barretenberg) produces UltraHonk proofs over BN254. The curve's base operations are native since Protocol 25 (CAP-0074), and UltraHonk verification runs on-chain through [Nethermind's rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk) verifier contract, whose host calls include `env.crypto().bn254()`'s `g1_msm`, Fr arithmetic (`fr_add/sub/mul/pow/inv`) and `pairing_check` — the MSM and Fr functions come from CAP-0080, so this verifier needs **Protocol 26+** and will fail to link on a Protocol-25 network. This is the stack OpenZeppelin's [Confidential Tokens developer preview](https://stellar.org/blog/developers/developer-preview-confidential-tokens-on-stellar) runs on (testnet). It is a young, community-maintained verifier: check its audit status and maturity before mainnet use.
+Noir's standard backend (Barretenberg) produces UltraHonk proofs over BN254. The curve's base operations are native since Protocol 25 (CAP-0074), and UltraHonk verification runs on-chain through [Nethermind's rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk) verifier contract, whose host calls include `env.crypto().bn254()`'s `g1_msm`, Fr arithmetic (`fr_add/sub/mul/pow/inv`) and `pairing_check` — the MSM and Fr functions come from CAP-0080 (Protocol 26). The current release, crate `ultrahonk_soroban_verifier` 0.1.0, depends on `soroban-sdk` ^28, and its README says contracts built with it need **Protocol 28+**. This is the stack OpenZeppelin's [Confidential Tokens developer preview](https://stellar.org/blog/developers/developer-preview-confidential-tokens-on-stellar) runs on (testnet). OpenZeppelin audited the verifier at an earlier commit (report dated 2026-09-18, no Critical/High/Medium findings, all findings resolved); the release adds later SDK upgrades, so the audited revision is not the release revision. Review that gap and the [audit report](https://github.com/NethermindEth/rs-soroban-ultrahonk/tree/main/audits) before mainnet use.
 
 > **Non-ZK only.** The rs-soroban-ultrahonk verifier implements Barretenberg's non-zero-knowledge flavor (`UltraKeccakFlavor`). Its [README](https://github.com/NethermindEth/rs-soroban-ultrahonk/tree/main/crates/ultrahonk-soroban-verifier) says a proof gives **no witness-hiding guarantee**: a private circuit input is not secret just because it is not a public input. In the example below, the proof does not protect `age`. Use this verifier to prove that a statement holds, not to hide data. For hidden inputs on-chain today, use a Groth16 stack such as Circom. ZK verification is in progress in [PR #38](https://github.com/NethermindEth/rs-soroban-ultrahonk/pull/38).
 
+The verifier README lists **Nargo 1.0.0-beta.9 + Barretenberg 0.87.0** with the Keccak oracle as its compatible proof tooling (`noirup -v 1.0.0-beta.9`, `bbup -v 0.87.0`). `bb` defaults to the Poseidon2 oracle, which this verifier rejects, so pass `--oracle_hash keccak` to every `bb` command. Do not pass `--zk`: it selects the ZK flavor, which the verifier does not support. Stay on 0.87.0: from `bb` 1.0.0 the default is the ZK flavor and `--disable_zk` replaces `--zk`, so these commands would produce proofs the verifier rejects.
+
 ```bash
-# Local proving workflow
+# Local proving workflow (Nargo 1.0.0-beta.9, Barretenberg 0.87.0)
 nargo new age_check && cd age_check
 cat > src/main.nr <<'EOF'
 fn main(age: u64, threshold: pub u64) {
     assert(age >= threshold);
 }
 EOF
-nargo check
-nargo execute witness          # writes the witness from Prover.toml inputs
-bb prove -b target/age_check.json -w target/witness.gz -o target/proof
-bb verify -k target/vk -p target/proof   # off-chain verification
+cat > Prover.toml <<'EOF'
+age = "30"
+threshold = "18"
+EOF
+nargo execute witness          # compiles target/age_check.json, writes target/witness.gz
+# -o is an output directory: prove writes target/proof + target/public_inputs, write_vk writes target/vk
+bb prove --scheme ultra_honk --oracle_hash keccak -b target/age_check.json -w target/witness.gz -o target
+bb write_vk --scheme ultra_honk --oracle_hash keccak -b target/age_check.json -o target
+bb verify --scheme ultra_honk --oracle_hash keccak -k target/vk -p target/proof -i target/public_inputs   # off-chain check
 ```
 
 Three ways to get a Noir statement on-chain, in order of preference:
 
-1. **On-chain UltraHonk verification** (Protocol 26+, CAP-0074 + CAP-0080): deploy or call an [rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk)-based verifier and submit `(proof, public inputs)` directly — trustless, no oracle.
+1. **On-chain UltraHonk verification** (Protocol 28+ for the current verifier release; CAP-0074 + CAP-0080): deploy or call an [rs-soroban-ultrahonk](https://github.com/NethermindEth/rs-soroban-ultrahonk)-based verifier and submit `(proof, public inputs)` directly — trustless, no oracle.
 2. **Switch the proving stack for on-chain parts**: express the on-chain-critical statement as a Circom/Groth16 circuit (walkthrough above) and keep Noir for off-chain components — smaller, battle-tested verifier at the cost of a second toolchain.
-3. **Attestation oracle** (fallback for older protocol targets or unaudited-verifier concerns): a service runs `bb verify` off-chain and submits a signed attestation; the contract `require_auth()`s the attester and applies policy. The trust assumption (the attester) must be explicit and documented — this is *not* trustless ZK, it's a verifiable-computation oracle.
+3. **Attestation oracle** (fallback for older protocol targets or verifier-audit concerns): a service runs `bb verify` off-chain and submits a signed attestation; the contract `require_auth()`s the attester and applies policy. The trust assumption (the attester) must be explicit and documented — this is *not* trustless ZK, it's a verifiable-computation oracle.
 
 ## Walkthrough: RISC Zero (Groth16 wrap, on-chain verifiable since Protocol 25)
 
