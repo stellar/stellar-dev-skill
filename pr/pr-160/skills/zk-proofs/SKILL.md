@@ -166,7 +166,7 @@ Noir's standard backend (Barretenberg) produces UltraHonk proofs over BN254. The
 
 > **Non-ZK only.** The rs-soroban-ultrahonk verifier implements Barretenberg's non-zero-knowledge flavor (`UltraKeccakFlavor`). Its [README](https://github.com/NethermindEth/rs-soroban-ultrahonk/tree/main/crates/ultrahonk-soroban-verifier) says a proof gives **no witness-hiding guarantee**: a private circuit input is not secret just because it is not a public input. In the example below, the proof does not protect `age`. Use this verifier to prove that a statement holds, not to hide data. For hidden inputs on-chain today, use a Groth16 stack such as Circom. ZK verification is in progress in [PR #38](https://github.com/NethermindEth/rs-soroban-ultrahonk/pull/38).
 
-The verifier README lists **Nargo 1.0.0-beta.9 + Barretenberg 0.87.0** with the Keccak oracle as its compatible proof tooling (`noirup -v 1.0.0-beta.9`, `bbup -v 0.87.0`). `bb` defaults to the Poseidon2 oracle, which this verifier rejects, so pass `--oracle_hash keccak` to every `bb` command. Do not pass `--zk`: it selects the ZK flavor, which the verifier does not support.
+The verifier README lists **Nargo 1.0.0-beta.9 + Barretenberg 0.87.0** with the Keccak oracle as its compatible proof tooling (`noirup -v 1.0.0-beta.9`, `bbup -v 0.87.0`). `bb` defaults to the Poseidon2 oracle, which this verifier rejects, so pass `--oracle_hash keccak` to every `bb` command. Do not pass `--zk`: it selects the ZK flavor, which the verifier does not support. Stay on 0.87.0: from `bb` 1.0.0 the default is the ZK flavor and `--disable_zk` replaces `--zk`, so these commands would produce proofs the verifier rejects.
 
 ```bash
 # Local proving workflow (Nargo 1.0.0-beta.9, Barretenberg 0.87.0)
