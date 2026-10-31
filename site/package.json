@@ -21,7 +21,7 @@
   "dependencies": {
     "@next/third-parties": "^16.3.8",
     "@stellar/design-system": "^3.2.7",
-    "next": "16.3.8",
+    "next": "16.4.1",
     "react": "^19.2.2",
     "react-dom": "^19.2.2"
   },
