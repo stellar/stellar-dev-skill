@@ -496,6 +496,29 @@ desc = "A description of my token"
 image = "https://example.com/token-logo.png"
 ```
 
+### SEP-0008 (Regulated Assets)
+
+Use [SEP-0008](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0008.md) when the issuer must approve each transaction, not just each trustline (securities, transfer limits, per-transfer compliance checks). The issuer sets both `AUTH_REQUIRED` and `AUTH_REVOCABLE`, runs an approval server, and flags the asset in its `[[CURRENCIES]]` entry:
+
+```toml
+[[CURRENCIES]]
+code = "MYTOKEN"
+issuer = "GABC..."
+regulated = true
+approval_server = "https://example.com/tx-approve"
+approval_criteria = "Transfers need a completed KYC check."
+```
+
+Wallet flow: build and sign the transaction, then POST it as `tx` (base64 envelope XDR, JSON or form-encoded) to `approval_server`. Branch on the response `status`:
+
+- `success`: the issuer signed it. Submit the returned `tx`.
+- `revised`: the server added operations (typically authorize, transfer, deauthorize) and signed. Show `message`, check that no added operation uses the user's account as its source, then have the user re-sign and submit.
+- `pending`: wait `timeout` milliseconds (`0` means unknown), then resend the same `tx`.
+- `action_required`: open `action_url` (`action_method` `GET` or `POST`, optional SEP-9 `action_fields`), then resend. Any status can come back.
+- `rejected` (HTTP 400): show `error` and do not submit.
+
+The approval server signs but never submits; the wallet submits. The Go reference server that SEP-0008 links was removed from `stellar/go-stellar-sdk` in October 2025, so plan to build your own. SEP-0008 works on classic assets and trustline flags; for permissioned contract tokens see SEP-0057 (T-REX, Draft) in [`../standards/SKILL.md`](../standards/SKILL.md).
+
 ### SEP-0010 (Web Authentication)
 
 Authenticate users with their Stellar accounts. Flow: the server generates a challenge transaction, the client signs it with their wallet, and the server verifies the signature. See [SEP-0010](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).

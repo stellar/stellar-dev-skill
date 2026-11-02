@@ -1,0 +1,14 @@
+{
+  "skills": [
+    "assets"
+  ],
+  "query": "Our security token on Stellar needs us to approve every transfer, not just the trustline. How do wallets get our sign-off?",
+  "expected_behavior": [
+    "Names SEP-0008 (Regulated Assets) and its approval server, not only AUTH_REQUIRED trustline authorization",
+    "Sets both AUTH_REQUIRED and AUTH_REVOCABLE on the issuer",
+    "Publishes `regulated = true`, `approval_server` and `approval_criteria` in the asset's stellar.toml `[[CURRENCIES]]` entry",
+    "Has the wallet POST the user-signed transaction as `tx` and handle success, revised, pending, action_required and rejected",
+    "Tells the wallet to inspect a revised transaction for added operations sourced from the user's account before re-signing",
+    "Does not route a classic-asset approval flow to SEP-0057 (T-REX), which covers contract tokens"
+  ]
+}
