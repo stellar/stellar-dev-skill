@@ -284,7 +284,7 @@ pub fn transfer(env: Env, from: Address, to: Address, amount: i128) -> Result<()
 }
 ```
 
-- Returning `Result` gives callers typed errors: generated clients expose both `foo()` (panics on error) and `try_foo()` returning `Result<Result<T, E>, InvokeError>` — `Ok(Err(e))` is your typed error, outer `Err` is a host-level failure (budget, bad auth, type mismatch).
+- Returning `Result` gives callers typed errors: generated clients expose both `foo()` (panics on error) and `try_foo()` returning `Result<Result<T, _>, Result<E, InvokeError>>`. `Err(Ok(e))` is your typed error. `Err(Err(_))` is an `InvokeError`: a panic or host-level failure (bad auth, type mismatch), or an error code your `E` does not define. `Ok(Err(_))` means the return value failed to convert to `T`. If `foo` does not return `Result`, `E` is `soroban_sdk::Error`, so host failures arrive as `Err(Ok(_))`. Budget exhaustion and footprint violations are not recoverable, so `try_` cannot catch them. In tests: `assert_eq!(client.try_transfer(&from, &to, &0), Err(Ok(ContractError::InvalidAmount)));`
 - When panicking, use `panic_with_error!(&env, Error::X)`, not bare `panic!("msg")` — bare panics surface as opaque host errors clients can't match on.
 - Error codes are public ABI. Never renumber across upgrades.
 - An `Err` return or panic rolls back **all** state changes of the invocation, including nested calls' writes.
