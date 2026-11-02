@@ -421,8 +421,10 @@ async function submitSorobanTransaction(signedXdr: string) {
   // status: "PENDING" | "DUPLICATE" | "TRY_AGAIN_LATER" | "ERROR"
   let response = await rpc.sendTransaction(transaction);
 
-  // TRY_AGAIN_LATER: not queued (busy queue, or this source account already
-  // has a transaction in flight). Resending the same signed transaction is safe.
+  // TRY_AGAIN_LATER: not queued. Usually this source account already has a
+  // transaction in flight, so resending the same signed transaction is safe.
+  // If the queue was full, stellar-core bans this exact transaction for 10
+  // ledgers, so resends keep failing: rebuild and re-sign with a higher fee.
   for (let i = 0; response.status === "TRY_AGAIN_LATER" && i < 5; i++) {
     await new Promise((r) => setTimeout(r, 2000));
     response = await rpc.sendTransaction(transaction);
@@ -433,7 +435,7 @@ async function submitSorobanTransaction(signedXdr: string) {
     throw new Error("Transaction rejected", { cause: response.errorResult });
   }
   if (response.status === "TRY_AGAIN_LATER") {
-    throw new Error("RPC is still busy; resubmit later");
+    throw new Error("Not queued; rebuild with a higher fee or resubmit later");
   }
 
   // PENDING or DUPLICATE (already queued): poll for completion.
