@@ -496,6 +496,10 @@ desc = "A description of my token"
 image = "https://example.com/token-logo.png"
 ```
 
+### SEP-0008 (Regulated Assets)
+
+Use [SEP-0008](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0008.md) when the issuer must approve each transaction, not just each trustline. The issuer sets `AUTH_REQUIRED` and `AUTH_REVOCABLE`, publishes `regulated`, `approval_server` and `approval_criteria` in `[[CURRENCIES]]`, and runs an approval server that signs compliant transactions. Wallets POST each signed transaction to it and handle `success`, `revised`, `pending`, `action_required` and `rejected`. Setup, transaction shape and the full wallet flow: [regulated-assets.md](regulated-assets.md). For permissioned contract tokens, see SEP-0057 (T-REX, Draft) in [`../standards/SKILL.md`](../standards/SKILL.md).
+
 ### SEP-0010 (Web Authentication)
 
 Authenticate users with their Stellar accounts. Flow: the server generates a challenge transaction, the client signs it with their wallet, and the server verifies the signature. See [SEP-0010](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md).
