@@ -1,0 +1,14 @@
+{
+  "skills": [
+    "smart-contracts"
+  ],
+  "query": "My Stellar contract returns Result<(), ContractError>. Write a unit test that checks transfer fails with InvalidAmount when the amount is zero.",
+  "expected_behavior": [
+    "Calls the generated try_transfer method rather than transfer, which panics on error",
+    "Matches the contract's typed error as Err(Ok(ContractError::InvalidAmount)), not Ok(Err(...))",
+    "Does not describe Err(Err(_)) as the typed contract error: it is an InvokeError from a panic, a host failure, or an error code the enum does not define"
+  ],
+  "machine_checkable": [
+    "Generated test module compiles and passes: cargo test"
+  ]
+}
