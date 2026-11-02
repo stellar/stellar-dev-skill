@@ -6,7 +6,7 @@
   "expected_behavior": [
     "Names all four sendTransaction statuses: PENDING, DUPLICATE, TRY_AGAIN_LATER, ERROR",
     "Throws or reports on ERROR, reading the parsed `errorResult` (raw JSON field `errorResultXdr`)",
-    "Resends the same signed transaction after a delay on TRY_AGAIN_LATER, with a retry cap",
+    "Retries TRY_AGAIN_LATER with a cap, and says a full queue needs a higher fee because stellar-core bans the same transaction for a few ledgers",
     "Polls on DUPLICATE as on PENDING (e.g. with pollTransaction) instead of dropping the transaction",
     "Does not claim the SDK throws when stellar-core rejects a transaction"
   ]
