@@ -1,0 +1,15 @@
+{
+  "skills": [
+    "smart-contracts"
+  ],
+  "query": "Add an upgrade function to my Stellar contract so the admin can ship new code later.",
+  "expected_behavior": [
+    "Gates the upgrade on the stored admin with admin.require_auth()",
+    "Calls env.deployer().update_current_contract(ContractExecutable::Wasm(new_wasm_hash)), not the update_current_contract_wasm call deprecated since soroban-sdk 28",
+    "Says to upload the new Wasm first (stellar contract upload) and pass its hash, and that the address and storage survive while __constructor does not re-run",
+    "Warns that storage layout changes need a migration plan"
+  ],
+  "machine_checkable": [
+    "Generated contract builds with stellar contract build and no deprecation warnings"
+  ]
+}

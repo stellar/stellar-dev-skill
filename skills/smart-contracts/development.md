@@ -329,16 +329,20 @@ Custom token implementations, asset issuance, and SAC deployment: `../assets/SKI
 Decide early whether the contract is mutable. If yes, gate the upgrade behind admin/governance auth and track versions:
 
 ```rust
+use soroban_sdk::ContractExecutable;
+
 contractmeta!(key = "binver", val = "1.0.0");
 
 pub fn upgrade(env: Env, new_wasm_hash: BytesN<32>) {
     let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
     admin.require_auth();
-    env.deployer().update_current_contract_wasm(new_wasm_hash);
+    env.deployer()
+        .update_current_contract(ContractExecutable::Wasm(new_wasm_hash));
 }
 ```
 
 - Upload the new WASM first (`stellar contract upload`), pass its hash here. The contract address and all storage survive; only the executable changes. `__constructor` does not re-run.
+- `update_current_contract` takes a `ContractExecutable` since `soroban-sdk` 28 (CAP-85). The older `update_current_contract_wasm(hash)` still works but is deprecated.
 - **Storage schema is your problem.** New code reading an old key with a changed `#[contracttype]` shape fails to decode. Patterns: store a schema version and branch on it; add enum variants rather than reshaping existing ones; ship an idempotent, admin-gated `migrate` entrypoint enforcing `new_version > current_version`.
 - SEP-0049 standardizes upgradeable-contract interfaces; OpenZeppelin's [stellar-contracts](https://github.com/OpenZeppelin/stellar-contracts) ships audited implementations.
 
@@ -357,11 +361,12 @@ impl Factory {
         owner.require_auth();
         env.deployer()
             .with_address(env.current_contract_address(), salt)
-            .deploy_v2(wasm_hash, constructor_args)
+            .deploy_contract(ContractExecutable::Wasm(wasm_hash), constructor_args)
     }
 }
 ```
 
+- `deploy_contract` replaces the deprecated `deploy_v2` since `soroban-sdk` 28.
 - Addresses are deterministic per (deployer, salt) — `deployed_address()` computes one without deploying; derive salts intentionally.
 - Authorize who may deploy; emit an event per deployment so instances are indexable.
 - Keep factory logic separate from instance business logic.
