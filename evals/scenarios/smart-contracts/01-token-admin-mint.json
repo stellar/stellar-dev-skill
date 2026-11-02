@@ -11,6 +11,6 @@
     "Compiles for the wasm32v1-none target with #![no_std] and soroban-sdk types"
   ],
   "machine_checkable": [
-    "Generated contract compiles: cargo build --target wasm32v1-none --release"
+    "Generated contract builds: stellar contract build (stellar-cli v25.2.0+, since soroban-sdk 28 rejects a plain cargo build for wasm32v1-none)"
   ]
 }

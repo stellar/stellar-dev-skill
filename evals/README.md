@@ -29,7 +29,7 @@ One JSON file per scenario under `scenarios/<skill>/`:
 
 ## Grading tiers
 
-1. **Machine-checkable** (strongest — run in CI): generated Rust compiles with `cargo build --target wasm32v1-none`, generated TypeScript passes `tsc --noEmit`, CLI commands match real `stellar` syntax. This tier alone would have caught every snippet bug fixed in #41.
+1. **Machine-checkable** (strongest — run in CI): generated Rust builds with `stellar contract build` (a plain `cargo build --target wasm32v1-none` fails from `soroban-sdk` 28), generated TypeScript passes `tsc --noEmit`, CLI commands match real `stellar` syntax. This tier alone would have caught every snippet bug fixed in #41.
 2. **Behavior assertions**: the `expected_behavior` strings, graded by an LLM judge (or a human) against the transcript.
 3. **Trigger checks**: the right skill loaded, the right companion file was read, and no skill loads for off-topic queries.
 
@@ -48,7 +48,7 @@ q=$(python3 -c "import json;print(json.load(open('evals/scenarios/dapp/01-freigh
 claude -p "$q" --output-format stream-json --verbose > /tmp/eval-transcript.jsonl
 
 # 3. Tier 1 — extract any generated code from the transcript and compile it
-#    Rust:        cargo build --target wasm32v1-none --release
+#    Rust:        stellar contract build   (stellar-cli v25.2.0+)
 #    TypeScript:  tsc --noEmit (with the packages the scenario names installed)
 
 # 4. Tier 2 — grade expected_behavior against the transcript (LLM judge or human).
