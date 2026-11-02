@@ -396,12 +396,15 @@ Current mainnet per-transaction ceilings (network-configured, change by validato
 |---|---|
 | CPU instructions | 400M |
 | Memory | 40 MB |
-| Ledger entries read / written | 200 / 200 |
-| Bytes read / written | 200 KB / ~129 KB |
+| Footprint entries (read-only + read-write) | 400 |
+| Disk-read entries / written entries | 200 / 200 |
+| Disk-read bytes / written bytes | 200 KB / ~129 KB |
 | Transaction size | ~129 KB |
 | Contract events + return value | 16 KB |
 | Contract WASM size | 128 KB |
 | Ledger entry size (incl. whole instance storage) | 64 KB (keys 250 B) |
+
+Disk reads count classic entries (accounts, trustlines) in the footprint plus archived contract entries being restored. Live contract data and code are served from memory, so they count toward the 400 footprint entries but not the 200 disk reads.
 
 Optimization rules that actually move the needle:
 

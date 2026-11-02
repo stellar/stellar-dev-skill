@@ -1,0 +1,11 @@
+{
+  "skills": [
+    "smart-contracts"
+  ],
+  "query": "My Stellar contract call reads 300 live contract data entries and writes 20. Will one Mainnet transaction fit under the ledger entry limits?",
+  "expected_behavior": [
+    "Names the 400-entry cap on the whole footprint (read-only plus read-write) and checks 320 entries against it",
+    "Explains that the 200-entry read limit counts disk reads only (classic entries and archived contract entries being restored), so live contract data does not count toward it",
+    "Says the limits are network settings that validators can change, and points to Stellar Lab's Network Limits page or `stellar network settings --network mainnet` for live values"
+  ]
+}
