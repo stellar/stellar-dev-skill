@@ -243,9 +243,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: rustup target add wasm32v1-none
+      - uses: stellar/stellar-cli@v28.1.0   # the tag picks the CLI version
       - run: cargo test
-      - run: cargo build --release --target wasm32v1-none
+      - run: stellar contract build
 ```
+
+From `soroban-sdk` 28, `cargo build --target wasm32v1-none` stops with an error. Build Wasm with `stellar contract build` (stellar-cli v25.2.0+).
 
 For integration jobs, run `stellar/quickstart` as a service container and deploy with the CLI (`cargo install stellar-cli --locked`).
 
