@@ -60,6 +60,7 @@ Treat this file as a routing map, not a source of final governance/status truth.
 - [SEP-0055](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0055.md): Contract build verification
 - [SEP-0056](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0056.md): Vault-style tokenized products
 - [SEP-0057](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0057.md): Regulated token patterns (T-REX)
+- [SEP-0008](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0008.md): Regulated classic assets (per-transaction issuer approval server)
 
 ### Auth, identity, and metadata
 - [SEP-0010](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md): Web authentication
@@ -98,7 +99,7 @@ Use the CAP preamble status fields as the source of truth for implementation rea
 ### I am building a fungible token
 1. Start with SEP-0041 interface expectations.
 2. Prefer Stellar Assets + SAC interop unless custom logic is required.
-3. If regulated, review SEP-0057 patterns.
+3. If regulated: a classic asset that needs issuer approval per transaction uses SEP-0008 (approval server); a contract token uses SEP-0057 (T-REX, Draft) patterns.
 
 ### I need upgrade-safe contracts
 1. Read SEP-0049 guidance for upgrade process design.
