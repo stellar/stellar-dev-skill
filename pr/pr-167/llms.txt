@@ -93,6 +93,7 @@ The skills installed via the methods above, grouped by category.
 ### Assets
 
 - [Stellar Assets & SAC](https://skills.stellar.org/skills/assets/SKILL.md): Stellar Assets (classic) + trustlines + Stellar Asset Contract (SAC) bridge to smart contracts. Covers asset issuance, distribution, authorization flags, clawback, regulated assets, trustline management, and the SAC interop layer that exposes classic assets as SEP-41 contract tokens. Use when tokenizing real-world assets, issuing stablecoins, managing trustlines, or bridging classic assets to smart contracts.
+  - [Regulated Assets (SEP-0008)](https://skills.stellar.org/skills/assets/regulated-assets.md)
 
 ### APIs
 
