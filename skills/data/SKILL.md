@@ -126,23 +126,41 @@ if (StellarSdk.rpc.Api.isSimulationError(simulation)) {
 #### Send Transaction
 
 ```typescript
-const response = await rpc.sendTransaction(signedTransaction);
+// status: "PENDING" | "DUPLICATE" | "TRY_AGAIN_LATER" | "ERROR"
+let response = await rpc.sendTransaction(signedTransaction);
 
-if (response.status === "PENDING") {
-  // Poll for result
-  let result = await rpc.getTransaction(response.hash);
-  while (result.status === "NOT_FOUND") {
-    await new Promise(r => setTimeout(r, 1000));
-    result = await rpc.getTransaction(response.hash);
-  }
+// TRY_AGAIN_LATER: not queued. Usually this source account already has a
+// transaction in flight, so resending the same signed transaction is safe.
+// If the queue was full, stellar-core bans this exact transaction for 10
+// ledgers, so resends keep failing: rebuild it with a higher fee instead.
+for (let i = 0; response.status === "TRY_AGAIN_LATER" && i < 5; i++) {
+  await new Promise((r) => setTimeout(r, 2000));
+  response = await rpc.sendTransaction(signedTransaction);
+}
 
-  if (result.status === "SUCCESS") {
-    console.log("Success:", result.returnValue);
-  } else {
-    console.error("Failed:", result.status);
-  }
+if (response.status === "ERROR") {
+  // Rejected by stellar-core. The SDK parses the raw errorResultXdr field
+  // into errorResult (a TransactionResult).
+  throw new Error("Transaction rejected", { cause: response.errorResult });
+}
+if (response.status === "TRY_AGAIN_LATER") {
+  throw new Error("Not queued; rebuild with a higher fee or resubmit later");
+}
+
+// PENDING (queued now) or DUPLICATE (already queued): poll for the result.
+// pollTransaction tries 30 times, 1s apart, by default.
+const result = await rpc.pollTransaction(response.hash);
+
+if (result.status === "SUCCESS") {
+  console.log("Success:", result.returnValue);
+} else if (result.status === "FAILED") {
+  console.error("Failed on-chain:", result.resultXdr); // a TransactionResult
+} else {
+  console.error("Not confirmed yet (NOT_FOUND); check getTransaction later");
 }
 ```
+
+`DUPLICATE` means the same transaction is still in the queue. Once it is applied, sending it again returns `ERROR` (`txBAD_SEQ`). So before you treat `ERROR` on a resend as a failure, call `getTransaction(hash)`.
 
 #### Get Transaction
 
@@ -202,8 +220,8 @@ const account = await rpc.getAccount(publicKey);
 const result = await horizonServer.submitTransaction(tx);
 
 // RPC (for smart contract transactions)
-const response = await rpc.sendTransaction(tx);
-const result = await pollForResult(response.hash);
+const response = await rpc.sendTransaction(tx); // branch on response.status (see Send Transaction)
+const result = await rpc.pollTransaction(response.hash);
 ```
 
 ### Historical Data
@@ -355,15 +373,16 @@ export const horizon = new StellarSdk.Horizon.Server(config.horizonUrl);
 ### Error Handling
 
 ```typescript
-// RPC errors
+// RPC: a rejected transaction does not throw. sendTransaction returns
+// status "ERROR" (see Send Transaction). The SDK throws only JSON-RPC
+// errors ({ code, message }, e.g. malformed params) and HTTP/network failures.
 try {
-  const result = await rpc.sendTransaction(tx);
-} catch (error) {
-  if (error.code === 400) {
-    // Invalid transaction
-  } else if (error.code === 503) {
-    // Service unavailable
+  const response = await rpc.sendTransaction(tx);
+  if (response.status === "ERROR") {
+    // Rejected: inspect response.errorResult
   }
+} catch (error) {
+  console.error("RPC call failed:", error); // JSON-RPC { code, message } or HTTP error
 }
 
 // Horizon errors

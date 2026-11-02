@@ -159,7 +159,13 @@ const tx = new StellarSdk.TransactionBuilder(account, { fee: "100", networkPassp
 const sim = await rpc.simulateTransaction(tx);
 const prepared = StellarSdk.rpc.assembleTransaction(tx, sim).build();
 prepared.sign(keypair);
-const result = await rpc.sendTransaction(prepared);
+const sent = await rpc.sendTransaction(prepared);
+// Only PENDING and DUPLICATE mean the transaction is queued; fail the test otherwise.
+if (sent.status !== "PENDING" && sent.status !== "DUPLICATE") {
+  throw new Error(`sendTransaction returned ${sent.status}`, { cause: sent.errorResult });
+}
+const result = await rpc.pollTransaction(sent.hash);
+if (result.status !== "SUCCESS") throw new Error(`transaction ${result.status}`);
 ```
 
 In Rust, gate network-dependent tests behind `#[ignore]` and run them with `cargo test -- --ignored` in environments where the network is up.
