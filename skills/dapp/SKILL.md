@@ -418,15 +418,28 @@ async function submitSorobanTransaction(signedXdr: string) {
     config.networkPassphrase
   ) as StellarSdk.Transaction;
 
-  const response = await rpc.sendTransaction(transaction);
+  // status: "PENDING" | "DUPLICATE" | "TRY_AGAIN_LATER" | "ERROR"
+  let response = await rpc.sendTransaction(transaction);
 
-  if (response.status === "ERROR") {
-    throw new Error(`Send failed: ${response.errorResult}`);
+  // TRY_AGAIN_LATER: not queued (busy queue, or this source account already
+  // has a transaction in flight). Resending the same signed transaction is safe.
+  for (let i = 0; response.status === "TRY_AGAIN_LATER" && i < 5; i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    response = await rpc.sendTransaction(transaction);
   }
 
-  // Poll for completion. pollTransaction handles the retry loop (default 5
-  // attempts, 1s apart — tune with { attempts, sleepStrategy }) instead of a
-  // hand-rolled while loop that can spin forever.
+  if (response.status === "ERROR") {
+    // errorResult is the parsed TransactionResult (raw RPC field: errorResultXdr)
+    throw new Error("Transaction rejected", { cause: response.errorResult });
+  }
+  if (response.status === "TRY_AGAIN_LATER") {
+    throw new Error("RPC is still busy; resubmit later");
+  }
+
+  // PENDING or DUPLICATE (already queued): poll for completion.
+  // pollTransaction handles the retry loop (default 30 attempts, 1s apart;
+  // tune with { attempts, sleepStrategy }) instead of a hand-rolled while
+  // loop that can spin forever.
   const getResponse = await rpc.pollTransaction(response.hash);
 
   if (getResponse.status === "SUCCESS") {
