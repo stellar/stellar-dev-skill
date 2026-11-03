@@ -1,0 +1,12 @@
+{
+  "skills": [
+    "dapp"
+  ],
+  "query": "In my Stellar dapp I want to call a smart contract and send an XLM payment in the same transaction so both happen atomically. Show me how to build it with the JS SDK.",
+  "expected_behavior": [
+    "Says a smart contract transaction can hold only one operation (invokeHostFunction, extendFootprintTtl or restoreFootprint)",
+    "Does not build a transaction that adds a payment or other classic operation next to contract.call",
+    "Notes that prepareTransaction/assembleTransaction rejects the mixed transaction and the network rejects it as malformed",
+    "Offers a working path: move the transfer into the contract call (e.g. via the native SAC) for atomicity, or send two separate transactions"
+  ]
+}
