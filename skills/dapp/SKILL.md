@@ -331,7 +331,7 @@ export async function increment(client: contract.Client & CounterContract) {
 
 Use this only when you need direct control over simulation and assembly (e.g. to adjust resources or auth entries before signing). Otherwise prefer `contract.Client` above.
 
-A smart contract transaction holds exactly one operation: `invokeHostFunction`, `extendFootprintTtl` or `restoreFootprint`. You cannot batch a contract call with classic operations (a payment, `manageData`, a trustline change). `prepareTransaction` throws on that shape before it simulates, and the network rejects it as `txMALFORMED`. To do several things atomically, do them inside one contract call (a contract can call other contracts, including a classic asset's SAC). Otherwise send separate transactions.
+A smart contract transaction holds exactly one operation: `invokeHostFunction`, `extendFootprintTtl` or `restoreFootprint`. You cannot batch a contract call with classic operations (a payment, `manageData`, a trustline change). RPC simulation rejects that shape ("Transaction contains more than one operation"), so `prepareTransaction` throws, and the network rejects it as `txMALFORMED`. To do several things atomically, do them inside one contract call (a contract can call other contracts, including a classic asset's SAC). Otherwise send separate transactions.
 
 ```typescript
 import * as StellarSdk from "@stellar/stellar-sdk";
