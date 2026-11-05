@@ -32,6 +32,14 @@ claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"
 
 You can also try Raven in the browser at the [playground](https://raven.stellar.buzz/playground), a hosted chat UI for asking Raven questions (sign-in required).
 
+## Stellar Docs MCP: official docs server
+
+The [Stellar Docs MCP server](https://developers.stellar.org/docs/build/building-with-ai#stellar-docs-mcp-server) searches and reads the official Stellar docs, including the OpenAPI specs. It needs no sign-in and also serves these skills as MCP resources. Use it when you want answers from the docs only. Use Raven when you also need live ecosystem data.
+
+```bash
+claude mcp add --transport http --scope user stellar-docs "https://developers.stellar.org/mcp"
+```
+
 ## Installing
 
 These skills work with any agent that supports the [Agent Skills](https://agentskills.io) standard.
