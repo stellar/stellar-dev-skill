@@ -2,14 +2,14 @@
   "skills": [
     "dapp"
   ],
-  "query": "Build a Next.js page that connects the Freighter wallet and sends 10 XLM to another address.",
+  "query": "Build a Next.js page that connects the Varial wallet and sends 10 XLM to another address.",
   "expected_behavior": [
-    "Uses the error-object @stellar/freighter-api pattern ({ address, error } returns), not try/catch around bare returns",
+    "Uses the error-object @stellar/varial-sdk pattern ({ address, error } returns), not try/catch around bare returns",
     "Validates or passes the network passphrase explicitly when signing",
     "Builds the payment with TransactionBuilder + Operation.payment and waits for confirmation after submission",
     "Marks wallet-touching components as client components (\"use client\")"
   ],
   "machine_checkable": [
-    "Generated TypeScript passes tsc --noEmit against @stellar/stellar-sdk and @stellar/freighter-api"
+    "Generated TypeScript passes tsc --noEmit against @stellar/stellar-sdk and @stellar/varial-sdk"
   ]
 }

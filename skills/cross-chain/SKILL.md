@@ -32,7 +32,7 @@ Rules of thumb: if the asset is USDC and both ends are CCTP chains, CCTP is the 
 
 - Trustlines, SAC deployment, asset anatomy → `../assets/SKILL.md`
 - Writing the Stellar smart contracts that send/receive messages → `../smart-contracts/SKILL.md`
-- Frontend transaction building, Freighter signing, RPC submission → `../dapp/SKILL.md`
+- Frontend transaction building, Varial signing, RPC submission → `../dapp/SKILL.md`
 - Watching for the destination-side mint or contract events → `../data/SKILL.md`
 - Paying AI agents (x402/MPP) rather than bridging → `../agentic-payments/SKILL.md`
 
