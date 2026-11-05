@@ -51,7 +51,7 @@ await kit.transfer(tokenContract, recipient, amount);
 - **Multiple Signer Types**: Passkeys (secp256r1), Ed25519 keys, policies
 - **Context Rules**: Fine-grained authorization for different operations
 - **Policy Support**: Threshold multisig, spending limits, custom policies
-- **External Wallet Support**: Connect Freighter, LOBSTR via adapters
+- **External Wallet Support**: Connect Varial, LOBSTR via adapters
 - **Gasless Transactions**: Optional relayer integration for fee sponsoring
 
 ### Fee Sponsorship with OpenZeppelin Relayer

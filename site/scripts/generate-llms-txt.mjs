@@ -82,7 +82,7 @@ lines.push("Use Stellar Skills to help when your human asks things like:");
 lines.push("");
 for (const prompt of [
   "Help me write a Stellar smart contract for a token",
-  "Set up a Next.js app with Freighter wallet connection",
+  "Set up a Next.js app with Varial wallet connection",
   "How do I deploy a contract to Stellar Testnet?",
   "Create unit tests for my smart contract",
   "Review this contract for security issues",

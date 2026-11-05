@@ -92,7 +92,7 @@ export const SKILL_CARD_SOURCES: readonly SkillCardSource[] = [
     category: "Frontend",
     title: "Frontend & Wallets",
     description:
-      "Build Stellar dApps with the JavaScript SDK, Freighter, Wallets Kit, and passkey smart accounts.",
+      "Build Stellar dApps with the JavaScript SDK, Varial, Wallets Kit, and passkey smart accounts.",
   },
   {
     source: "skills/assets/SKILL.md",

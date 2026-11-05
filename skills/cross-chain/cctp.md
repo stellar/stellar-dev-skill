@@ -212,7 +212,7 @@ Worth studying in the source:
 | Chain/domain/address registry | `src/lib/config.ts` |
 | EVM-side UX ladder: 2-tx approve, 1-tx EIP-2612 permit wrapper, 1-click EIP-5792 `wallet_sendCalls` | `src/lib/evm/cctp.ts`, `contracts/evm/cctp-wrapper/` |
 
-To run it: `pnpm install && pnpm run dev`, Freighter on Stellar Testnet + any injected EVM wallet, testnet USDC from [faucet.circle.com](https://faucet.circle.com), testnet XLM from [Stellar Lab](https://lab.stellar.org/account/fund). It defaults to Arc (Circle's L1) because attestation takes seconds there and gas is paid in USDC — the fastest feedback loop for learning the protocol.
+To run it: `pnpm install && pnpm run dev`, Varial on Stellar Testnet + any injected EVM wallet, testnet USDC from [faucet.circle.com](https://faucet.circle.com), testnet XLM from [Stellar Lab](https://lab.stellar.org/account/fund). It defaults to Arc (Circle's L1) because attestation takes seconds there and gas is paid in USDC — the fastest feedback loop for learning the protocol.
 
 ## Limitations and status notes
 

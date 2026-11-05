@@ -15,7 +15,7 @@ This skill provides AI assistants with deep knowledge of the current Stellar dev
 - **Client SDKs**: stellar-sdk (JavaScript), Python, Go, Rust
 - **APIs**: Stellar RPC (preferred), Horizon (legacy)
 - **Assets**: Stellar Assets, Stellar Asset Contract (SAC)
-- **Wallets**: Freighter, Stellar Wallets Kit, Smart Accounts (passkeys)
+- **Wallets**: Varial, Stellar Wallets Kit, Smart Accounts (passkeys)
 - **Testing**: Local Quickstart, Testnet, Unit tests
 - **Security**: Smart contract security patterns, audit checklists
 - **Ecosystem**: DeFi protocols, developer tools, community projects
@@ -105,7 +105,7 @@ Each sub-skill is a self-contained Agent Skill with its own frontmatter. Larger 
 
 ```
 "Help me write a Stellar smart contract for a token"
-"Set up a Next.js app with Freighter wallet connection"
+"Set up a Next.js app with Varial wallet connection"
 "How do I deploy a contract to Stellar Testnet?"
 "Create unit tests for my smart contract"
 "Review this contract for security issues"

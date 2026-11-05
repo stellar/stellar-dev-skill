@@ -44,7 +44,7 @@ Evals exercise an *agent using the skills*, so the harness is any agent with the
 # 2. Run one scenario headlessly and capture the transcript.
 #    Plain text output gives only the final answer; tier 3 needs the tool
 #    events, so capture the full event stream instead.
-q=$(python3 -c "import json;print(json.load(open('evals/scenarios/dapp/01-freighter-payment.json'))['query'])")
+q=$(python3 -c "import json;print(json.load(open('evals/scenarios/dapp/01-varial-payment.json'))['query'])")
 claude -p "$q" --output-format stream-json --verbose > /tmp/eval-transcript.jsonl
 
 # 3. Tier 1 — extract any generated code from the transcript and compile it

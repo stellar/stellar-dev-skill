@@ -71,14 +71,15 @@ const usdc = new StellarSdk.Asset(
 import * as StellarSdk from "@stellar/stellar-sdk";
 
 const server = new StellarSdk.Horizon.Server("https://horizon-testnet.stellar.org");
+const rpcServer = new StellarSdk.rpc.Server("https://soroban-testnet.stellar.org");
 
 // 1. Create issuing account (should be separate from distribution)
 const issuerKeypair = StellarSdk.Keypair.random();
 const distributorKeypair = StellarSdk.Keypair.random();
 
-// 2. Fund accounts (testnet)
-await fetch(`https://friendbot.stellar.org?addr=${issuerKeypair.publicKey()}`);
-await fetch(`https://friendbot.stellar.org?addr=${distributorKeypair.publicKey()}`);
+// 2. Fund accounts (testnet). fundAddress throws if funding fails.
+await rpcServer.fundAddress(issuerKeypair.publicKey());
+await rpcServer.fundAddress(distributorKeypair.publicKey());
 ```
 
 ### Issue Asset
@@ -128,7 +129,7 @@ await server.submitTransaction(issueTx);
 
 ### Lock Issuing Account
 
-For fixed-supply tokens, lock the issuer:
+For fixed-supply tokens, lock the issuer. Master weight 0 disables only the master key, so first remove any other signers (or confirm their combined weight can never meet the account's thresholds):
 
 ```typescript
 const lockTx = new StellarSdk.TransactionBuilder(issuerAccount, {
@@ -145,7 +146,7 @@ const lockTx = new StellarSdk.TransactionBuilder(issuerAccount, {
 
 lockTx.sign(issuerKeypair);
 await server.submitTransaction(lockTx);
-// Issuer can never issue more tokens
+// With no other signers, the issuer can never issue more tokens
 ```
 
 ## Asset Flags
