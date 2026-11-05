@@ -11,10 +11,10 @@ The Blux examples below assume the app is wrapped in `BluxProvider` with an `app
 // components/ConnectButton.tsx
 "use client";
 
-import { useFreighter } from "@/hooks/useFreighter";
+import { useVarial } from "@/hooks/useVarial";
 
 export function ConnectButton() {
-  const { connected, address, connect, disconnect } = useFreighter();
+  const { connected, address, connect, disconnect } = useVarial();
 
   if (connected && address) {
     return (
@@ -66,12 +66,12 @@ export function BluxConnectButton() {
 "use client";
 
 import { useState } from "react";
-import { useFreighter } from "@/hooks/useFreighter";
+import { useVarial } from "@/hooks/useVarial";
 import { buildPaymentTx, submitTransaction } from "@/lib/transactions";
 import { config } from "@/lib/stellar";
 
 export function SendPayment() {
-  const { address, sign } = useFreighter();
+  const { address, sign } = useVarial();
   const [destination, setDestination] = useState("");
   const [amount, setAmount] = useState("");
   const [status, setStatus] = useState<string | null>(null);

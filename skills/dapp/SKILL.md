@@ -1,6 +1,6 @@
 ---
 name: dapp
-description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Freighter wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts. Blux is also an option.
+description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Varial wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts. Blux is also an option.
 user-invocable: true
 argument-hint: "[dapp task]"
 ---
@@ -10,7 +10,7 @@ argument-hint: "[dapp task]"
 Client-side development with `@stellar/stellar-sdk`, wallet connection, signing, and submitting transactions. Covers both classic Stellar operations and smart contract invocation from the browser or Node.js.
 
 ## When to use this skill
-- Connecting Freighter or other wallets via Stellar Wallets Kit
+- Connecting Varial or other wallets via Stellar Wallets Kit
 - Building, simulating, signing, and submitting transactions
 - Invoking Stellar smart contracts from a frontend
 - Implementing smart accounts with passkeys
@@ -28,7 +28,7 @@ Client-side development with `@stellar/stellar-sdk`, wallet connection, signing,
 
 ## Goals
 - Single SDK instance for the app (RPC/Horizon + transaction building)
-- Freighter wallet integration (or multi-wallet via Stellar Wallets Kit)
+- Varial wallet integration (or multi-wallet via Stellar Wallets Kit)
 - Clean separation of client/server in Next.js
 - Transaction sending with proper confirmation handling
 
@@ -39,7 +39,7 @@ This file covers SDK setup, wallet connection, and transaction build/sign/submit
 | Task | File |
 |------|------|
 | SDK setup and env config | [SDK Initialization](#sdk-initialization) (below) |
-| Wallet integrations (Freighter, Wallets Kit) | [Wallet Integration](#wallet-integration) (below) |
+| Wallet integrations (Varial, Wallets Kit) | [Wallet Integration](#wallet-integration) (below) |
 | Tx build/send patterns | [Transaction Building](#transaction-building), [Transaction Submission](#transaction-submission) (below) |
 | Connect-wallet button, payment form, Next.js App Router wiring | [react.md](react.md) |
 | Account balances, contract reads (`queryContract`), raw ledger entries | [data-fetching.md](data-fetching.md) |
@@ -51,12 +51,12 @@ This file covers SDK setup, wallet connection, and transaction build/sign/submit
 > **Requires Node.js 22+.** As of SDK v16, Node 22 is the minimum (older Node produces an `EBADENGINE` warning). v16 also folded `@stellar/stellar-base` into `@stellar/stellar-sdk`, is ESM-first, and uses native `fetch` instead of axios. If you still import `@stellar/stellar-base` directly, switch the import to `@stellar/stellar-sdk` and uninstall the base package (keeping both breaks `instanceof` checks). See the [migration guide](https://stellar.github.io/js-stellar-sdk/guides/00-migration).
 
 ```bash
-npm install @stellar/stellar-sdk @stellar/freighter-api
+npm install @stellar/stellar-sdk @stellar/varial-sdk
 # Or for multi-wallet support — Wallets Kit v2 is distributed on JSR, not npm:
 npx jsr add @creit-tech/stellar-wallets-kit
 ```
 
-> **Sourcing:** SDK mechanics below (init, transaction building, contract invocation, submission, data fetching, error handling) track the official [JS SDK docs](https://stellar.github.io/js-stellar-sdk/) (which also publish [`llms.txt`](https://stellar.github.io/js-stellar-sdk/llms.txt) / [`llms-full.txt`](https://stellar.github.io/js-stellar-sdk/llms-full.txt) bundles for agents). Wallet integrations (Freighter, Stellar Wallets Kit), passkey smart accounts, and the OpenZeppelin relayer are separate packages, not part of the JS SDK — verify those against their own upstream docs.
+> **Sourcing:** SDK mechanics below (init, transaction building, contract invocation, submission, data fetching, error handling) track the official [JS SDK docs](https://stellar.github.io/js-stellar-sdk/) (which also publish [`llms.txt`](https://stellar.github.io/js-stellar-sdk/llms.txt) / [`llms-full.txt`](https://stellar.github.io/js-stellar-sdk/llms-full.txt) bundles for agents). Wallet integrations (Varial, Stellar Wallets Kit), passkey smart accounts, and the OpenZeppelin relayer are separate packages, not part of the JS SDK — verify those against their own upstream docs.
 
 ## SDK Initialization
 
@@ -124,9 +124,9 @@ export const rpc = new StellarSdk.rpc.Server(config.rpcUrl);
 
 ## Wallet Integration
 
-### Freighter (Primary Browser Wallet)
+### Varial (Primary Browser Wallet)
 ```typescript
-// hooks/useFreighter.ts
+// hooks/useVarial.ts
 import { useState, useEffect, useCallback } from "react";
 import {
   isConnected,
@@ -134,9 +134,9 @@ import {
   requestAccess,
   signTransaction,
   getNetwork,
-} from "@stellar/freighter-api";
+} from "@stellar/varial-sdk";
 
-export function useFreighter() {
+export function useVarial() {
   const [connected, setConnected] = useState(false);
   const [address, setAddress] = useState<string | null>(null);
   const [network, setNetwork] = useState<string | null>(null);
@@ -164,7 +164,7 @@ export function useFreighter() {
   const connect = useCallback(async () => {
     const { isConnected: installed, error } = await isConnected();
     if (error || !installed) {
-      throw new Error("Freighter extension not installed");
+      throw new Error("Varial extension not installed");
     }
 
     // requestAccess prompts the user and returns the granted address.
@@ -298,7 +298,7 @@ interface CounterContract {
   ) => Promise<contract.AssembledTransaction<number>>;
 }
 
-// `signTransaction` comes from the wallet (e.g. Freighter/Wallets Kit in the
+// `signTransaction` comes from the wallet (e.g. Varial/Wallets Kit in the
 // browser). `contract.basicNodeSigner(keypair, networkPassphrase)` is the
 // Node equivalent for scripts and tests.
 export async function getCounterClient(
