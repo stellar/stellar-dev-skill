@@ -316,6 +316,13 @@ Remote Model Context Protocol (MCP) server for AI agents. Searches Stellar docs 
 - **Connect (Claude Code)**: `claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"`
 - **Tools**: `search`, `execute`
 
+#### Stellar Docs MCP
+Official MCP server for the Stellar docs site. Searches the docs, reads full pages and OpenAPI specs, and serves these skills as MCP resources. No sign-in. Use it for docs-only answers. Use Raven when you also need live ecosystem data.
+- **Server**: https://developers.stellar.org/mcp
+- **Docs**: https://developers.stellar.org/docs/build/building-with-ai#stellar-docs-mcp-server
+- **Connect (Claude Code)**: `claude mcp add --transport http --scope user stellar-docs "https://developers.stellar.org/mcp"`
+- **Tools**: `search_stellar_developer_docs`, `query_docs_filesystem_stellar_developer_docs` (read pages with `cat`, `rg`, `tree`), `submit_feedback`
+
 ## Oracles
 
 #### Reflector Network
