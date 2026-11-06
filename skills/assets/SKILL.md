@@ -377,12 +377,17 @@ pub fn transfer_asset(
 
 SAC implements the standard SEP-41 token interface:
 - `balance(id: Address) -> i128`
-- `transfer(from: Address, to: Address, amount: i128)`
-- `approve(from: Address, spender: Address, amount: i128, expiration_ledger: u32)`
+- `transfer(from: Address, to: MuxedAddress, amount: i128)`
+- `transfer_from(spender: Address, from: Address, to: Address, amount: i128)`
+- `approve(from: Address, spender: Address, amount: i128, live_until_ledger: u32)`
 - `allowance(from: Address, spender: Address) -> i128`
 - `decimals() -> u32`
 - `name() -> String`
-- `symbol() -> Symbol`
+- `symbol() -> String`
+
+Only `transfer` takes a `MuxedAddress` destination. The generated
+`TokenClient` accepts `impl Into<MuxedAddress>` there, so pass an `&Address`
+as `&to` (as above), never `&to.into()`, which fails to compile (E0283).
 
 ## When to Use What
 

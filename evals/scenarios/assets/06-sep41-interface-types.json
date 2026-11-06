@@ -1,0 +1,13 @@
+{
+  "skills": [
+    "assets"
+  ],
+  "query": "I'm writing a Soroban contract that implements the SEP-41 token interface. What are the exact signatures for transfer, transfer_from and symbol?",
+  "expected_behavior": [
+    "Gives `transfer(from: Address, to: MuxedAddress, amount: i128)`, with a `MuxedAddress` destination",
+    "Gives `transfer_from(spender: Address, from: Address, to: Address, amount: i128)`, keeping a plain `Address` destination",
+    "Gives `symbol() -> String`, not `Symbol`",
+    "Does not claim existing callers must convert an `Address` by hand: the generated client accepts `impl Into<MuxedAddress>`, so `&to` works",
+    "Does not suggest `&to.into()` for the client call, since it fails type inference (E0283)"
+  ]
+}
