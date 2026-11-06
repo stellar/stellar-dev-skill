@@ -22,15 +22,15 @@ This skill provides AI assistants with deep knowledge of the current Stellar dev
 
 ## Raven: live MCP server
 
-These skills give your agent durable Stellar context, baked in. [Raven](https://raven.stellar.buzz) is a complementary **remote Model Context Protocol (MCP) server** for on-demand lookups: connect an agent and it searches Stellar docs and live ecosystem data, cross-referenced into single answers. Its catalog also includes these skills, so Raven is a live delivery gateway for them. Use both: skills for durable best practices, Raven for current lookups.
+These skills give your agent durable Stellar context, baked in. [Raven](https://raven.stellar.org) is a complementary **remote Model Context Protocol (MCP) server** for on-demand lookups: connect an agent and it searches Stellar docs and live ecosystem data, cross-referenced into single answers. Its catalog also includes these skills, so Raven is a live delivery gateway for them. Use both: skills for durable best practices, Raven for current lookups.
 
-Raven is open source at [kalepail/stellar-raven](https://github.com/kalepail/stellar-raven). Connect it in Claude Code:
+Raven is open source at [stellar-experimental/stellar-raven](https://github.com/stellar-experimental/stellar-raven). Connect it in Claude Code:
 
 ```bash
-claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"
+claude mcp add --transport http stellar-raven "https://raven.stellar.org/mcp"
 ```
 
-You can also try Raven in the browser at the [playground](https://raven.stellar.buzz/playground), a hosted chat UI for asking Raven questions (sign-in required).
+You can also try Raven in the browser at the [playground](https://raven.stellar.org/playground), a hosted chat UI for asking Raven questions (sign-in required).
 
 ## Stellar Docs MCP: official docs server
 

@@ -310,10 +310,10 @@ Rust SDK for smart contract development.
 
 #### Raven
 Remote Model Context Protocol (MCP) server for AI agents. Searches Stellar docs and live ecosystem data, cross-referenced into single answers. Its catalog also serves these skills.
-- **Server**: https://raven.stellar.buzz (MCP endpoint: https://raven.stellar.buzz/mcp)
-- **Playground**: https://raven.stellar.buzz/playground (hosted chat UI for humans; sign-in required)
-- **GitHub**: https://github.com/kalepail/stellar-raven
-- **Connect (Claude Code)**: `claude mcp add --transport http stellar-raven "https://raven.stellar.buzz/mcp"`
+- **Server**: https://raven.stellar.org (MCP endpoint: https://raven.stellar.org/mcp)
+- **Playground**: https://raven.stellar.org/playground (hosted chat UI for humans; sign-in required)
+- **GitHub**: https://github.com/stellar-experimental/stellar-raven
+- **Connect (Claude Code)**: `claude mcp add --transport http stellar-raven "https://raven.stellar.org/mcp"`
 - **Tools**: `search`, `execute`
 
 #### Stellar Docs MCP
