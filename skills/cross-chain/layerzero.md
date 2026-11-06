@@ -285,7 +285,7 @@ OFT is LayerZero's token standard, the analogue of Axelar's ITS. The Stellar con
 - `oft` — the deployable contract, with the `pausable`, `oft_fee`, and `rate_limiter` extensions bolted on.
 - `sac-manager` — the piece that makes an **existing classic Stellar asset** work as a MintBurn OFT. It becomes the SAC's admin and forwards `mint`, `clawback`, `set_authorized`, and `set_admin` under role gates (`MINTER_ROLE`, `CLAWBACK_ROLE`, `BLACKLISTER_ROLE`, `ADMIN_MANAGER_ROLE`). This is exactly the USDT0 arrangement.
 
-One hard prerequisite from the SAC-manager design: **the issuer account must be locked** (master key weight `0`). Payments from a classic issuer are minting, so an unlocked issuer can bypass the role model entirely and the trust story collapses. Lock it *after* `set_admin` hands the SAC to the manager, never before: the issuer is the SAC's first admin, and only it can authorize that first handover. USDT0's issuer is locked. Verify that before you trust any contract-administered classic asset — see `../assets/SKILL.md`.
+One hard prerequisite from the SAC-manager design: **the issuer account must be locked** (master key weight `0` and no other signers that can meet its thresholds). Payments from a classic issuer are minting, so an unlocked issuer can bypass the role model entirely and the trust story collapses. Lock it *after* `set_admin` hands the SAC to the manager, never before: the issuer is the SAC's first admin, and only it can authorize that first handover. USDT0's issuer is locked. Verify that before you trust any contract-administered classic asset — see `../assets/SKILL.md`.
 
 ## Choosing between Axelar GMP and LayerZero OApp
 
