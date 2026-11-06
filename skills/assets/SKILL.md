@@ -416,14 +416,20 @@ SAC implements the standard SEP-41 token interface:
 > [setting a custom SAC admin](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)
 > for the pattern and `../cross-chain/layerzero.md` for that deployment.
 >
-> One hard prerequisite: **lock the issuer** (master key weight `0`).
-> Payments from a classic issuer are minting, so an unlocked issuer can mint
-> outside the contract and bypass the role model entirely.
+> One hard prerequisite: **lock the issuer account completely.** Payments
+> from a classic issuer are minting, so an unlocked issuer can mint outside
+> the contract and bypass the role model entirely. Master key weight `0`
+> disables only the master key: any other signers whose combined weight
+> meets the medium threshold can still issue, and signers meeting the high
+> threshold can restore the master key. So remove every other signer (or
+> confirm their combined weight can never meet the thresholds), as in
+> [Lock Issuing Account](#lock-issuing-account).
 >
 > **Do it in this order: `set_admin` first, then lock the issuer.** A SAC's
 > admin starts as the issuer account, and only the *current* admin can
-> authorize the first `set_admin`. Lock the issuer before that call and the
-> admin stays the locked issuer forever, because nobody can sign the handover
+> authorize the first `set_admin`. Lock the issuer completely before that
+> call and the admin stays the locked issuer forever, because no signer can
+> authorize the handover
 > ([SAC admin guide](https://developers.stellar.org/docs/build/guides/tokens/custom-sac-admin)).
 > After the handover the SAC still mints under the new admin, so lock the
 > issuer then.
@@ -547,5 +553,6 @@ Standard contract interface for NFTs on Stellar. Reference implementations avail
   mean balances can be frozen or clawed back. A contract SAC admin does not
   contain that power on its own: an issuer whose master key still signs can
   mint, freeze and claw back directly, whatever the admin contract allows. So
-  confirm the master key weight is `0`, then identify who holds the admin
-  contract's roles
+  confirm the master key weight is `0` and no other signers remain (or their
+  combined weight can never meet any threshold: freezing needs only the low
+  one), then identify who holds the admin contract's roles
