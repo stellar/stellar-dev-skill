@@ -224,7 +224,7 @@ Embedded wallet SDK that gives each user a classic `G…` account behind Google,
 - **Website**: https://cavos.xyz
 - **Docs**: https://docs.cavos.xyz/docs/stellar ([llms.txt](https://docs.cavos.xyz/llms.txt))
 - **GitHub**: https://github.com/cavos-labs/kit
-- **Authorization model**: One Ed25519 spend key, derived by HKDF from a per-user MasterDEK and held on the device: a non-extractable WebCrypto key in the browser (inside the Cavos vault iframe by default), the OS keystore on React Native, caller-supplied on Node
+- **Authorization model**: One Ed25519 spend key, derived by HKDF from a per-user MasterDEK and held in the browser as a non-extractable WebCrypto key (inside the Cavos vault iframe by default in the React provider with an `appId`). Stellar on React Native and Node is not on this path yet
 - **Use Case**: In-app wallets for users who have no Stellar wallet
 - **Features**:
   - Classic `G…` account that also signs its own Soroban `require_auth` entries
