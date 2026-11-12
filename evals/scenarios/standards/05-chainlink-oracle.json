@@ -5,7 +5,8 @@
     "Loads the standards skill and reads the Chainlink entry in ecosystem.md rather than answering from memory or from Chainlink's EVM docs",
     "States that the Chainlink proxy is not SEP-40 and does not call `lastprice()` or other SEP-40 methods on it",
     "Calls the single mainnet proxy `CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ` with the feed's 32-byte `data_id` instead of inventing a per-feed contract address, and uses the testnet proxy only for testnet",
-    "Calls `latest_round(data_id, decimals)` with `decimals` set (18 unless Chainlink approved a lower precision) and reads `answer` as an I256 alongside `timestamp`",
-    "If it suggests Data Streams, says it needs an allowlisted account and on-chain report verification with the Chainlink Verifier"
+    "Calls `latest_round(data_id, decimals)` with `decimals` set to 18 (or no lower than `get_min_decimals(data_id)`) and reads `answer` as an I256 alongside `timestamp`",
+    "Checks `timestamp` against ledger time and the feed's heartbeat instead of trusting the latest round as current",
+    "If it suggests Data Streams, says it needs a paid Data Streams subscription and on-chain report verification with `verify(signed_report, sender)` on the Verifier contract, and does not claim the on-chain Verifier needs an allowlisted account"
   ]
 }

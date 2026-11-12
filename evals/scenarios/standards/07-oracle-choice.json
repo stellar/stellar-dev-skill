@@ -1,0 +1,11 @@
+{
+  "skills": ["standards"],
+  "query": "I'm building a perps protocol on Stellar and need prices for liquidations. Which oracle should I use, and how do I make sure the price isn't stale?",
+  "expected_behavior": [
+    "Loads the standards skill and reads the Oracles section of ecosystem.md, including the oracle comparison table",
+    "Recommends a pull oracle for execution-time prices (Pyth Pro, or Chainlink Data Streams) and says Pyth Pro needs an API key and Data Streams needs a paid subscription",
+    "For Pyth Pro, uses the verifier `CACZ3GBAKUPIAFRILUFO27J5RUH5GJ2VSJ46LP6GJYSKGDRTQ5MS3HCH` on mainnet and calls `verify_update` from inside its own contract, for example via `pyth-lazer-stellar-sdk`'s `PythLazerClient`, never trusting a parsed update from the off-chain caller or using `parse_payload` alone",
+    "States that the Pyth Pro verifier checks only signatures, so the contract must reject old or carried-forward feeds using `feed_update_timestamp` (microseconds) against ledger time",
+    "Advises reading two independent oracles for liquidations and refusing to act when they diverge past a set bound"
+  ]
+}
