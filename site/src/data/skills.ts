@@ -538,6 +538,14 @@ const ECOSYSTEM_CARD_SOURCES: readonly EcosystemCardSource[] = [
     copyValue:
       "https://raw.githubusercontent.com/ziyang-theory/cryptography-research-skills/main/implementation/crypto-research-artifacts/SKILL.md",
   },
+  {
+    title: "Cavos",
+    description:
+      "Add embedded Stellar wallets to a web or React Native app with @cavos/kit. Users sign in with Google, Apple, GitHub, Telegram, or an email code and get a classic G account with no seed phrase. Covers the React provider, sponsored reserves and fees, XLM payments, trustlines, Soroban calls, signing backend-built XDR, and device restore.",
+    pathLabel: "cavos-labs/kit",
+    copyValue:
+      "https://raw.githubusercontent.com/cavos-labs/kit/main/skills/cavos-stellar/SKILL.md",
+  },
 ] as const;
 
 /** `ECOSYSTEM_CARD_SOURCES` sorted by title, case-insensitive. */
