@@ -541,7 +541,7 @@ const ECOSYSTEM_CARD_SOURCES: readonly EcosystemCardSource[] = [
   {
     title: "Cavos",
     description:
-      "Add embedded Stellar wallets to a web or React Native app with @cavos/kit. Users sign in with Google, Apple, GitHub, Telegram, or an email code and get a classic G account with no seed phrase. Covers the React provider, sponsored reserves and fees, XLM payments, trustlines, Soroban calls, signing backend-built XDR, and device restore.",
+      "Add embedded Stellar wallets to a web app with @cavos/kit. Users sign in with Google, Apple, GitHub, Telegram, or an email code and get a classic G account with no seed phrase. Covers the React provider, sponsored reserves and fees, XLM payments, trustlines, Soroban calls, signing backend-built XDR, and device restore.",
     pathLabel: "cavos-labs/kit",
     copyValue:
       "https://raw.githubusercontent.com/cavos-labs/kit/main/skills/cavos-stellar/SKILL.md",

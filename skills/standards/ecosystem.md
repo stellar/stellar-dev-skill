@@ -219,6 +219,20 @@ TypeScript SDK for passkey-based smart wallets. Sibling to Smart Account Kit, wi
 - **Demo**: [passkey-kit-demo.pages.dev](https://passkey-kit-demo.pages.dev)
 - **Example**: [Super Peach](https://github.com/kalepail/superpeach)
 
+#### Cavos
+Embedded wallet SDK that gives each user a classic `G…` account behind Google, Apple, GitHub, Telegram, or email sign-in, with reserves and fees sponsored.
+- **Website**: https://cavos.xyz
+- **Docs**: https://docs.cavos.xyz/docs/stellar ([llms.txt](https://docs.cavos.xyz/llms.txt))
+- **GitHub**: https://github.com/cavos-labs/kit
+- **Authorization model**: One Ed25519 spend key, derived by HKDF from a per-user MasterDEK and held in the browser as a non-extractable WebCrypto key (inside the Cavos vault iframe by default in the React provider with an `appId`). Stellar on React Native and Node is not on this path yet
+- **Use Case**: In-app wallets for users who have no Stellar wallet
+- **Features**:
+  - Classic `G…` account that also signs its own Soroban `require_auth` entries
+  - Sponsored account creation (`create()`), trustlines, and fee-bumps; the relayer cannot authorize the account's operations
+  - Optional restore by signing in again: an AWS Nitro enclave holds a sealed copy of the MasterDEK and re-encrypts it to a new device; the enclave does not sign and is part of the trust model
+  - Optional passkey that stores an encrypted copy of the MasterDEK
+  - Live on mainnet: [example account](https://stellar.expert/explorer/public/account/GCTAQXKRGWROJ5UZBLUQ472PNNFOPQQOJBPCVSVCM5SKPKDOAVP5LG4Q)
+
 #### OpenZeppelin Relayer
 Service for fee-sponsored transaction submission.
 - **Docs**: https://docs.openzeppelin.com/relayer
