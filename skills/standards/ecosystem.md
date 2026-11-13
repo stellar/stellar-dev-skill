@@ -122,7 +122,7 @@ DEX aggregator that splits and routes swaps across Soroswap, Aquarius, Phoenix, 
 - **Docs**: https://xoxno.com/docs/stellar-aggregator/overview (append `.md` for Markdown)
 - **Agent skill**: [`xoxno-swap-aggregator/SKILL.md`](https://raw.githubusercontent.com/XOXNO/rs-lending-xlm/main/skills/xoxno-swap-aggregator/SKILL.md)
 - **API**: https://stellar-swap.xoxno.com (quotes and unsigned XDR, [OpenAPI](https://stellar-swap.xoxno.com/api-docs/openapi.json)), no API key
-- **SDK**: TypeScript [`@xoxno/sdk-js`](https://github.com/XOXNO/sdk-js) (`/stellar-swap`)
+- **SDK**: TypeScript [`@xoxno/sdk-js`](https://github.com/XOXNO/sdk-js) (`stellar-lending`: `getStellarAggregatorQuote`, `buildStellarExecuteStrategyTx`)
 - **Router (mainnet)**: `CCVENFSVCBYDHVOACFZXMNNYVOZ3LKXPZYU5LUI4N7KTXOKRVYD7F3TR`
 
 ### Yield & Vaults
@@ -398,7 +398,7 @@ Push oracle with multi-source prices for majors, stablecoins, and tokenized asse
 - **Interface**: one SEP-40 contract (`lastprice`, `price`, `prices`) for supported Stellar assets, plus per-asset MultiFeed contracts that read from a shared adapter
 - **SEP-40 (mainnet)**: `CBMGLKUQZVSAIL5CPDDAWSUY7MAKXISHMOZEVLMBUWBMFGHRJSR4WYRF`
 - **MultiFeed adapter**: mainnet `CA526Y2NQWGWVVQ7RFFPGAZMU66PSYJ3UC2MTVAV4ZU7OM5BOPHDXUSG`, testnet `CBIHT4HVRIT5OMVLSXZ44J2ZAXYBDDGOSCN3LTN2DOC6SWHDS5IP6BK3`
-- **Updates**: on a 0.01 to 0.5 percent deviation or a 12 or 24-hour heartbeat, depending on the feed
+- **Updates**: on a 0.01 to 0.5 percent deviation or a heartbeat, depending on the feed. Most heartbeats are 12 or 24 hours; a few feeds update every few minutes or every 6 hours.
 - **SDK**: Rust https://github.com/redstone-finance/rust-sdk
 - **Integrations**: Blend, Templar, XOXNO
 
