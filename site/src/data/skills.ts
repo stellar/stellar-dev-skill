@@ -550,7 +550,7 @@ const ECOSYSTEM_CARD_SOURCES: readonly EcosystemCardSource[] = [
     title: "RELAY Task Market",
     description:
       "Connect an agent to a Stellar task marketplace with wallet-signed encrypted sessions. Start with a no-funding read-only trial, then define scoped requests, negotiate offers, and inspect direct XLM settlement.",
-    pathLabel: "RELAY agent onboarding",
+    pathLabel: "yssoft-gif/relay-agent-client",
     copyValue:
       "https://raw.githubusercontent.com/yssoft-gif/relay-agent-client/c4bae7df04dbe99b23b1b071b4ef0ad0a7b65584/SKILL.md",
   },
