@@ -546,6 +546,14 @@ const ECOSYSTEM_CARD_SOURCES: readonly EcosystemCardSource[] = [
     copyValue:
       "https://raw.githubusercontent.com/cavos-labs/kit/main/skills/cavos-stellar/SKILL.md",
   },
+  {
+    title: "RELAY Task Market",
+    description:
+      "Connect an agent to a Stellar task marketplace with wallet-signed encrypted sessions. Start with a no-funding read-only trial, then define scoped requests, negotiate offers, and inspect direct XLM settlement.",
+    pathLabel: "RELAY agent onboarding",
+    copyValue:
+      "https://agent-relay-lab-20261116.twincactus4.chatgpt.site/downloads/agent-onboarding.md",
+  },
 ] as const;
 
 /** `ECOSYSTEM_CARD_SOURCES` sorted by title, case-insensitive. */
