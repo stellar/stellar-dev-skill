@@ -360,9 +360,9 @@ const ECOSYSTEM_CARD_SOURCES: readonly EcosystemCardSource[] = [
     title: "Nirium Agentic Payments",
     description:
       "Charge AI agents per API call on Stellar with the Nirium toolkit: scaffold a working x402 seller with nirium-cli in one command, charge per route with x402Serve() from the nirium SDK, and read live protocol data, market state, autonomous loop status, and execution nodes through the nirium-mcp server. Live on mainnet since July 9, 2026.",
-    pathLabel: "nirium-protocol/nirium-sdk",
+    pathLabel: "nirium-protocol/nirium",
     copyValue:
-      "https://raw.githubusercontent.com/nirium-protocol/nirium-sdk/main/skills/nirium-agentic-payments/SKILL.md",
+      "https://raw.githubusercontent.com/nirium-protocol/nirium/main/skills/nirium-agentic-payments/SKILL.md",
   },
   {
     title: "Contextio SDK",
