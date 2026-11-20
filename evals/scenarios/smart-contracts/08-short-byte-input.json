@@ -1,0 +1,14 @@
+{
+  "skills": [
+    "smart-contracts"
+  ],
+  "query": "My Stellar contract function takes a `payload: Bytes` argument: a 32-byte key followed by a 4-byte big-endian nonce. Write the function that parses both and stores them.",
+  "expected_behavior": [
+    "Checks payload.len() before calling Bytes::slice or copy_into_slice",
+    "Rejects a short or long payload with a #[contracterror] variant (for example Err(Error::InvalidPayload)), not by letting the host trap",
+    "Does not claim Bytes::slice returns an Option or Result for an out-of-range index: it traps with Error(Object, IndexBounds)"
+  ],
+  "machine_checkable": [
+    "Generated test module compiles and passes: cargo test, with a try_ test asserting Err(Ok(<the contract's error variant>)) for a 10-byte payload"
+  ]
+}
