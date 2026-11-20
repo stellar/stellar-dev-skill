@@ -261,7 +261,7 @@ For integration jobs, run `stellar/quickstart` as a service container and deploy
 ## Checklist
 
 - [ ] Unit tests cover all public functions, including error paths (`try_` methods)
-- [ ] Edge cases: zero amounts, max values, empty state
+- [ ] Edge cases: zero amounts, max values, empty state, short or malformed byte inputs
 - [ ] Authorization verified with `env.auths()` or specific `mock_auths`
 - [ ] Events asserted (`event.to_xdr` comparison)
 - [ ] Storage TTL behavior validated
