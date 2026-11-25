@@ -1,0 +1,15 @@
+{
+  "skills": [
+    "dapp"
+  ],
+  "query": "My testnet dapp uses Stellar Wallets Kit. Users want to connect their mobile wallets with WalletConnect. How do I add that?",
+  "expected_behavior": [
+    "Reads dapp/walletconnect.md rather than answering from memory",
+    "Imports WalletConnectModule from @creit-tech/stellar-wallets-kit/modules/wallet-connect and adds it next to defaultModules() in StellarWalletsKit.init, since defaultModules() does not include it",
+    "Passes a projectId from the Reown Dashboard and app metadata (name, description, url, icons)",
+    "Sets allowedChains to WalletConnectTargetChain.TESTNET to match the kit's testnet network, because the module defaults to stellar:pubnet only"
+  ],
+  "machine_checkable": [
+    "Generated TypeScript passes tsc --noEmit"
+  ]
+}

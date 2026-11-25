@@ -98,7 +98,7 @@ Copy the `skills/` directory contents to your assistant's skills location.
 ```
 skills/
 ├── smart-contracts/           # Stellar smart contracts — SKILL.md router + development/testing/security files
-├── dapp/                      # Frontend — SKILL.md router + react / data-fetching / smart-accounts files
+├── dapp/                      # Frontend — SKILL.md router + react / data-fetching / smart-accounts / walletconnect files
 ├── assets/SKILL.md            # Stellar Assets, trustlines, SAC bridge
 ├── data/                      # Stellar RPC (preferred) — SKILL.md router + horizon (legacy) file
 ├── agentic-payments/          # AI/machine payments — SKILL.md router + x402 / mpp files
