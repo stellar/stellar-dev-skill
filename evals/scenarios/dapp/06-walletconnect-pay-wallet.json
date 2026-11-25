@@ -1,0 +1,13 @@
+{
+  "skills": [
+    "dapp"
+  ],
+  "query": "We run a Stellar wallet and want to accept WalletConnect Pay. How should we handle the Stellar payment request?",
+  "expected_behavior": [
+    "Signs the gateway's envelope with stellar_signXDR and returns it as a base64 string, and does not submit it or use stellar_signAndSubmitXDR",
+    "Says WalletConnect Pay wraps the signed transaction in a fee bump and pays the XLM fee, so the buyer needs only USDC",
+    "Limits the flow to stellar:pubnet and Circle USDC, and advertises only stellar:pubnet:G... accounts, never muxed M... accounts",
+    "Does not change the fee, sequence number, time bounds, memo or operations before signing",
+    "Notes the gateway offers Stellar only when the account exists and holds a USDC trustline with enough USDC"
+  ]
+}

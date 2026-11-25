@@ -202,6 +202,27 @@ SDK for integrating multiple Stellar wallets.
 - **GitHub**: https://github.com/Creit-Tech/Stellar-Wallets-Kit
 - **Supports**: Varial, LOBSTR, xBull, Albedo, Rabet, Hana, Ledger, Trezor, WalletConnect
 
+#### WalletConnect
+Open protocol that connects mobile wallets to dapps. It defines a `stellar` namespace.
+- **Docs**: https://docs.walletconnect.com/wallets/chains/stellar
+- **Chains (CAIP-2)**: `stellar:pubnet`, `stellar:testnet`. Accounts are CAIP-10, for example `stellar:pubnet:G...`
+- **Methods**: `stellar_signXDR`, `stellar_signAndSubmitXDR`, `stellar_signMessage`, `stellar_signAuthEntry`
+- **Events**: `accountsChanged`, `chainChanged`
+- **Status**: the Stellar RPC standard is a proposal under review, so shapes can change
+- **Dapp integration**: the Stellar Wallets Kit WalletConnect module needs a project ID and app metadata. See [dapp/walletconnect.md](../dapp/walletconnect.md)
+
+#### WalletConnect Pay
+Payment network where WalletConnect Pay builds the payment and the wallet only signs. Supports Stellar since 29 October 2026; LOBSTR was the first live wallet.
+- **Docs**: https://docs.walletconnect.com/payments/wallets/token-chain-support/stellar-support
+- **Network and asset**: `stellar:pubnet` only, Circle USDC (`stellar:pubnet/asset:USDC-GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN`)
+- **Fees**: WalletConnect Pay wraps the signed transaction in a fee bump and pays the XLM fee. The buyer needs only USDC
+- **Wallet rules**:
+  - Sign with `stellar_signXDR` and return the envelope. Never use `stellar_signAndSubmitXDR`: the buyer then pays the fee and uses the payment's sequence number
+  - Advertise only `G...` accounts. Muxed (`M...`) accounts are not valid
+  - The account must exist and hold a USDC trustline with enough USDC, or the gateway does not offer Stellar
+  - Do not change the fee, sequence number, time bounds, memo or operations. The gateway rejects a changed envelope
+- **Implementation guide**: [dapp/walletconnect.md](../dapp/walletconnect.md#wallet-accept-walletconnect-pay)
+
 ## Developer Tools
 
 ### Smart Account & Authentication
