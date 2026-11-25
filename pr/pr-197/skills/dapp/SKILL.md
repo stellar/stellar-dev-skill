@@ -215,7 +215,7 @@ import { defaultModules } from "@creit-tech/stellar-wallets-kit/modules/utils";
 // there is no instance to construct or pass around.
 // defaultModules() loads every wallet that needs no extra setup; modules with
 // prerequisites (WalletConnect, Ledger, Trezor) must be imported and added explicitly.
-// WalletConnect needs a project ID, app metadata and allowedChains: see walletconnect.md.
+// WalletConnect needs a project ID and app metadata, plus allowedChains on testnet: see walletconnect.md.
 StellarWalletsKit.init({
   modules: defaultModules(),
   network: Networks.TESTNET,
