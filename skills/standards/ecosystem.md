@@ -554,6 +554,7 @@ Notable teams shipping production-level code on Stellar. For a broader directory
 | **Creit Tech** | [creit.tech](https://creit.tech) | [Creit-Tech](https://github.com/Creit-Tech) | [@CreitTech_](https://x.com/CreitTech_) | Stellar Wallets Kit, xBull, SorobanHub |
 | **Ultra Stellar** | [ultrastellar.com](https://ultrastellar.com) | [lobstrco](https://github.com/lobstrco) | [@Lobstrco](https://x.com/Lobstrco) | LOBSTR wallet, StellarExpert |
 | **Trustless Work** | [trustlesswork.com](https://www.trustlesswork.com) | [Trustless-Work](https://github.com/Trustless-Work) | [@TrustlessWork](https://x.com/TrustlessWork) | Escrow-as-a-Service platform |
+| **Boundless** | [boundlessfi.xyz](https://www.boundlessfi.xyz) | [boundlessfi](https://github.com/boundlessfi) | [@boundless_fi](https://x.com/boundless_fi) | Hackathon, bounty, grant, and crowdfunding platform |
 
 ## Project Directories
 
@@ -580,6 +581,17 @@ Grants up to $150K per funding round.
 Security audit funding for SCF projects.
 - **Website**: https://stellar.org/grants-and-funding/soroban-audit-bank
 - **Features**: Pre-negotiated audit rates, readiness checklist
+
+### Hackathon & Bounty Platforms
+
+#### Boundless
+Platform for Stellar hackathons, bounties, grants, and crowdfunding. Builders find open programs and submit work. Organizers fund prizes into a Soroban escrow contract and winners are paid in USDC.
+- **Website**: https://www.boundlessfi.xyz
+- **Browse**: [Hackathons](https://www.boundlessfi.xyz/hackathons), [Bounties](https://www.boundlessfi.xyz/bounties), [Grants](https://www.boundlessfi.xyz/grants)
+- **Docs**: https://docs.boundlessfi.xyz
+- **GitHub**: https://github.com/boundlessfi
+- **Mainnet Escrow Contract**: `CCFVEGOQJEM47LRAJU2LHEK4KTL5VYN7AOGZ2HH2GNHAMXTILNMMJGQZ`
+- **Features**: Built-in USDC wallet, application credits that keep spam out, regional chapters, testing quests, judge panels and scoring, milestone releases for crowdfunding, one reputation and leaderboard across every program
 
 ## Real-World Assets
 
