@@ -1,6 +1,6 @@
 ---
 name: dapp
-description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Varial wallet, Stellar Wallets Kit (multi-wallet), Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts. Blux is also an option.
+description: Stellar dApp / frontend development. Covers the JavaScript stellar-sdk (browser + Node.js), Varial wallet, Stellar Wallets Kit (multi-wallet), WalletConnect and WalletConnect Pay, Wallet Standard, smart accounts with passkeys, transaction building / signing / submission, smart contract invocation from the client, simulation, and error handling. Use when building a React/Next.js/Node.js app that talks to Stellar — classic operations or smart contracts. Blux is also an option.
 user-invocable: true
 argument-hint: "[dapp task]"
 ---
@@ -10,7 +10,7 @@ argument-hint: "[dapp task]"
 Client-side development with `@stellar/stellar-sdk`, wallet connection, signing, and submitting transactions. Covers both classic Stellar operations and smart contract invocation from the browser or Node.js.
 
 ## When to use this skill
-- Connecting Varial or other wallets via Stellar Wallets Kit
+- Connecting Varial or other wallets via Stellar Wallets Kit, including mobile wallets over WalletConnect
 - Building, simulating, signing, and submitting transactions
 - Invoking Stellar smart contracts from a frontend
 - Implementing smart accounts with passkeys
@@ -44,6 +44,7 @@ This file covers SDK setup, wallet connection, and transaction build/sign/submit
 | Connect-wallet button, payment form, Next.js App Router wiring | [react.md](react.md) |
 | Account balances, contract reads (`queryContract`), raw ledger entries | [data-fetching.md](data-fetching.md) |
 | Passkey smart wallets (Smart Account Kit), gasless tx via OpenZeppelin Relayer | [smart-accounts.md](smart-accounts.md) |
+| WalletConnect: Wallets Kit module setup, the `stellar_*` wallet methods, WalletConnect Pay | [walletconnect.md](walletconnect.md) |
 | Production UX checklist | [Transaction UX Checklist](#transaction-ux-checklist) (below) |
 
 ## Recommended Dependencies
@@ -214,6 +215,7 @@ import { defaultModules } from "@creit-tech/stellar-wallets-kit/modules/utils";
 // there is no instance to construct or pass around.
 // defaultModules() loads every wallet that needs no extra setup; modules with
 // prerequisites (WalletConnect, Ledger, Trezor) must be imported and added explicitly.
+// WalletConnect needs a project ID and app metadata, plus allowedChains on testnet: see walletconnect.md.
 StellarWalletsKit.init({
   modules: defaultModules(),
   network: Networks.TESTNET,
